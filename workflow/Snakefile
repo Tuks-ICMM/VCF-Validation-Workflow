@@ -1,4 +1,6 @@
 from snakemake.utils import min_version
+from pandas import read_csv
+from os.path import join
 
 __author__ = "Graeme Ford"
 __credits__ = [
@@ -16,9 +18,17 @@ __email__ = "graeme.ford@tuks.co.za"
 __status__ = "Development"
 
 
+# ENFORCE SNAKEMAKE VERSION CHECK:
 min_version("6.0")
 
+# DEFINE CONFIG FILE FOR SNAKEMAKE:
+configfile: join("config", "config.json")
+
+# IMPORT DATASET METADATA:
 datasets = read_csv(join("input", "datasets.csv"), header=0)
+
+# IMPORT COMMON FUNCTIONS:
+include: "rules/common.py"
 
 rule all:
     """
@@ -27,7 +37,8 @@ rule all:
     log:
         "logs/ALL/ALL.log"
     input:
-        "results/PREP/{sample}.vcf.gz",
+        expand("results/PREP/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])),
+        expand("results/LIFTOVER/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])),
 
 
 
@@ -70,3 +81,44 @@ rule VALIDATE:
         shell(
             "module load bcftools-1.7; bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}_NORMALISED.vcf.gz -O z -o results/PREP/{wildcards.sample}.vcf.gz"
         )
+
+
+rule LIFTOVER:
+    """
+    Lift Variants onto same Reference build. Otherwise we cant merge them or analyse them in context of each other.
+    """
+    log:
+        "logs/LIFTOVER/{sample}.log",
+    input:
+        "results/PREP/{sample}.vcf.gz",
+    output:
+        "results/LIFTOVER/{sample}.vcf.gz",
+    params:
+        prefix=lambda wildcards: "results/LIFTOVER/{sample}_LIFTED".format(
+            sample=wildcards.sample
+        ),
+        exclusionList=(
+            lambda wildcards: "results/LIFTOVER/{sample}_EXCLUDE.dat".format(
+                sample=wildcards.sample
+            )
+        ),
+        chainFile=join("resources", "hg19ToHg38.over.chain"),
+        LiftOver=join("resources", "liftOverPlink.py"),
+        rmBadLifts=join("resources", "rmBadLifts.py"),
+        ref=join(
+            *next(
+                i["file_path"]
+                for i in config["reference-genomes"]
+            if i["version"] == "GRCh38"
+                ),
+        ),
+        mem=f'-Xmx{search("memory", "LIFTOVER")} ',
+    resources:
+        cpus=search("cores", "LIFTOVER"),
+        nodes=search("nodes", "LIFTOVER"),
+        queue=search("queue", "LIFTOVER"),
+        walltime=search("walltime", "LIFTOVER"),
+    conda:
+        join("envs", "snakemake.yml")
+    script:
+        join("scripts", "00 - LIFTOVER.py")

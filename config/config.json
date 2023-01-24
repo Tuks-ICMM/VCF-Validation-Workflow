@@ -1,0 +1,48 @@
+{
+    "reference-genomes": [
+        {
+            "version": "GRCh38",
+            "file_path": [
+                "/",
+                "nlustre",
+                "users",
+                "graeme",
+                "PUBLIC",
+                "GRCh38",
+                "GRCh38.fa.gz"
+            ]
+        }
+    ],
+    "environment": {
+        "email": {
+            "address": "graeme.ford@tuks.co.za",
+            "conditions": [
+                "o",
+                "e"
+            ]
+        },
+        "working-directory": "/nlustre/users/graeme/PUBLIC/GnomeAD_pipeline_test/",
+        "queues": [
+            {
+                "queue": "long",
+                "walltime": "900:00:00",
+                "memory": "128G",
+                "cores": "10",
+                "nodes": "1",
+                "rules": [
+                    "all",
+                    "VALIDATE",
+                    "LIFTOVER",
+                    "COLLATE",
+                    "ALL_COLLATE",
+                    "ANNOTATE",
+                    "ADMIXTURE",
+                    "TRIM_AND_NAME",
+                    "FILTER",
+                    "TRANSPILE_CLUSTERS",
+                    "PLINK"
+                ]
+            }
+        ]
+    }
+}
