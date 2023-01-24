@@ -25,7 +25,7 @@ Changelog
 
 ---
 
-## [v1.1.0-ALPHA](https://github.com/Tuks-ICMM/Pharmacogenetic-Analysis-Pipeline/compare/v1.0.0-ALPHA...v1.1.0-ALPHA) (2023-01-24)
+## [v1.1.0-ALPHA](https://github.com/Tuks-ICMM/Vcf-Validation/compare/v1.0.0-ALPHA...v1.1.0-ALPHA) (2023-01-24)
 
 ### Features
 - remove unnecessary `FORMAT` annotations in incoming `.vcf.gz` files genotype columns.
