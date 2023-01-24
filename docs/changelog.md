@@ -6,7 +6,7 @@ nav_order: 5
 ---
 
 # Changelog
-{: .no-toc }
+{: .no_toc }
 
 Recent changes to the _{{ site.title }}_.
 {: .fs-6 .fw-300 }
