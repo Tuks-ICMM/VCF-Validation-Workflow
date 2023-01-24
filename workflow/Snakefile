@@ -1,0 +1,72 @@
+from snakemake.utils import min_version
+
+__author__ = "Graeme Ford"
+__credits__ = [
+    "Graeme Ford",
+    "Prof. Michael S. Pepper",
+    "Prof. Fourie Joubert",
+    "Antionette Colic",
+    "Fatima Barmania",
+    "Sarah Turner",
+    "Megan Holborn",
+]
+__version__ = "1.0.0"
+__maintainer__ = "Graeme Ford"
+__email__ = "graeme.ford@tuks.co.za"
+__status__ = "Development"
+
+
+min_version("6.0")
+
+datasets = read_csv(join("input", "datasets.csv"), header=0)
+
+rule all:
+    """
+    Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
+    """
+    log:
+        "logs/ALL/ALL.log"
+    input:
+        "results/PREP/{sample}.vcf.gz",
+
+
+
+
+rule VALIDATE:
+    """
+    Perform normalisation of variants, validation of VCF format as well as REF alleles and strip out INFO tags.
+    """
+    log:
+        "logs/VALIDATE/{sample}.log",
+    input:
+        lambda wildcards: datasets.loc[datasets["dataset_name"] == wildcards.sample, "file"].item()
+    output:
+        "results/PREP/{sample}.vcf.gz",
+    params:
+        memory=search("memory", "VALIDATE"),
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE"),
+    run:
+        # Remove variant types we cant yet analyse:
+        shell(
+            "module load gatk-4.2.2.0; gatk SelectVariants  -V {input} --select-type-to-include SNP --select-type-to-include INDEL --select-type-to-exclude MIXED --select-type-to-exclude MNP --select-type-to-exclude SYMBOLIC --exclude-filtered -O results/PREP/{wildcards.sample}_FILTERED.vcf.gz"
+        ),
+        # Strip out INFO tags:
+        shell(
+            "module load bcftools-1.7; bcftools annotate -x INFO -O z -o results/PREP/{wildcards.sample}_NO_INFO.vcf.gz results/PREP/{wildcards.sample}_FILTERED.vcf.gz"
+        ),
+        # Regenerate and verify the VCF header:
+        shell(
+            "module load picard-2.17.11; java -Xmx{params.memory} -jar $PICARD FixVcfHeader I=results/PREP/{wildcards.sample}_NO_INFO.vcf.gz O=results/PREP/{wildcards.sample}_NEW_INFO.vcf.gz"
+        ),
+        # Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
+        shell(
+            "module load bcftools-1.7; bcftools norm -m -any results/PREP/{wildcards.sample}_NEW_INFO.vcf.gz -O z -o results/PREP/{wildcards.sample}_NORMALISED.vcf.gz"
+        ),
+        # Ensure consistency of chromosome nomenclature for each dataset
+        shell(
+            "module load bcftools-1.7; bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}_NORMALISED.vcf.gz -O z -o results/PREP/{wildcards.sample}.vcf.gz"
+        )
