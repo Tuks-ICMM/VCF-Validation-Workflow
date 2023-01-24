@@ -68,7 +68,7 @@ rule VALIDATE:
         ),
         # Strip out INFO tags:
         shell(
-            "module load bcftools-1.7; bcftools annotate -x INFO -O z -o results/PREP/{wildcards.sample}_NO_INFO.vcf.gz results/PREP/{wildcards.sample}_FILTERED.vcf.gz"
+            "module load bcftools-1.7; bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}_NO_INFO.vcf.gz results/PREP/{wildcards.sample}_FILTERED.vcf.gz"
         ),
         # Regenerate and verify the VCF header:
         shell(
