@@ -56,7 +56,7 @@ if listed_refs != "GRCh38":
     shell("module load liftover"),
     if listed_refs == "GRCh37" or listed_refs == "Hg19":
         shell("echo 'Lifting from GRCh37 to GRCh38.'"),
-        directoryExists("results/LIFTOVER")
+        directoryExists("results/LIFTOVER"),
         shell(
             "module load plink-2; plink2 --vcf results/PREP/{wildcards.sample}.vcf.gz --set-all-var-ids @:#\$r-\$a --allow-extra-chr --new-id-max-allele-len 40 truncate --chr 1-22 --out results/LIFTOVER/{wildcards.sample}_PREP --export vcf-4.2 bgz --output-chr chr26"
         ),

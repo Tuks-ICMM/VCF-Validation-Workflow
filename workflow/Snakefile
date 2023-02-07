@@ -21,26 +21,30 @@ __status__ = "Development"
 # ENFORCE SNAKEMAKE VERSION CHECK:
 min_version("6.0")
 
+
 # DEFINE CONFIG FILE FOR SNAKEMAKE:
 configfile: join("config", "config.json")
+
 
 # IMPORT DATASET METADATA:
 datasets = read_csv(join("input", "datasets.csv"), header=0)
 
+
 # IMPORT COMMON FUNCTIONS:
 include: "rules/common.py"
+
 
 rule all:
     """
     Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
     """
     log:
-        "logs/ALL/ALL.log"
+        "logs/ALL/ALL.log",
     input:
         expand("results/PREP/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])),
-        expand("results/LIFTOVER/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])),
-
-
+        expand(
+            "results/LIFTOVER/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])
+        ),
 
 
 rule VALIDATE:
@@ -50,7 +54,9 @@ rule VALIDATE:
     log:
         "logs/VALIDATE/{sample}.log",
     input:
-        lambda wildcards: datasets.loc[datasets["dataset_name"] == wildcards.sample, "file"].item()
+        lambda wildcards: datasets.loc[
+            datasets["dataset_name"] == wildcards.sample, "file"
+        ].item(),
     output:
         "results/PREP/{sample}.vcf.gz",
         "results/PREP/{sample}.vcf.gz.tbi",
@@ -83,9 +89,7 @@ rule VALIDATE:
             "module load bcftools-1.7; bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}_NORMALISED.vcf.gz -O z -o results/PREP/{wildcards.sample}.vcf.gz"
         ),
         # Generate Tabix index for output VCF
-        shell(
-            "tabix -p vcf results/PREP/{wildcards.sample}.vcf.gz"
-        )
+        shell("tabix -p vcf results/PREP/{wildcards.sample}.vcf.gz")
 
 
 rule LIFTOVER:
@@ -96,6 +100,7 @@ rule LIFTOVER:
         "logs/LIFTOVER/{sample}.log",
     input:
         "results/PREP/{sample}.vcf.gz",
+        "results/PREP/{sample}.vcf.gz.tbi",
     output:
         "results/LIFTOVER/{sample}.vcf.gz",
     params:
@@ -114,8 +119,8 @@ rule LIFTOVER:
             *next(
                 i["file_path"]
                 for i in config["reference-genomes"]
-            if i["version"] == "GRCh38"
-                ),
+                if i["version"] == "GRCh38"
+            ),
         ),
         mem=f'-Xmx{search("memory", "LIFTOVER")} ',
     resources:
