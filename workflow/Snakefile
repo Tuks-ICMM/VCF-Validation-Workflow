@@ -17,7 +17,6 @@ __maintainer__ = "Graeme Ford"
 __email__ = "graeme.ford@tuks.co.za"
 __status__ = "Development"
 
-
 # ENFORCE SNAKEMAKE VERSION CHECK:
 min_version("6.0")
 
@@ -133,4 +132,4 @@ rule LIFTOVER:
     conda:
         join("envs", "snakemake.yml")
     script:
-        join("scripts", "00 - LIFTOVER.py")
+        join("scripts", "00-LIFTOVER.py")
