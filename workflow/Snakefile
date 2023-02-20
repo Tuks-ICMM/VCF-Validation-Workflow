@@ -57,6 +57,10 @@ rule VALIDATE:
             datasets["dataset_name"] == wildcards.sample, "file"
         ].item(),
     output:
+        "results/PREP/{sample}/NO_INFO.vcf.gz",
+        "results/PREP/{sample}/NEW_INFO.vcf.gz",
+        "results/PREP/{sample}/FILTERED.vcf.gz",
+        "results/PREP/{sample}/NORMALISED.vcf.gz",
         "results/PREP/{sample}.vcf.gz",
         "results/PREP/{sample}.vcf.gz.tbi",
     params:
@@ -77,32 +81,32 @@ rule VALIDATE:
         """
         # Strip out INFO tags:
         echo -e "\n--- LOG SECTION START | bcftools annotate ---" 1>&2
-        bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}_NO_INFO.vcf.gz {input}
+        bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}/NO_INFO.vcf.gz {input}
         echo -e "--- LOG SECTION END | bcftools annotate ---" 1>&2
 
         # Regenerate and verify the VCF header:
         echo -e "\n--- LOG SECTION START | GATK FixVcfHeader ---" 1>&2
-        java -Xmx{params.memory} -jar $PICARD FixVcfHeader I=results/PREP/{wildcards.sample}_NO_INFO.vcf.gz O=results/PREP/{wildcards.sample}_NEW_INFO.vcf.gz
+        java -Xmx{params.memory} -jar $PICARD FixVcfHeader I=results/PREP/{wildcards.sample}/NO_INFO.vcf.gz O=results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz
         echo -e "--- LOG SECTION END | GATK FixVcfHeader ---\n" 1>&2
 
         # Remove variant types we cant yet analyse:
         echo -e "\n--- LOG SECTION START | GATK SelectVariants ---" 1>&2
-        gatk SelectVariants -V results/PREP/{wildcards.sample}_NEW_INFO.vcf.gz --select-type-to-include SNP --select-type-to-include INDEL --select-type-to-exclude MIXED --select-type-to-exclude MNP --select-type-to-exclude SYMBOLIC --exclude-filtered -O results/PREP/{wildcards.sample}_FILTERED.vcf.gz
+        gatk SelectVariants -V results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz --select-type-to-include SNP --select-type-to-include INDEL --select-type-to-exclude MIXED --select-type-to-exclude MNP --select-type-to-exclude SYMBOLIC --exclude-filtered -O results/PREP/{wildcards.sample}/FILTERED.vcf.gz
         echo -e "--- LOG SECTION END | GATK FixVcfHeader ---\n" 1>&2
         
         # Subset samples according to user defined list and remove variants that do not pass QC:
         echo -e "\n--- LOG SECTION START | bcftools view ---" 1>&2
-        bcftools view -S input/{wildcards.sample}_samples_subset.txt -f 'PASS' -O z -o results/PREP/{wildcards.sample}_FILTERED2.vcf.gz results/PREP/{wildcards.sample}_FILTERED.vcf.gz
+        bcftools view -S input/{wildcards.sample}/samples_subset.txt -f 'PASS' -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz
         echo -e "--- LOG SECTION END | bcftools view ---\n" 1>&2
         
         # Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
         echo -e "\n--- LOG SECTION START | bcftools norm ---" 1>&2
-        bcftools norm -m -any results/PREP/{wildcards.sample}_FILTERED2.vcf.gz -O z -o results/PREP/{wildcards.sample}_NORMALISED.vcf.gz
+        bcftools norm -m -any results/PREP/{wildcards.sample}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.sample}/NORMALISED.vcf.gz
         echo -e "--- LOG SECTION END | bcftools norm ---\n" 1>&2
 
         # Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
         echo -e "\n--- LOG SECTION START | bcftools annotate ---" 1>&2
-        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}_NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP -O z -o results/PREP/{wildcards.sample}.vcf.gz
+        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP -O z -o results/PREP/{wildcards.sample}.vcf.gz
         echo -e "--- LOG SECTION END | bcftools annotate --- \n" 1>&2
 
         echo -e "\n--- LOG SECTION START | tabix ---" 1>&2
