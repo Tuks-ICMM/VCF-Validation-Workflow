@@ -106,7 +106,7 @@ rule VALIDATE:
 
         # Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
         echo -e "\n--- LOG SECTION START | bcftools annotate ---" 1>&2
-        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP -O z -o results/PREP/{wildcards.sample}.vcf.gz
+        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.sample} -O z -o results/PREP/{wildcards.sample}.vcf.gz
         echo -e "--- LOG SECTION END | bcftools annotate --- \n" 1>&2
 
         echo -e "\n--- LOG SECTION START | tabix ---" 1>&2
