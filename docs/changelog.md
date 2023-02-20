@@ -24,6 +24,20 @@ Changelog
 </details>
 
 ---
+## [v1.1.2-ALPHA](https://github.com/Tuks-ICMM/Vcf-Validation/compare/v1.1.1-ALPHA...v1.1.2-ALPHA) (2023-02-20)
+
+### VALIDATE and LIFTOVER changes
+Changes to `VALIDATE`:
+
+- Reordered steps to ensure that file sizes are reduced as early as possible.
+- Added parameters to subset samples according to user specified list `/input/{dataset}_samples_subset.txt`
+- Added parameters to filter out variants not passing QC checks ('PASS' in FILTER column of VCF).
+- Added file for naming chromosomes according to custom parameters `/input/rename_chr.txt`
+
+Changes to `00 - LIFTOVER.py` file:
+
+- Files that have undergone the `LIFTOVER` process are unsorted. This can interfere with downstream analyses. Functionality has been added to sort the files by chromosome. 
+- Variants of files that have undergone `LIFTOVER` are renamed; however, this was not the case for files that did not need `LIFTOVER`. Functionality was added to rectify this.
 
 ## [v1.1.1-ALPHA](https://github.com/Tuks-ICMM/Vcf-Validation/compare/v1.1.0-ALPHA...v1.1.1-ALPHA) (2023-02-07)
 
