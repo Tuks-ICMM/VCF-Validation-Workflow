@@ -82,7 +82,7 @@ rule VALIDATE:
         # Strip out INFO tags:
         echo -e "\n--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
         bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}/NO_INFO.vcf.gz {input}
-        echo -e "--- LOG SECTION END | BcfTools 'annotate' ---" 1>&2
+        echo -e "--- LOG SECTION END | BcfTools 'annotate' ---\n" 1>&2
 
         # Regenerate and verify the VCF header:
         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
@@ -96,7 +96,6 @@ rule VALIDATE:
         
         # Subset samples according to user defined list and remove variants that do not pass QC:
         echo -e "--- LOG SECTION START | BcfTools 'view' ---" 1>&2
-        sleep 10s
         bcftools view -S input/{wildcards.sample}_samples_subset.txt -f 'PASS' -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz results/PREP/{wildcards.sample}/CLEANED.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'view' ---\n" 1>&2
         
@@ -107,7 +106,7 @@ rule VALIDATE:
 
         # Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
         echo -e "--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
-        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | BcfTools sort -m {params.memory} -T results/PREP/{wildcards.sample} -O z -o results/PREP/{wildcards.sample}.vcf.gz
+        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.sample} -O z -o results/PREP/{wildcards.sample}.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'annotate' --- \n" 1>&2
 
         echo -e "--- LOG SECTION START | SamTools 'tabix' ---" 1>&2
