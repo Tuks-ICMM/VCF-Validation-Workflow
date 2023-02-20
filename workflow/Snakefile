@@ -81,7 +81,7 @@ rule VALIDATE:
         """
         # Strip out INFO tags:
         echo -e "\n--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
-        bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}/NO_INFO.vcf.gz {input}
+        bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}/NO_INFO.vcf.gz {input}q
         echo -e "--- LOG SECTION END | BcfTools 'annotate' ---" 1>&2
 
         # Regenerate and verify the VCF header:
@@ -96,6 +96,7 @@ rule VALIDATE:
         
         # Subset samples according to user defined list and remove variants that do not pass QC:
         echo -e "--- LOG SECTION START | BcfTools 'view' ---" 1>&2
+        sleep 10s
         bcftools view -S input/{wildcards.sample}_samples_subset.txt -f 'PASS' -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz results/PREP/{wildcards.sample}/CLEANED.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'view' ---\n" 1>&2
         
