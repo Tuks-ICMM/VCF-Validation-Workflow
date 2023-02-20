@@ -80,38 +80,38 @@ rule VALIDATE:
     shell:
         """
         # Strip out INFO tags:
-        echo -e "\n--- LOG SECTION START | bcftools annotate ---" 1>&2
+        echo -e "\n--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
         bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}/NO_INFO.vcf.gz {input}
-        echo -e "--- LOG SECTION END | bcftools annotate ---" 1>&2
+        echo -e "--- LOG SECTION END | BcfTools 'annotate' ---" 1>&2
 
         # Regenerate and verify the VCF header:
-        echo -e "\n--- LOG SECTION START | GATK FixVcfHeader ---" 1>&2
+        echo -e "\n--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
         java -Xmx{params.memory} -jar $PICARD FixVcfHeader I=results/PREP/{wildcards.sample}/NO_INFO.vcf.gz O=results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz
-        echo -e "--- LOG SECTION END | GATK FixVcfHeader ---\n" 1>&2
+        echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
 
         # Remove variant types we cant yet analyse:
-        echo -e "\n--- LOG SECTION START | GATK SelectVariants ---" 1>&2
+        echo -e "\n--- LOG SECTION START | GATK 'SelectVariants' ---" 1>&2
         gatk SelectVariants -V results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz --select-type-to-include SNP --select-type-to-include INDEL --select-type-to-exclude MIXED --select-type-to-exclude MNP --select-type-to-exclude SYMBOLIC --exclude-filtered -O results/PREP/{wildcards.sample}/FILTERED.vcf.gz
-        echo -e "--- LOG SECTION END | GATK FixVcfHeader ---\n" 1>&2
+        echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
         
         # Subset samples according to user defined list and remove variants that do not pass QC:
-        echo -e "\n--- LOG SECTION START | bcftools view ---" 1>&2
+        echo -e "\n--- LOG SECTION START | BcfTools 'view' ---" 1>&2
         bcftools view -S input/{wildcards.sample}/samples_subset.txt -f 'PASS' -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz
-        echo -e "--- LOG SECTION END | bcftools view ---\n" 1>&2
+        echo -e "--- LOG SECTION END | BcfTools 'view' ---\n" 1>&2
         
         # Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
-        echo -e "\n--- LOG SECTION START | bcftools norm ---" 1>&2
+        echo -e "\n--- LOG SECTION START | BcfTools 'norm' ---" 1>&2
         bcftools norm -m -any results/PREP/{wildcards.sample}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.sample}/NORMALISED.vcf.gz
-        echo -e "--- LOG SECTION END | bcftools norm ---\n" 1>&2
+        echo -e "--- LOG SECTION END | BcfTools 'norm' ---\n" 1>&2
 
         # Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
-        echo -e "\n--- LOG SECTION START | bcftools annotate ---" 1>&2
-        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.sample} -O z -o results/PREP/{wildcards.sample}.vcf.gz
-        echo -e "--- LOG SECTION END | bcftools annotate --- \n" 1>&2
+        echo -e "\n--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
+        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | BcfTools sort -m {params.memory} -T results/PREP/{wildcards.sample} -O z -o results/PREP/{wildcards.sample}.vcf.gz
+        echo -e "--- LOG SECTION END | BcfTools 'annotate' --- \n" 1>&2
 
-        echo -e "\n--- LOG SECTION START | tabix ---" 1>&2
+        echo -e "\n--- LOG SECTION START | SamTools 'tabix' ---" 1>&2
         tabix -p vcf results/PREP/{wildcards.sample}.vcf.gz
-        echo -e "--- LOG SECTION END | tabix --- \n" 1>&2
+        echo -e "--- LOG SECTION END | SamTools 'tabix' --- \n" 1>&2
         """
 
 
