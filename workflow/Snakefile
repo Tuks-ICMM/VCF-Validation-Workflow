@@ -81,7 +81,7 @@ rule VALIDATE:
         """
         # Strip out INFO tags:
         echo -e "\n--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
-        bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}/NO_INFO.vcf.gz {input}q
+        bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}/NO_INFO.vcf.gz {input}
         echo -e "--- LOG SECTION END | BcfTools 'annotate' ---" 1>&2
 
         # Regenerate and verify the VCF header:
