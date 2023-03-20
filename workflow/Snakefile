@@ -76,7 +76,6 @@ rule VALIDATE:
     envmodules:
         "bcftools-1.7",
         "picard-2.17.11",
-        "gatk-4.2.2.0",
         "samtools-1.7"
     shell:
         """
@@ -91,9 +90,9 @@ rule VALIDATE:
         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
 
         # Remove variant types we cant yet analyse:
-        echo -e "--- LOG SECTION START | GATK 'SelectVariants' ---" 1>&2
-        gatk SelectVariants -V results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz --select-type-to-include SNP --select-type-to-include INDEL --select-type-to-exclude MIXED --select-type-to-exclude MNP --select-type-to-exclude SYMBOLIC --exclude-filtered -O results/PREP/{wildcards.sample}/CLEANED.vcf.gz
-        echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
+        echo -e "--- LOG SECTION START | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ' ---" 1>&2
+        bcftools view -v snps,indels -f PASS -O z -o results/PREP/{wildcards.sample}/CLEANED.vcf.gz results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz
+        echo -e "--- LOG SECTION END | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ---\n" 1>&2
         
         # Subset samples according to user defined list and remove variants that do not pass QC:
         echo -e "--- LOG SECTION START | BcfTools 'view' ---" 1>&2
