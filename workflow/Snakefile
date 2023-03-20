@@ -32,11 +32,14 @@ datasets = read_csv(join("input", "datasets.csv"), header=0)
 # IMPORT COMMON FUNCTIONS:
 include: "rules/common.py"
 
+# SET GLOBAL DOCKER RECIPIE TO USE:
+container: "docker://graemeford/pipeline-os"
 
 rule all:
     """
     Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
     """
+    default_target: True
     log:
         "logs/ALL/ALL.log",
     input:
@@ -75,8 +78,6 @@ rule VALIDATE:
         "picard-2.17.11",
         "gatk-4.2.2.0",
         "samtools-1.7"
-    container:
-        "docker://graemeford/pipeline-os"
     shell:
         """
         # Strip out INFO tags:
@@ -151,7 +152,5 @@ rule LIFTOVER:
         nodes=search("nodes", "LIFTOVER"),
         queue=search("queue", "LIFTOVER"),
         walltime=search("walltime", "LIFTOVER"),
-    container:
-        "docker://graemeford/pipeline-os"
     script:
         join("scripts", "00-LIFTOVER.py")
