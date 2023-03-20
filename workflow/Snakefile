@@ -87,7 +87,7 @@ rule VALIDATE:
 
         # Regenerate and verify the VCF header:
         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
-        java -Xmx{params.memory} -jar $PICARD FixVcfHeader I=results/PREP/{wildcards.sample}/NO_INFO.vcf.gz O=results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz
+        picard-tools -Xmx{params.memory} FixVcfHeader I=results/PREP/{wildcards.sample}/NO_INFO.vcf.gz O=results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz
         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
 
         # Remove variant types we cant yet analyse:
