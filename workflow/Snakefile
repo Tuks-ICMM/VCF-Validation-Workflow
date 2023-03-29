@@ -136,15 +136,13 @@ rule bcftools_filter:
 # group: VALIDATE
 # conditional: true
 if isfile(join("input", "samples.csv")):
-    samples = read_csv(join("input", "samples.csv"), header=0)
-
     rule bcftools_subset:
         """
         Subset samples according to user defined list and remove variants that do not pass QC.
         """
         group: "VALIDATE"
         input:
-            "input/samples.csv",
+            samples="input/samples.csv",
             "results/PREP/{dataset}/bcftools_filter.vcf.gz"
         output:
             pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
@@ -158,7 +156,7 @@ if isfile(join("input", "samples.csv")):
         envmodules:
             config["environment"]["envmodules"]["bcftools"],
         params:
-            samples=lambda wildcards: samples["dataset" == wildcards.dataset]["sample_name"].join(",")
+            samples=lambda wildcards: read_csv(input.samples, header=0)["dataset" == wildcards.dataset]["sample_name"].join(",")
         shell:
             """
             echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
