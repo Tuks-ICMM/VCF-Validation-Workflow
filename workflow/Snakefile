@@ -245,7 +245,6 @@ rule tabix:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        cd results/{wildcards.operation}/{wildcards.dataset}/
         tabix -p vcf {input}
         """
 
