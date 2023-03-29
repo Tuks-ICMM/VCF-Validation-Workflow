@@ -160,7 +160,7 @@ if isfile("input/samples.csv"):
         shell:
             """
             echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
-            bcftools view -s {{ params.samples }} -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz results/PREP/{wildcards.sample}/CLEANED.vcf.gz
+            bcftools view -s {{ params.samples }} -O z -o results/PREP/{wildcards.dataset}/FILTERED.vcf.gz results/PREP/{wildcards.dataset}/CLEANED.vcf.gz
             echo -e "--- LOG SECTION END | BcfTools 'view(subset_if_applicable,QC=PASS)' ---\n" 1>&2
             """
  
