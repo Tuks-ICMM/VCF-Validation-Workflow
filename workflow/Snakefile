@@ -60,6 +60,7 @@ rule strip_INFO_tags:
             datasets["dataset_name"] == wildcards.dataset, "file"
         ].item(),
     output:
+        # "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
         pipe("results/PREP/{dataset}/strip_INFO_tags.vcf.gz")
     benchmark:
         "results/_benchmarks/VALIDATE/strip_INFO_tags/{dataset}.benchmark"
@@ -72,7 +73,7 @@ rule strip_INFO_tags:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        bcftools annotate -x INFO,FORMAT -Ou {input} > {output}
+        bcftools annotate -x INFO,FORMAT -Ou {input} 1> {output}
         """
 
 # group: VALIDATE
@@ -113,7 +114,8 @@ rule filter:
     input:
         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
-        pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
+        "results/PREP/{dataset}/bcftools_filter.vcf.gz"
+        # pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
     log:
         "results/PREP/{dataset}/bcftools_filter.log"
     benchmark:
@@ -129,7 +131,7 @@ rule filter:
         memory=search("memory", "VALIDATE")
     shell:
         """
-        bcftools view -v snps,indels -f PASS -Ou < {input} 1> {output} 2>{log}
+        bcftools view -v snps,indels -f PASS -O z -o {output} < {input} 2>{log}
         """
 
 # group: VALIDATE
@@ -144,7 +146,8 @@ if isfile(join("input", "samples.csv")):
             vcf="results/PREP/{dataset}/bcftools_filter.vcf.gz",
             samples="input/samples.csv"
         output:
-            pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
+            "results/PREP/{dataset}/bcftools_subset.vcf.gz"
+            # pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
         log:
             "results/PREP/{dataset}/bcftools_subset.log"
         benchmark:
@@ -160,7 +163,7 @@ if isfile(join("input", "samples.csv")):
             samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0).query("dataset == 'GnomAD'")["sample_name"].tolist())
         shell:
             """
-            bcftools view -s {{ params.samples }} -Ou < {input.vcf} 1> {output} 2>{log}
+            bcftools view -s {{ params.samples }} -Oz -o {input.vcf} 1> {output} 2>{log}
             """
  
 # group: VALIDATE
