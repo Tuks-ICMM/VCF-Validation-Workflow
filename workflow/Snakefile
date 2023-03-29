@@ -231,7 +231,7 @@ rule tabix:
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
     benchmark:
-        "results/_benchmarks/VALIDATE/tabix/{dataset}.log"
+        "results/_benchmarks/{operation}/tabix/{dataset}_{output}.log"
     shell:
         """
         cd results/{operation}/{dataset}/
