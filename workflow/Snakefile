@@ -94,7 +94,7 @@ rule FixVcfHeader:
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
     envmodules:
-        config["environment"]["envmodules"]["picard"],
+        config["environment"]["envmodules"]["piccard"],
     params:
         memory=search("memory", "VALIDATE")
     shell:
