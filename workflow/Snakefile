@@ -136,8 +136,8 @@ rule bcftools_filter:
 # group: VALIDATE
 # conditional: true
 if isfile(join("input", "samples.csv")):
-    samples = read_csv(join("input", "samples.csv"), header=0)
-    
+    samples = read_csv(join("input", "samples.csv"), header=None)
+
     rule bcftools_subset:
         """
         Subset samples according to user defined list and remove variants that do not pass QC.
