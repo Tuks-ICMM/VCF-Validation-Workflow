@@ -101,7 +101,7 @@ rule FixVcfHeader:
     shell:
         """
         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
-        picard-tools -Xmx{params.memory} FixVcfHeader I=results/PREP/{wildcards.sample}/NO_INFO.vcf.gz O={output}
+        picard-tools -Xmx{params.memory} FixVcfHeader I=results/PREP/{wildcards.dataset}/NO_INFO.vcf.gz O={output}
         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
         """
 
@@ -129,7 +129,7 @@ rule bcftools_filter:
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ' ---" 1>&2
-        bcftools view -v snps,indels -f PASS -O z -o results/PREP/{wildcards.sample}/CLEANED.vcf.gz results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz
+        bcftools view -v snps,indels -f PASS -O z -o results/PREP/{wildcards.dataset}/CLEANED.vcf.gz results/PREP/{wildcards.dataset}/NEW_INFO.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ---\n" 1>&2
         """
 
@@ -186,7 +186,7 @@ rule bcftools_normalize:
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'norm' ---" 1>&2
-        bcftools norm -m -any results/PREP/{wildcards.sample}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.sample}/NORMALISED.vcf.gz
+        bcftools norm -m -any results/PREP/{wildcards.dataset}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'norm' ---\n" 1>&2
         """
 
