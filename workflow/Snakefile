@@ -136,7 +136,7 @@ rule bcftools_filter:
 # group: VALIDATE
 # conditional: true
 if isfile(join("input", "samples.csv")):
-    samples = read_csv(join("input", "samples.csv"), header=None)
+    samples = read_csv(join("input", "samples.csv"), header=0)
 
     rule bcftools_subset:
         """
