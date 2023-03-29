@@ -72,7 +72,7 @@ rule strip_INFO_tags:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        bcftools annotate -x INFO,FORMAT -O z -o {output} {input}
+        bcftools annotate -x INFO,FORMAT -Ou {input} > {output}
         """
 
 # group: VALIDATE
@@ -113,8 +113,7 @@ rule filter:
     input:
         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
-        "results/PREP/{dataset}/bcftools_filter.vcf.gz"
-        # pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
+        pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
     log:
         "results/PREP/{dataset}/bcftools_filter.log"
     benchmark:
@@ -130,7 +129,7 @@ rule filter:
         memory=search("memory", "VALIDATE")
     shell:
         """
-        bcftools view -v snps,indels -f PASS -O z -o results/PREP/{wildcards.dataset}/CLEANED.vcf.gz results/PREP/{wildcards.dataset}/NEW_INFO.vcf.gz 2>{log}
+        bcftools view -v snps,indels -f PASS -Ou < {input} 1> {output} 2>{log}
         """
 
 # group: VALIDATE
@@ -161,7 +160,7 @@ if isfile(join("input", "samples.csv")):
             samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0).query("dataset == 'GnomAD'")["sample_name"].tolist())
         shell:
             """
-            bcftools view -s {{ params.samples }} -O z -o results/PREP/{wildcards.dataset}/FILTERED.vcf.gz {input.vcf} 2>{log}
+            bcftools view -s {{ params.samples }} -Ou < {input.vcf} 1> {output} 2>{log}
             """
  
 # group: VALIDATE
@@ -188,7 +187,7 @@ rule normalize:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        bcftools norm -m -any results/PREP/{wildcards.dataset}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz 2>{log}
+        bcftools norm -m -any -O z -o {output} < {input} 2>{log}
         """
 
 # group: VALIDATE
