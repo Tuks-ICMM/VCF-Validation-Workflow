@@ -43,7 +43,7 @@ rule all:
     log:
         "logs/ALL/ALL.log",
     input:
-        expand("results/PREP/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])),
+        "results/PREP/bcftools_annotate.vcf.gz",
         expand(
             "results/LIFTOVER/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])
         ),
