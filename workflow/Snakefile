@@ -67,7 +67,7 @@ rule strip_INFO_tags:
     benchmark:
         "results/_benchmarks/VALIDATE/strip_INFO_tags/{sample}.tsv"
     envmodules:
-        config["software"]["bcftools"],
+        config["envmodules"]["bcftools"],
     shell:
         """
         # Strip out INFO tags:
@@ -96,7 +96,7 @@ rule FixVcfHeader:
     benchmark:
         "results/_benchmarks/VALIDATE/FixVcfHeader/{sample}.tsv"
     envmodules:
-        config["software"]["picard"],
+        config["environment"]["envmodules"]["picard"],
     shell:
         """
         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
@@ -124,7 +124,7 @@ rule bcftools_filter:
     benchmark:
         "results/_benchmarks/VALIDATE/bcftools_filter/{sample}.tsv"
     envmodules:
-        config["software"]["bcftools"],
+        config["environment"]["envmodules"]["bcftools"],
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ' ---" 1>&2
@@ -155,7 +155,7 @@ if isfile("input/samples.csv"):
         benchmark:
             "results/_benchmarks/VALIDATE/bcftools_subset/{sample}.tsv"
         envmodules:
-            config["software"]["bcftools"],
+            config["environment"]["envmodules"]["bcftools"],
         shell:
             """
             echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
@@ -181,7 +181,7 @@ rule bcftools_normalize:
     benchmark:
         "results/_benchmarks/VALIDATE/bcftools_normalize/{sample}.tsv"
     envmodules:
-        config["software"]["bcftools"],
+        config["environment"]["envmodules"]["bcftools"],
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'norm' ---" 1>&2
@@ -207,7 +207,7 @@ rule bcftools_annotate:
     benchmark:
         "results/_benchmarks/VALIDATE/bcftools_annotate/{sample}.tsv"
     envmodules:
-        config["software"]["bcftools"],
+        config["environment"]["envmodules"]["bcftools"],
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
