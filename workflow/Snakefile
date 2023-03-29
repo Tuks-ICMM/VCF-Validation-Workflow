@@ -87,7 +87,7 @@ rule FixVcfHeader:
     output:
         pipe("results/PREP/{dataset}/FixVcfHeader.vcf.gz")
     benchmark:
-        "results/_benchmarks/VALIDATE/FixVcfHeader/{sample}.tsv"
+        "results/_benchmarks/VALIDATE/FixVcfHeader/{dataset}.tsv"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -115,7 +115,7 @@ rule bcftools_filter:
     output:
         pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
     benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_filter/{sample}.tsv"
+        "results/_benchmarks/VALIDATE/bcftools_filter/{dataset}.tsv"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -146,7 +146,7 @@ if isfile("input/samples.csv"):
         output:
             pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
         benchmark:
-            "results/_benchmarks/VALIDATE/bcftools_subset/{sample}.tsv"
+            "results/_benchmarks/VALIDATE/bcftools_subset/{dataset}.tsv"
         resources:
             cpus=search("cores", "VALIDATE"),
             nodes=search("nodes", "VALIDATE"),
@@ -179,7 +179,7 @@ rule bcftools_normalize:
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
     benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_normalize/{sample}.tsv"
+        "results/_benchmarks/VALIDATE/bcftools_normalize/{dataset}.tsv"
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     shell:
@@ -205,7 +205,7 @@ rule bcftools_annotate:
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
     benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_annotate/{sample}.tsv"
+        "results/_benchmarks/VALIDATE/bcftools_annotate/{dataset}.tsv"
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     shell:
@@ -231,7 +231,7 @@ rule tabix:
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
     benchmark:
-        "results/_benchmarks/VALIDATE/tabix/{sample}.log"
+        "results/_benchmarks/VALIDATE/tabix/{dataset}.log"
     shell:
         """
         cd results/{operation}/{dataset}/
@@ -244,22 +244,22 @@ rule LIFTOVER:
     Lift Variants onto same Reference build. Otherwise we cant merge them or analyse them in context of each other.
     """
     log:
-        "logs/LIFTOVER/{sample}.log",
+        "logs/LIFTOVER/{dataset}.log",
     input:
-        "results/PREP/{sample}.vcf.gz",
-        "results/PREP/{sample}.vcf.gz.tbi",
+        "results/PREP/{dataset}.vcf.gz",
+        "results/PREP/{dataset}.vcf.gz.tbi",
     output:
-        "results/LIFTOVER/{sample}.vcf.gz",
+        "results/LIFTOVER/{dataset}.vcf.gz",
     group: "LIFTOVER"
     benchmark:
-        "results/_benchmarks/LIFTOVER/{sample}.log"
+        "results/_benchmarks/LIFTOVER/{dataset}.log"
     params:
-        prefix=lambda wildcards: "results/LIFTOVER/{sample}_LIFTED".format(
-            sample=wildcards.sample
+        prefix=lambda wildcards: "results/LIFTOVER/{dataset}_LIFTED".format(
+            dataset=wildcards.dataset
         ),
         exclusionList=(
-            lambda wildcards: "results/LIFTOVER/{sample}_EXCLUDE.dat".format(
-                sample=wildcards.sample
+            lambda wildcards: "results/LIFTOVER/{dataset}_EXCLUDE.dat".format(
+                dataset=wildcards.dataset
             )
         ),
         chainFile=join("resources", "hg19ToHg38.over.chain"),
