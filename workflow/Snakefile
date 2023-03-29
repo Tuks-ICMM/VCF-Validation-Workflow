@@ -209,6 +209,8 @@ rule bcftools_annotate:
         "results/_benchmarks/VALIDATE/bcftools_annotate/{dataset}.tsv"
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
+    params:
+        memory=search("memory", "VALIDATE")
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
