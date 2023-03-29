@@ -212,7 +212,7 @@ rule bcftools_annotate:
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
-        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.sample} -O z -o results/PREP/{wildcards.sample}.vcf.gz
+        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o results/PREP/{wildcards.dataset}.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'annotate' --- \n" 1>&2
         """
 
