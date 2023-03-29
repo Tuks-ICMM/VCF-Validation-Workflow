@@ -113,7 +113,8 @@ rule filter:
     input:
         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
-        pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
+        "results/PREP/{dataset}/bcftools_filter.vcf.gz"
+        # pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
     log:
         "results/PREP/{dataset}/bcftools_filter.log"
     benchmark:
@@ -172,7 +173,8 @@ rule normalize:
     input:
         lambda wildcards: "results/PREP/{dataset}/bcftools_subset.vcf.gz" if isfile("input/samples.csv") else "results/PREP/{dataset}/bcftools_filter.vcf.gz"
     output:
-        pipe("results/PREP/{dataset}/bcftools_normalize.vcf.gz")
+        "results/PREP/{dataset}/bcftools_normalize.vcf.gz"
+        # pipe("results/PREP/{dataset}/bcftools_normalize.vcf.gz")
     log:
         "results/PREP/{dataset}/bcftools_normalize.log"
     benchmark:
