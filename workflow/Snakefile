@@ -163,7 +163,7 @@ if isfile(join("input", "samples.csv")):
             samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0).query("dataset == 'GnomAD'")["sample_name"].tolist())
         shell:
             """
-            bcftools view -s {{ params.samples }} -O z -o {output} {input.vcf}  2>{log}
+            bcftools view -s {params.samples} -O z -o {output} {input.vcf}  2>{log}
             """
  
 # group: VALIDATE
