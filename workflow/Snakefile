@@ -78,41 +78,42 @@ rule strip_INFO_tags:
         """
 
 # group: VALIDATE
-rule FixVcfHeader:
-    """
-    Validate the VCF header and specification has been followed
-    """
-    group: "VALIDATE"
-    input:
-        "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
-    output:
-        "results/PREP/{dataset}/FixVcfHeader.vcf.gz"
-    benchmark:
-        "results/_benchmarks/VALIDATE/FixVcfHeader/{dataset}.tsv"
-    resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
-    envmodules:
-        config["environment"]["envmodules"]["piccard"],
-    params:
-        memory=search("memory", "VALIDATE")
-    shell:
-        """
-        echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
-        picard-tools -Xmx{params.memory} FixVcfHeader I={input} O={output}
-        echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
-        """
+# TODO: Identify Replacement for Piccards `FixVcfHeader`.
+# rule FixVcfHeader:
+#     """
+#     Validate the VCF header and specification has been followed
+#     """
+#     group: "VALIDATE"
+#     input:
+#         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+#     output:
+#         "results/PREP/{dataset}/FixVcfHeader.vcf.gz"
+#     benchmark:
+#         "results/_benchmarks/VALIDATE/FixVcfHeader/{dataset}.tsv"
+#     resources:
+#         cpus=search("cores", "VALIDATE"),
+#         nodes=search("nodes", "VALIDATE"),
+#         queue=search("queue", "VALIDATE"),
+#         walltime=search("walltime", "VALIDATE")
+#     envmodules:
+#         config["environment"]["envmodules"]["piccard"],
+#     params:
+#         memory=search("memory", "VALIDATE")
+#     shell:
+#         """
+#         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
+#         picard-tools -Xmx{params.memory} FixVcfHeader I={input} O={output}
+#         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
+#         """
 
 # group: VALIDATE
-rule bcftools_filter:
+rule filter:
     """
     Remove variant types we cant yet analyse
     """
     group: "VALIDATE"
     input:
-        "results/PREP/{dataset}/FixVcfHeader.vcf.gz"
+        "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
         pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
     benchmark:
@@ -136,7 +137,7 @@ rule bcftools_filter:
 # group: VALIDATE
 # conditional: true
 if isfile(join("input", "samples.csv")):
-    rule bcftools_subset:
+    rule subset:
         """
         Subset samples according to user defined list and remove variants that do not pass QC.
         """
@@ -165,7 +166,7 @@ if isfile(join("input", "samples.csv")):
             """
  
 # group: VALIDATE
-rule bcftools_normalize:
+rule normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
@@ -191,7 +192,7 @@ rule bcftools_normalize:
         """
 
 # group: VALIDATE
-rule bcftools_annotate:
+rule annotate:
     """
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
