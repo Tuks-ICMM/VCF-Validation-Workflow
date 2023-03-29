@@ -45,7 +45,7 @@ def directoryExists(path: str):
 
 print("Determining Liftover requirements now...")
 listed_refs: list = datasets.loc[
-    datasets["dataset_name"] == wildcards.sample, "reference_genome"
+    datasets["dataset_name"] == wildcards.dataset, "reference_genome"
 ].item()
 if listed_refs != "GRCh38":
     shell(
@@ -58,36 +58,38 @@ if listed_refs != "GRCh38":
         shell("echo 'Lifting from GRCh37 to GRCh38.'"),
         directoryExists("results/LIFTOVER"),
         shell(
-            "plink2 --vcf results/PREP/{wildcards.sample}.vcf.gz --set-all-var-ids @:#\$r-\$a --allow-extra-chr --new-id-max-allele-len 40 truncate --chr 1-22 --out results/LIFTOVER/{wildcards.sample}_PREP --export vcf-4.2 bgz --output-chr chr26"
-        ),
-        shell("sleep 60; tabix -p vcf results/LIFTOVER/{wildcards.sample}_PREP.vcf.gz"),
-        shell(
-            "picard-tools LiftoverVcf I=results/LIFTOVER/{wildcards.sample}_PREP.vcf.gz O=results/LIFTOVER/{wildcards.sample}_LIFTOVER.vcf.gz C={params.chainFile} REJECT=results/LIFTOVER/{wildcards.sample}_REJECTED.vcf.gz R={params.ref}"
+            "plink2 --vcf results/PREP/{wildcards.dataset}.vcf.gz --set-all-var-ids @:#\$r-\$a --allow-extra-chr --new-id-max-allele-len 40 truncate --chr 1-22 --out results/LIFTOVER/{wildcards.dataset}_PREP --export vcf-4.2 bgz --output-chr chr26"
         ),
         shell(
-            "bcftools sort -m 1G -T results/LIFTOVER -O z -o results/LIFTOVER/{wildcards.sample}.vcf.gz results/LIFTOVER/{wildcards.sample}_LIFTOVER.vcf.gz"
+            "sleep 60; tabix -p vcf results/LIFTOVER/{wildcards.dataset}_PREP.vcf.gz"
+        ),
+        shell(
+            "picard-tools LiftoverVcf I=results/LIFTOVER/{wildcards.dataset}_PREP.vcf.gz O=results/LIFTOVER/{wildcards.dataset}_LIFTOVER.vcf.gz C={params.chainFile} REJECT=results/LIFTOVER/{wildcards.dataset}_REJECTED.vcf.gz R={params.ref}"
+        ),
+        shell(
+            "bcftools sort -m 1G -T results/LIFTOVER -O z -o results/LIFTOVER/{wildcards.dataset}.vcf.gz results/LIFTOVER/{wildcards.dataset}_LIFTOVER.vcf.gz"
         ),
     # TODO: Add conditionals for other human reference genome builds
     else:
         print(
             "No liftover required. Dataset {} is already mapped to GRCh38.".format(
-                wildcards.sample
+                wildcards.dataset
             )
         ),
-        shell("touch results/LIFTOVER/{wildcards.sample}_EXCLUDE.dat"),
+        shell("touch results/LIFTOVER/{wildcards.dataset}_EXCLUDE.dat"),
         shell(
-            "plink --map input/{wildcards.sample}.map --ped input/{wildcards.sample}.ped --allow-extra-chr --chr 1-22 --recode vcf --keep-allele-order --exclude {params.exclusionList} --out results/LIFTOVER/{wildcards.sample}"
+            "plink --map input/{wildcards.dataset}.map --ped input/{wildcards.dataset}.ped --allow-extra-chr --chr 1-22 --recode vcf --keep-allele-order --exclude {params.exclusionList} --out results/LIFTOVER/{wildcards.dataset}"
         ),
-    # shell("bgzip results/LIFTOVER/{wildcards.sample}.vcf"),
-    shell("sleep 1m; tabix -f -p vcf results/LIFTOVER/{wildcards.sample}.vcf.gz"),
+    # shell("bgzip results/LIFTOVER/{wildcards.dataset}.vcf"),
+    shell("sleep 1m; tabix -f -p vcf results/LIFTOVER/{wildcards.dataset}.vcf.gz"),
     shell(
-        "echo 'results/LIFTOVER/{wildcards.sample}.vcf.gz' >> results/LIFTOVER/merge.list"
+        "echo 'results/LIFTOVER/{wildcards.dataset}.vcf.gz' >> results/LIFTOVER/merge.list"
     )
 else:
     shell(
-        "plink2 --vcf results/PREP/{wildcards.sample}.vcf.gz --set-all-var-ids @:#\$r-\$a --allow-extra-chr --new-id-max-allele-len 400 truncate --chr 1-22 --out results/LIFTOVER/{wildcards.sample} --export vcf-4.2 bgz --output-chr chr26"
+        "plink2 --vcf results/PREP/{wildcards.dataset}.vcf.gz --set-all-var-ids @:#\$r-\$a --allow-extra-chr --new-id-max-allele-len 400 truncate --chr 1-22 --out results/LIFTOVER/{wildcards.dataset} --export vcf-4.2 bgz --output-chr chr26"
     ),
-    shell("sleep 60; tabix -p vcf results/LIFTOVER/{wildcards.sample}.vcf.gz"),
+    shell("sleep 60; tabix -p vcf results/LIFTOVER/{wildcards.dataset}.vcf.gz"),
     shell(
-        "echo 'results/LIFTOVER/{wildcards.sample}.vcf.gz' >> results/LIFTOVER/merge.list"
+        "echo 'results/LIFTOVER/{wildcards.dataset}.vcf.gz' >> results/LIFTOVER/merge.list"
     )
