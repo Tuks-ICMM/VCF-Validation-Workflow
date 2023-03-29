@@ -72,9 +72,7 @@ rule strip_INFO_tags:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        echo -e "\n--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
         bcftools annotate -x INFO,FORMAT -O z -o {output} {input}
-        echo -e "--- LOG SECTION END | BcfTools 'annotate' ---\n" 1>&2
         """
 
 # group: VALIDATE
