@@ -51,26 +51,26 @@ rule all:
 # group: VALIDATE
 rule strip_INFO_tags:
     """
+    Strip out INFO tags
     """
+    group: "VALIDATE"
     input:
         lambda wildcards: datasets.loc[
-            datasets["dataset_name"] == wildcards.sample, "file"
+            datasets["dataset_name"] == wildcards.dataset, "file"
         ].item(),
     output:
         pipe("results/PREP/{dataset}/strip_INFO_tags.vcf.gz")
-    group: "VALIDATE"
+    benchmark:
+        "results/_benchmarks/VALIDATE/strip_INFO_tags/{dataset}.tsv"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
-    benchmark:
-        "results/_benchmarks/VALIDATE/strip_INFO_tags/{sample}.tsv"
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        # Strip out INFO tags:
         echo -e "\n--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
         bcftools annotate -x INFO,FORMAT -O z -o {output} {input}
         echo -e "--- LOG SECTION END | BcfTools 'annotate' ---\n" 1>&2
@@ -79,24 +79,24 @@ rule strip_INFO_tags:
 # group: VALIDATE
 rule FixVcfHeader:
     """
-    Strip out INFO tags
+    Validate the VCF header and specification has been followed
     """
+    group: "VALIDATE"
     input:
         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
         pipe("results/PREP/{dataset}/FixVcfHeader.vcf.gz")
-    group: "VALIDATE"
-    params:
-        memory=search("memory", "VALIDATE")
+    benchmark:
+        "results/_benchmarks/VALIDATE/FixVcfHeader/{sample}.tsv"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
-    benchmark:
-        "results/_benchmarks/VALIDATE/FixVcfHeader/{sample}.tsv"
     envmodules:
         config["environment"]["envmodules"]["picard"],
+    params:
+        memory=search("memory", "VALIDATE")
     shell:
         """
         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
@@ -109,22 +109,22 @@ rule bcftools_filter:
     """
     Remove variant types we cant yet analyse
     """
+    group: "VALIDATE"
     input:
         "results/PREP/{dataset}/FixVcfHeader.vcf.gz"
     output:
         pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
-    group: "VALIDATE"
-    params:
-        memory=search("memory", "VALIDATE")
+    benchmark:
+        "results/_benchmarks/VALIDATE/bcftools_filter/{sample}.tsv"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
-    benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_filter/{sample}.tsv"
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
+    params:
+        memory=search("memory", "VALIDATE")
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ' ---" 1>&2
@@ -139,23 +139,23 @@ if isfile("input/samples.csv"):
         """
         Subset samples according to user defined list and remove variants that do not pass QC.
         """
+        group: "VALIDATE"
         input:
             "input/samples.csv",
             "results/PREP/{dataset}/bcftools_filter.vcf.gz"
         output:
             pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
-        group: "VALIDATE"
-        params:
-            samples=lambda wildcards: samples["dataset" == wildcards.sample]["sample_name"].join(",")
+        benchmark:
+            "results/_benchmarks/VALIDATE/bcftools_subset/{sample}.tsv"
         resources:
             cpus=search("cores", "VALIDATE"),
             nodes=search("nodes", "VALIDATE"),
             queue=search("queue", "VALIDATE"),
             walltime=search("walltime", "VALIDATE")
-        benchmark:
-            "results/_benchmarks/VALIDATE/bcftools_subset/{sample}.tsv"
         envmodules:
             config["environment"]["envmodules"]["bcftools"],
+        params:
+            samples=lambda wildcards: samples["dataset" == wildcards.sample]["sample_name"].join(",")
         shell:
             """
             echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
