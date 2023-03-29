@@ -1,6 +1,6 @@
 from snakemake.utils import min_version
 from pandas import read_csv
-from os.path import join
+from os.path import join, isFile
 
 __author__ = "Graeme Ford"
 __credits__ = [
@@ -18,7 +18,7 @@ __email__ = "graeme.ford@tuks.co.za"
 __status__ = "Development"
 
 # ENFORCE SNAKEMAKE VERSION CHECK:
-min_version("6.0")
+min_version("7")
 
 
 # DEFINE CONFIG FILE FOR SNAKEMAKE:
@@ -48,71 +48,194 @@ rule all:
             "results/LIFTOVER/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])
         ),
 
-
-rule VALIDATE:
+# group: VALIDATE
+rule strip_INFO_tags:
     """
-    Perform normalisation of variants, validation of VCF format as well as REF alleles and strip out INFO tags.
     """
-    log:
-        "results/PREP/{sample}.log",
     input:
         lambda wildcards: datasets.loc[
             datasets["dataset_name"] == wildcards.sample, "file"
         ].item(),
     output:
-        "results/PREP/{sample}/NO_INFO.vcf.gz",
-        "results/PREP/{sample}/NEW_INFO.vcf.gz",
-        "results/PREP/{sample}/FILTERED.vcf.gz",
-        "results/PREP/{sample}/NORMALISED.vcf.gz",
-        "results/PREP/{sample}.vcf.gz",
-        "results/PREP/{sample}.vcf.gz.tbi",
-    params:
-        memory=search("memory", "VALIDATE"),
-        samples=lambda wildcards: samples["dataset" == wildcards.sample]["sample_name"].join(",")
+        pipe("results/PREP/{dataset}/strip_INFO_tags.vcf.gz")
+    group: "VALIDATE"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
         queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    benchmark:
+        "results/_benchmarks/VALIDATE/strip_INFO_tags/{sample}.tsv"
     envmodules:
-        "bcftools-1.7",
-        "picard-2.17.11",
-        "samtools-1.7"
+        config["software"]["bcftools"],
     shell:
         """
         # Strip out INFO tags:
         echo -e "\n--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
-        bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}/NO_INFO.vcf.gz {input}
+        bcftools annotate -x INFO,FORMAT -O z -o {output} {input}
         echo -e "--- LOG SECTION END | BcfTools 'annotate' ---\n" 1>&2
+        """
 
-        # Regenerate and verify the VCF header:
+# group: VALIDATE
+rule FixVcfHeader:
+    """
+    Strip out INFO tags
+    """
+    input:
+        "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+    output:
+        pipe("results/PREP/{dataset}/FixVcfHeader.vcf.gz")
+    group: "VALIDATE"
+    params:
+        memory=search("memory", "VALIDATE")
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    benchmark:
+        "results/_benchmarks/VALIDATE/FixVcfHeader/{sample}.tsv"
+    envmodules:
+        config["software"]["picard"],
+    shell:
+        """
         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
-        picard-tools -Xmx{params.memory} FixVcfHeader I=results/PREP/{wildcards.sample}/NO_INFO.vcf.gz O=results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz
+        picard-tools -Xmx{params.memory} FixVcfHeader I=results/PREP/{wildcards.sample}/NO_INFO.vcf.gz O={output}
         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
+        """
 
-        # Remove variant types we cant yet analyse:
+# group: VALIDATE
+rule bcftools_filter:
+    """
+    Remove variant types we cant yet analyse
+    """
+    input:
+        "results/PREP/{dataset}/FixVcfHeader.vcf.gz"
+    output:
+        pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
+    group: "VALIDATE"
+    params:
+        memory=search("memory", "VALIDATE")
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    benchmark:
+        "results/_benchmarks/VALIDATE/bcftools_filter/{sample}.tsv"
+    envmodules:
+        config["software"]["bcftools"],
+    shell:
+        """
         echo -e "--- LOG SECTION START | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ' ---" 1>&2
         bcftools view -v snps,indels -f PASS -O z -o results/PREP/{wildcards.sample}/CLEANED.vcf.gz results/PREP/{wildcards.sample}/NEW_INFO.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ---\n" 1>&2
-        
-        # Subset samples according to user defined list and remove variants that do not pass QC:
-        echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
-        bcftools view -s {{ params.samples }} -f 'PASS' -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz results/PREP/{wildcards.sample}/CLEANED.vcf.gz
-        echo -e "--- LOG SECTION END | BcfTools 'view(subset_if_applicable,QC=PASS)' ---\n" 1>&2
-        
-        # Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
+        """
+
+# group: VALIDATE
+# conditional: true
+if isFile("input/samples.csv"):
+    rule bcftools_subset:
+        """
+        Subset samples according to user defined list and remove variants that do not pass QC.
+        """
+        input:
+            "input/samples.csv",
+            "results/PREP/{dataset}/bcftools_filter.vcf.gz"
+        output:
+            pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
+        group: "VALIDATE"
+        params:
+            samples=lambda wildcards: samples["dataset" == wildcards.sample]["sample_name"].join(",")
+        resources:
+            cpus=search("cores", "VALIDATE"),
+            nodes=search("nodes", "VALIDATE"),
+            queue=search("queue", "VALIDATE"),
+            walltime=search("walltime", "VALIDATE")
+        benchmark:
+            "results/_benchmarks/VALIDATE/bcftools_subset/{sample}.tsv"
+        envmodules:
+            config["software"]["bcftools"],
+        shell:
+            """
+            echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
+            bcftools view -s {{ params.samples }} -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz results/PREP/{wildcards.sample}/CLEANED.vcf.gz
+            echo -e "--- LOG SECTION END | BcfTools 'view(subset_if_applicable,QC=PASS)' ---\n" 1>&2
+            """
+ 
+# group: VALIDATE
+rule bcftools_normalize:
+    """
+    Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
+    """
+    input:
+        lambda wildcards: "results/PREP/{dataset}/bcftools_subset.vcf.gz" if isFile("input/samples.csv") else "results/PREP/{dataset}/bcftools_filter.vcf.gz"
+    output:
+        pipe("results/PREP/{dataset}/bcftools_normalize.vcf.gz")
+    group: "VALIDATE"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    benchmark:
+        "results/_benchmarks/VALIDATE/bcftools_normalize/{sample}.tsv"
+    envmodules:
+        config["software"]["bcftools"],
+    shell:
+        """
         echo -e "--- LOG SECTION START | BcfTools 'norm' ---" 1>&2
         bcftools norm -m -any results/PREP/{wildcards.sample}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.sample}/NORMALISED.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'norm' ---\n" 1>&2
+        """
 
-        # Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
+# group: VALIDATE
+rule bcftools_annotate:
+    """
+    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
+    """
+    input:
+        "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+    output:
+        pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
+    group: "VALIDATE"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    benchmark:
+        "results/_benchmarks/VALIDATE/bcftools_annotate/{sample}.tsv"
+    envmodules:
+        config["software"]["bcftools"],
+    shell:
+        """
         echo -e "--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
         bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.sample} -O z -o results/PREP/{wildcards.sample}.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'annotate' --- \n" 1>&2
+        """
 
-        echo -e "--- LOG SECTION START | SamTools 'tabix' ---" 1>&2
-        tabix -p vcf results/PREP/{wildcards.sample}.vcf.gz
-        echo -e "--- LOG SECTION END | SamTools 'tabix' --- \n" 1>&2
+# group: VALIDATE
+rule tabix:
+    """
+    Generate tabix-index.
+    """
+    input:
+        "results/{operation}/{dataset}/{output}.vcf"
+    output:
+        "results/{operation}/{dataset}/{output}.vcf.gz.tbi",
+    group: "VALIDATE"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    benchmark:
+        "results/_benchmarks/VALIDATE/tabix/{sample}.log"
+    shell:
+        """
+        cd results/{operation}/{dataset}/
+        tabix -p vcf {input}
         """
 
 
@@ -127,6 +250,9 @@ rule LIFTOVER:
         "results/PREP/{sample}.vcf.gz.tbi",
     output:
         "results/LIFTOVER/{sample}.vcf.gz",
+    group: "LIFTOVER"
+    benchmark:
+        "results/_benchmarks/LIFTOVER/{sample}.log"
     params:
         prefix=lambda wildcards: "results/LIFTOVER/{sample}_LIFTED".format(
             sample=wildcards.sample
