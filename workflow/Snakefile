@@ -43,7 +43,7 @@ rule all:
     log:
         "logs/ALL/ALL.log",
     input:
-        expand("results/PREP/{dataset}/bcftools_annotate.vcf.gz", dataset=list(datasets["dataset_name"])
+        expand("results/PREP/{dataset}/annotate.vcf.gz", dataset=list(datasets["dataset_name"])
         ),
         expand(
             "results/LIFTOVER/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])
@@ -60,10 +60,11 @@ rule strip_INFO_tags:
             datasets["dataset_name"] == wildcards.dataset, "file"
         ].item(),
     output:
-        # "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
-        pipe("results/PREP/{dataset}/strip_INFO_tags.vcf.gz")
+        "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+    log:
+        "_logs/PREP/{dataset}/strip_INFO_tags.log"
     benchmark:
-        "results/_benchmarks/VALIDATE/strip_INFO_tags/{dataset}.benchmark"
+        "_benchmarks/VALIDATE/strip_INFO_tags/{dataset}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -73,7 +74,7 @@ rule strip_INFO_tags:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        bcftools annotate -x INFO,FORMAT -Ou {input} 1> {output}
+        bcftools annotate -x INFO,FORMAT -Oz -o {output} {input} 2>{log}
         """
 
 # group: VALIDATE
@@ -114,12 +115,12 @@ rule filter:
     input:
         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
-        "results/PREP/{dataset}/bcftools_filter.vcf.gz"
-        # pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
+        "results/PREP/{dataset}/filter.vcf.gz"
+        # pipe("results/PREP/{dataset}/filter.vcf.gz")
     log:
-        "results/PREP/{dataset}/bcftools_filter.log"
+        "_logs/PREP/{dataset}/filter.log"
     benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_filter/{dataset}.benchmark"
+        "_benchmarks/VALIDATE/filter/{dataset}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -136,35 +137,33 @@ rule filter:
 
 # group: VALIDATE
 # conditional: true
-if isfile(join("input", "samples.csv")):
-    rule subset:
+rule subset:
+    """
+    Subset samples according to user defined list and remove variants that do not pass QC.
+    """
+    group: "VALIDATE"
+    input:
+        vcf="results/PREP/{dataset}/filter.vcf.gz",
+        samples="input/samples.csv"
+    output:
+        "results/PREP/{dataset}/subset.vcf.gz"
+    log:
+        "_logs/PREP/{dataset}/subset.log"
+    benchmark:
+        "_benchmarks/VALIDATE/subset/{dataset}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    params:
+        samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0).query("dataset == 'GnomAD'")["sample_name"].tolist())
+    shell:
         """
-        Subset samples according to user defined list and remove variants that do not pass QC.
+        bcftools view -s {params.samples} -O z -o {output} {input.vcf}  2>{log}
         """
-        group: "VALIDATE"
-        input:
-            vcf="results/PREP/{dataset}/bcftools_filter.vcf.gz",
-            samples="input/samples.csv"
-        output:
-            "results/PREP/{dataset}/bcftools_subset.vcf.gz"
-            # pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
-        log:
-            "results/PREP/{dataset}/bcftools_subset.log"
-        benchmark:
-            "results/_benchmarks/VALIDATE/bcftools_subset/{dataset}.benchmark"
-        resources:
-            cpus=search("cores", "VALIDATE"),
-            nodes=search("nodes", "VALIDATE"),
-            queue=search("queue", "VALIDATE"),
-            walltime=search("walltime", "VALIDATE")
-        envmodules:
-            config["environment"]["envmodules"]["bcftools"],
-        params:
-            samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0).query("dataset == 'GnomAD'")["sample_name"].tolist())
-        shell:
-            """
-            bcftools view -s {params.samples} -O z -o {output} {input.vcf}  2>{log}
-            """
  
 # group: VALIDATE
 rule normalize:
@@ -173,14 +172,14 @@ rule normalize:
     """
     group: "VALIDATE"
     input:
-        lambda wildcards: "results/PREP/{dataset}/bcftools_subset.vcf.gz" if isfile("input/samples.csv") else "results/PREP/{dataset}/bcftools_filter.vcf.gz"
+        lambda wildcards: "results/PREP/{dataset}/subset.vcf.gz" if isfile("input/samples.csv") else "results/PREP/{dataset}/filter.vcf.gz"
     output:
-        "results/PREP/{dataset}/bcftools_normalize.vcf.gz"
-        # pipe("results/PREP/{dataset}/bcftools_normalize.vcf.gz")
+        "results/PREP/{dataset}/normalize.vcf.gz"
+        # pipe("results/PREP/{dataset}/normalize.vcf.gz")
     log:
-        "results/PREP/{dataset}/bcftools_normalize.log"
+        "_logs/PREP/{dataset}/normalize.log"
     benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_normalize/{dataset}.benchmark"
+        "results/_benchmarks/VALIDATE/normalize/{dataset}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -200,13 +199,13 @@ rule annotate:
     """
     group: "VALIDATE"
     input:
-        "results/PREP/{dataset}/bcftools_normalize.vcf.gz"
+        "results/PREP/{dataset}/normalize.vcf.gz"
     output:
-        "results/PREP/{dataset}/bcftools_annotate.vcf.gz"
+        "results/PREP/{dataset}/annotate.vcf.gz"
     log:
-        "results/PREP/{dataset}/bcftools_annotate.log"
+        "_logs/PREP/{dataset}/annotate.log"
     benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_annotate/{dataset}.benchmark"
+        "_benchmarks/VALIDATE/annotate/{dataset}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -233,9 +232,9 @@ rule tabix:
     output:
         "results/{operation}/{dataset}/{output}.vcf.gz.tbi"
     log:
-        "results/{operation}/{dataset}/{output}.log"
+        "_logs/{operation}/{dataset}/{output}.log"
     benchmark:
-        "results/_benchmarks/{operation}/{dataset}/{output}.benchmark"
+        "_benchmarks/{operation}/{dataset}/{output}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -248,45 +247,31 @@ rule tabix:
         tabix -p vcf {input}
         """
 
-
-rule LIFTOVER:
-    """
-    Lift Variants onto same Reference build. Otherwise we cant merge them or analyse them in context of each other.
-    """
+# TODO: IF (NEEDS LIFTOVER)
+rule liftover:
     group: "LIFTOVER"
     input:
-        "results/PREP/{dataset}/bcftools_annotate.vcf.gz",
-        "results/PREP/{dataset}/bcftools_annotate.vcf.gz.tbi",
+        "results/PREP/{dataset}/annotate.vcf.gz",
+        "results/PREP/{dataset}/annotate.vcf.gz.tbi",
     output:
-        "results/LIFTOVER/{dataset}.vcf.gz",
+        "results/PREP/{dataset}/liftover.vcf.gz"
+        "results/PREP/{dataset}/liftover_rejected.vcf.gz"
     log:
-        "logs/LIFTOVER/{dataset}.log",
+        "_logs/PREP/{dataset}/liftover.log"
     benchmark:
-        "results/_benchmarks/LIFTOVER/{dataset}.log"
-    resources:
-        cpus=search("cores", "LIFTOVER"),
-        nodes=search("nodes", "LIFTOVER"),
-        queue=search("queue", "LIFTOVER"),
-        walltime=search("walltime", "LIFTOVER"),
+        "_benchmarks/PREP/{dataset}/liftover.benchmark"
+    envmodules:
+        config["environment"]["envmodules"]["piccard"]
     params:
-        prefix=lambda wildcards: "results/LIFTOVER/{dataset}_LIFTED".format(
-            dataset=wildcards.dataset
-        ),
-        exclusionList=(
-            lambda wildcards: "results/LIFTOVER/{dataset}_EXCLUDE.dat".format(
-                dataset=wildcards.dataset
-            )
-        ),
         chainFile=join("resources", "hg19ToHg38.over.chain"),
-        LiftOver=join("resources", "liftOverPlink.py"),
-        rmBadLifts=join("resources", "rmBadLifts.py"),
         ref=join(
             *next(
-                i["file_path"]
-                for i in config["reference-genomes"]
-                if i["version"] == "GRCh38"
+                reference_genome["file_path"]
+                for reference_genome in config["reference-genomes"]
+                if reference_genome["version"] == "GRCh38"
             ),
         ),
-        mem=f'-Xmx{search("memory", "LIFTOVER")} ',
-    script:
-        join("scripts", "00-LIFTOVER.py")
+    shell:
+        """
+        picard-tools LiftoverVcf I={input[0]} O={output[0]} R={ref} C={params.chainFile} REJECT={output[1]} 2>{log}
+        """
