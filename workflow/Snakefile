@@ -67,7 +67,7 @@ rule strip_INFO_tags:
     benchmark:
         "results/_benchmarks/VALIDATE/strip_INFO_tags/{sample}.tsv"
     envmodules:
-        config["envmodules"]["bcftools"],
+        config["environment"]["envmodules"]["bcftools"],
     shell:
         """
         # Strip out INFO tags:
