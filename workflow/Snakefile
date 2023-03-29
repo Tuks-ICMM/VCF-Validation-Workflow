@@ -131,9 +131,7 @@ rule filter:
         memory=search("memory", "VALIDATE")
     shell:
         """
-        echo -e "--- LOG SECTION START | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ' ---" 1>&2
         bcftools view -v snps,indels -f PASS -O z -o results/PREP/{wildcards.dataset}/CLEANED.vcf.gz results/PREP/{wildcards.dataset}/NEW_INFO.vcf.gz 2>{log}
-        echo -e "--- LOG SECTION END | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ---\n" 1>&2
         """
 
 # group: VALIDATE
@@ -164,9 +162,7 @@ if isfile(join("input", "samples.csv")):
             samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0).query("dataset == 'GnomAD'")["sample_name"].tolist())
         shell:
             """
-            echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
             bcftools view -s {{ params.samples }} -O z -o results/PREP/{wildcards.dataset}/FILTERED.vcf.gz {input.vcf} 2>{log}
-            echo -e "--- LOG SECTION END | BcfTools 'view(subset_if_applicable,QC=PASS)' ---\n" 1>&2
             """
  
 # group: VALIDATE
@@ -192,9 +188,7 @@ rule normalize:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        echo -e "--- LOG SECTION START | BcfTools 'norm' ---" 1>&2
         bcftools norm -m -any results/PREP/{wildcards.dataset}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz 2>{log}
-        echo -e "--- LOG SECTION END | BcfTools 'norm' ---\n" 1>&2
         """
 
 # group: VALIDATE
@@ -222,9 +216,7 @@ rule annotate:
         memory=search("memory", "VALIDATE")
     shell:
         """
-        echo -e "--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
         bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o results/PREP/{wildcards.dataset}.vcf.gz 2>{log}
-        echo -e "--- LOG SECTION END | BcfTools 'annotate' --- \n" 1>&2
         """
 
 # group: VALIDATE
