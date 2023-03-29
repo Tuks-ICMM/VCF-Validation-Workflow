@@ -101,7 +101,7 @@ rule FixVcfHeader:
     shell:
         """
         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
-        picard-tools -Xmx{params.memory} FixVcfHeader I=results/PREP/{wildcards.dataset}/NO_INFO.vcf.gz O={output}
+        picard-tools -Xmx{params.memory} FixVcfHeader I={input} O={output}
         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
         """
 
