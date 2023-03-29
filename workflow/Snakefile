@@ -221,7 +221,7 @@ rule tabix:
     Generate tabix-index.
     """
     input:
-        "results/{operation}/{dataset}/{output}.vcf"
+        "results/{operation}/{dataset}/{output}.vcf.gz"
     output:
         "results/{operation}/{dataset}/{output}.vcf.gz.tbi",
     group: "VALIDATE"
@@ -246,8 +246,8 @@ rule LIFTOVER:
     log:
         "logs/LIFTOVER/{dataset}.log",
     input:
-        "results/PREP/{dataset}/bcftools_filter.vcf.gz",
-        "results/PREP/{dataset}/bcftools_filter.vcf.gz.tbi",
+        "results/PREP/{dataset}/bcftools_annotate.vcf.gz",
+        "results/PREP/{dataset}/bcftools_annotate.vcf.gz.tbi",
     output:
         "results/LIFTOVER/{dataset}.vcf.gz",
     group: "LIFTOVER"
