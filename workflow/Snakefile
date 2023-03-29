@@ -156,7 +156,7 @@ if isfile(join("input", "samples.csv")):
         envmodules:
             config["environment"]["envmodules"]["bcftools"],
         params:
-            samples=lambda wildcards: read_csv("{input.samples}", header=0)["dataset" == wildcards.dataset]["sample_name"].join(",")
+            samples=lambda wildcards, input: read_csv(input.samples, header=0)["dataset" == wildcards.dataset]["sample_name"].join(",")
         shell:
             """
             echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
