@@ -96,9 +96,9 @@ rule VALIDATE:
         echo -e "--- LOG SECTION END | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ---\n" 1>&2
         
         # Subset samples according to user defined list and remove variants that do not pass QC:
-        echo -e "--- LOG SECTION START | BcfTools 'view' ---" 1>&2
+        echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
         bcftools view -s {{ params.samples }} -f 'PASS' -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz results/PREP/{wildcards.sample}/CLEANED.vcf.gz
-        echo -e "--- LOG SECTION END | BcfTools 'view' ---\n" 1>&2
+        echo -e "--- LOG SECTION END | BcfTools 'view(subset_if_applicable,QC=PASS)' ---\n" 1>&2
         
         # Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
         echo -e "--- LOG SECTION START | BcfTools 'norm' ---" 1>&2
