@@ -68,6 +68,7 @@ rule VALIDATE:
         "results/PREP/{sample}.vcf.gz.tbi",
     params:
         memory=search("memory", "VALIDATE"),
+        samples=lambda wildcards: samples["dataset" == wildcards.sample]["sample_name"].join(",")
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -96,7 +97,7 @@ rule VALIDATE:
         
         # Subset samples according to user defined list and remove variants that do not pass QC:
         echo -e "--- LOG SECTION START | BcfTools 'view' ---" 1>&2
-        bcftools view -s {{ samples["dataset" == wildcards.sample]["sample_name"]|join(",") }} -f 'PASS' -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz results/PREP/{wildcards.sample}/CLEANED.vcf.gz
+        bcftools view -s {{ params.samples }} -f 'PASS' -O z -o results/PREP/{wildcards.sample}/FILTERED.vcf.gz results/PREP/{wildcards.sample}/CLEANED.vcf.gz
         echo -e "--- LOG SECTION END | BcfTools 'view' ---\n" 1>&2
         
         # Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
