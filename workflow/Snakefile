@@ -196,7 +196,7 @@ rule bcftools_annotate:
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
     input:
-        "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+        "results/PREP/{dataset}/bcftools_normalize.vcf.gz"
     output:
         "results/PREP/{dataset}/bcftools_annotate.vcf.gz"
     group: "VALIDATE"
