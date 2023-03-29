@@ -1,6 +1,6 @@
 from snakemake.utils import min_version
 from pandas import read_csv
-from os.path import join, isFile
+from os.path import join, isfile
 
 __author__ = "Graeme Ford"
 __credits__ = [
@@ -134,7 +134,7 @@ rule bcftools_filter:
 
 # group: VALIDATE
 # conditional: true
-if isFile("input/samples.csv"):
+if isfile("input/samples.csv"):
     rule bcftools_subset:
         """
         Subset samples according to user defined list and remove variants that do not pass QC.
@@ -169,7 +169,7 @@ rule bcftools_normalize:
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
     input:
-        lambda wildcards: "results/PREP/{dataset}/bcftools_subset.vcf.gz" if isFile("input/samples.csv") else "results/PREP/{dataset}/bcftools_filter.vcf.gz"
+        lambda wildcards: "results/PREP/{dataset}/bcftools_subset.vcf.gz" if isfile("input/samples.csv") else "results/PREP/{dataset}/bcftools_filter.vcf.gz"
     output:
         pipe("results/PREP/{dataset}/bcftools_normalize.vcf.gz")
     group: "VALIDATE"
