@@ -62,7 +62,7 @@ rule strip_INFO_tags:
     output:
         pipe("results/PREP/{dataset}/strip_INFO_tags.vcf.gz")
     benchmark:
-        "results/_benchmarks/VALIDATE/strip_INFO_tags/{dataset}.tsv"
+        "results/_benchmarks/VALIDATE/strip_INFO_tags/{dataset}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -116,8 +116,10 @@ rule filter:
         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
         pipe("results/PREP/{dataset}/bcftools_filter.vcf.gz")
+    log:
+        "results/PREP/{dataset}/bcftools_filter.log"
     benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_filter/{dataset}.tsv"
+        "results/_benchmarks/VALIDATE/bcftools_filter/{dataset}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -130,7 +132,7 @@ rule filter:
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ' ---" 1>&2
-        bcftools view -v snps,indels -f PASS -O z -o results/PREP/{wildcards.dataset}/CLEANED.vcf.gz results/PREP/{wildcards.dataset}/NEW_INFO.vcf.gz
+        bcftools view -v snps,indels -f PASS -O z -o results/PREP/{wildcards.dataset}/CLEANED.vcf.gz results/PREP/{wildcards.dataset}/NEW_INFO.vcf.gz 2>{log}
         echo -e "--- LOG SECTION END | BcfTools 'view(SNP,INDEL,exclude(MIXED,MNP,SYMBOLIC,filtered)) ---\n" 1>&2
         """
 
@@ -147,8 +149,10 @@ if isfile(join("input", "samples.csv")):
             samples="input/samples.csv"
         output:
             pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
+        log:
+            "results/PREP/{dataset}/bcftools_subset.log"
         benchmark:
-            "results/_benchmarks/VALIDATE/bcftools_subset/{dataset}.tsv"
+            "results/_benchmarks/VALIDATE/bcftools_subset/{dataset}.benchmark"
         resources:
             cpus=search("cores", "VALIDATE"),
             nodes=search("nodes", "VALIDATE"),
@@ -161,7 +165,7 @@ if isfile(join("input", "samples.csv")):
         shell:
             """
             echo -e "--- LOG SECTION START | BcfTools 'view(subset_if_applicable,QC=PASS)' ---" 1>&2
-            bcftools view -s {{ params.samples }} -O z -o results/PREP/{wildcards.dataset}/FILTERED.vcf.gz {input.vcf}
+            bcftools view -s {{ params.samples }} -O z -o results/PREP/{wildcards.dataset}/FILTERED.vcf.gz {input.vcf} 2>{log}
             echo -e "--- LOG SECTION END | BcfTools 'view(subset_if_applicable,QC=PASS)' ---\n" 1>&2
             """
  
@@ -170,24 +174,26 @@ rule normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
+    group: "VALIDATE"
     input:
         lambda wildcards: "results/PREP/{dataset}/bcftools_subset.vcf.gz" if isfile("input/samples.csv") else "results/PREP/{dataset}/bcftools_filter.vcf.gz"
     output:
         pipe("results/PREP/{dataset}/bcftools_normalize.vcf.gz")
-    group: "VALIDATE"
+    log:
+        "results/PREP/{dataset}/bcftools_normalize.log"
+    benchmark:
+        "results/_benchmarks/VALIDATE/bcftools_normalize/{dataset}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
-    benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_normalize/{dataset}.tsv"
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'norm' ---" 1>&2
-        bcftools norm -m -any results/PREP/{wildcards.dataset}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz
+        bcftools norm -m -any results/PREP/{wildcards.dataset}/FILTERED.vcf.gz -O z -o results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz 2>{log}
         echo -e "--- LOG SECTION END | BcfTools 'norm' ---\n" 1>&2
         """
 
@@ -196,18 +202,20 @@ rule annotate:
     """
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
+    group: "VALIDATE"
     input:
         "results/PREP/{dataset}/bcftools_normalize.vcf.gz"
     output:
         "results/PREP/{dataset}/bcftools_annotate.vcf.gz"
-    group: "VALIDATE"
+    log:
+        "results/PREP/{dataset}/bcftools_annotate.log"
+    benchmark:
+        "results/_benchmarks/VALIDATE/bcftools_annotate/{dataset}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
-    benchmark:
-        "results/_benchmarks/VALIDATE/bcftools_annotate/{dataset}.tsv"
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     params:
@@ -215,7 +223,7 @@ rule annotate:
     shell:
         """
         echo -e "--- LOG SECTION START | BcfTools 'annotate' ---" 1>&2
-        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o results/PREP/{wildcards.dataset}.vcf.gz
+        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o results/PREP/{wildcards.dataset}.vcf.gz 2>{log}
         echo -e "--- LOG SECTION END | BcfTools 'annotate' --- \n" 1>&2
         """
 
@@ -224,18 +232,22 @@ rule tabix:
     """
     Generate tabix-index.
     """
+    group: "VALIDATE"
     input:
         "results/{operation}/{dataset}/{output}.vcf.gz"
     output:
-        "results/{operation}/{dataset}/{output}.vcf.gz.tbi",
-    group: "VALIDATE"
+        "results/{operation}/{dataset}/{output}.vcf.gz.tbi"
+    log:
+        "results/{operation}/{dataset}/{output}.log"
+    benchmark:
+        "results/_benchmarks/{operation}/{dataset}/{output}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
         queue=search("queue", "VALIDATE"),
         walltime=search("walltime", "VALIDATE")
-    benchmark:
-        "results/_benchmarks/{operation}/tabix/{dataset}_{output}.log"
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
     shell:
         """
         cd results/{operation}/{dataset}/
@@ -247,16 +259,21 @@ rule LIFTOVER:
     """
     Lift Variants onto same Reference build. Otherwise we cant merge them or analyse them in context of each other.
     """
-    log:
-        "logs/LIFTOVER/{dataset}.log",
+    group: "LIFTOVER"
     input:
         "results/PREP/{dataset}/bcftools_annotate.vcf.gz",
         "results/PREP/{dataset}/bcftools_annotate.vcf.gz.tbi",
     output:
         "results/LIFTOVER/{dataset}.vcf.gz",
-    group: "LIFTOVER"
+    log:
+        "logs/LIFTOVER/{dataset}.log",
     benchmark:
         "results/_benchmarks/LIFTOVER/{dataset}.log"
+    resources:
+        cpus=search("cores", "LIFTOVER"),
+        nodes=search("nodes", "LIFTOVER"),
+        queue=search("queue", "LIFTOVER"),
+        walltime=search("walltime", "LIFTOVER"),
     params:
         prefix=lambda wildcards: "results/LIFTOVER/{dataset}_LIFTED".format(
             dataset=wildcards.dataset
@@ -277,10 +294,5 @@ rule LIFTOVER:
             ),
         ),
         mem=f'-Xmx{search("memory", "LIFTOVER")} ',
-    resources:
-        cpus=search("cores", "LIFTOVER"),
-        nodes=search("nodes", "LIFTOVER"),
-        queue=search("queue", "LIFTOVER"),
-        walltime=search("walltime", "LIFTOVER"),
     script:
         join("scripts", "00-LIFTOVER.py")
