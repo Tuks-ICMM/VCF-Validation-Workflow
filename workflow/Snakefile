@@ -142,8 +142,8 @@ if isfile(join("input", "samples.csv")):
         """
         group: "VALIDATE"
         input:
-            samples="input/samples.csv",
-            "results/PREP/{dataset}/bcftools_filter.vcf.gz"
+            "results/PREP/{dataset}/bcftools_filter.vcf.gz",
+            samples="input/samples.csv"
         output:
             pipe("results/PREP/{dataset}/bcftools_subset.vcf.gz")
         benchmark:
