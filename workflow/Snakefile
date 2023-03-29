@@ -213,8 +213,9 @@ rule annotate:
     params:
         memory=search("memory", "VALIDATE")
     shell:
+        # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
-        bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.dataset}/NORMALISED.vcf.gz | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o results/PREP/{wildcards.dataset}.vcf.gz 2>{log}
+        bcftools annotate --rename-chrs input/rename_chr.txt {input} | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o {output} 2>{log}
         """
 
 # group: VALIDATE
