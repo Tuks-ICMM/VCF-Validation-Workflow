@@ -86,7 +86,7 @@ rule FixVcfHeader:
     input:
         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
-        pipe("results/PREP/{dataset}/FixVcfHeader.vcf.gz")
+        "results/PREP/{dataset}/FixVcfHeader.vcf.gz"
     benchmark:
         "results/_benchmarks/VALIDATE/FixVcfHeader/{dataset}.tsv"
     resources:
