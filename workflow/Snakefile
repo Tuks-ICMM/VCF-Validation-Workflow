@@ -149,7 +149,7 @@ rule subset:
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     params:
-        samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0).query("dataset == 'GnomAD'")["sample_name"].tolist())
+        samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0)["sample_name"].tolist())
     shell:
         """
         bcftools view -s {params.samples} -O z -o {output} {input.vcf}  2>{log}
@@ -237,7 +237,6 @@ rule tabix:
         tabix -p vcf {input}
         """
 
-# TODO: IF (NEEDS LIFTOVER)
 rule liftover:
     group: "LIFTOVER"
     input:
