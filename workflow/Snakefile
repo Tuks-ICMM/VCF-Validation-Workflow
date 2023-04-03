@@ -277,5 +277,5 @@ rule liftover:
         ),
     shell:
         """
-        picard-tools LiftoverVcf I={input[0]} O={output[0]} R={ref} C={params.chainFile} REJECT={output[1]} 2>{log}
+        picard-tools LiftoverVcf I={input[0]} O={output[0]} R={params.ref} C={params.chainFile} REJECT={output[1]} 2>{log}
         """
