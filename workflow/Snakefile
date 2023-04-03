@@ -158,7 +158,8 @@ rule annotate:
     """
     group: "VALIDATE"
     input: 
-        "results/PREP/{dataset}/normalize.vcf.gz"
+        "results/PREP/{dataset}/normalize.vcf.gz",
+        "results/PREP/{dataset}/normalize.vcf.gz.tbi"
     output:
         "results/PREP/{dataset}/annotate.vcf.gz"
     log:
