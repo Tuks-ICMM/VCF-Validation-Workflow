@@ -132,7 +132,7 @@ rule normalize:
     """
     group: "VALIDATE"
     input:
-        lambda wildcards: "results/PREP/{dataset}/subset.vcf.gz" if isfile("input/samples.csv") else "results/PREP/{dataset}/filter.vcf.gz"
+        "results/PREP/{dataset}/filter.vcf.gz"
     output:
         "results/PREP/{dataset}/normalize.vcf.gz"
         # pipe("results/PREP/{dataset}/normalize.vcf.gz")
