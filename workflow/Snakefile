@@ -155,10 +155,9 @@ rule normalize:
 # group: VALIDATE
 rule annotate:
     """
-    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
     group: "VALIDATE"
-    input:
+    input: 
         "results/PREP/{dataset}/normalize.vcf.gz"
     output:
         "results/PREP/{dataset}/annotate.vcf.gz"
@@ -173,13 +172,40 @@ rule annotate:
         walltime=search("walltime", "VALIDATE")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
+    shell:
+        # --rename-chrs input/rename_chr.txt would go here
+        """
+        bcftools annotate -c ID -a resources/annotations.vcf.gz -O z -o {output} {input}
+        """
+
+# group: VALIDATE
+rule sort:
+    """
+    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
+    """
+    group: "VALIDATE"
+    input:
+        "results/PREP/{dataset}/annotate.vcf.gz"
+    output:
+        "results/PREP/{dataset}/sort.vcf.gz"
+    log:
+        "_logs/PREP/{dataset}/sort.log"
+    benchmark:
+        "_benchmarks/VALIDATE/sort/{dataset}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
     params:
         memory=search("memory", "VALIDATE"),
         copyAnnotations=lambda wildcards: isfile(join("resources", "annotations.vcf.gz"))
     shell:
         # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
-        bcftools annotate {% if params.copyAnnotations %} -c ID -a resources/annotations.vcf.gz {% endif %}--rename-chrs input/rename_chr.txt {input} | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o {output} 2>{log}
+        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o {output} < {input} 2>{log}
         """
 
 # group: VALIDATE
@@ -211,8 +237,8 @@ rule tabix:
 rule liftover:
     group: "LIFTOVER"
     input:
-        "results/PREP/{dataset}/annotate.vcf.gz",
-        "results/PREP/{dataset}/annotate.vcf.gz.tbi",
+        "results/PREP/{dataset}/sort.vcf.gz",
+        "results/PREP/{dataset}/sort.vcf.gz.tbi",
     output:
         "results/PREP/{dataset}/liftover.vcf.gz",
         "results/PREP/{dataset}/liftover_rejected.vcf.gz"
