@@ -266,7 +266,7 @@ rule liftover:
         PicardCommandLine LiftoverVcf I={input[0]} O={output[0]} R={params.ref} C={params.chainFile} REJECT={output[1]} 2>{log}
         """
 
-STart conditional output file list ocnstruction:
+# Start conditional output file list ocnstruction:
 output_files = list()
 
 output_files.append(expand("results/PREP/{dataset}/annotate.vcf.gz", dataset=list(datasets["dataset_name"])))
