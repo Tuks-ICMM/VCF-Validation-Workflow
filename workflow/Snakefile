@@ -39,20 +39,6 @@ include: "rules/common.py"
 # SET GLOBAL DOCKER RECIPIE TO USE:
 container: "docker://graemeford/pipeline-os"
 
-rule all:
-    """
-    Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
-    """
-    default_target: True
-    log:
-        "logs/ALL/ALL.log",
-    input:
-        expand("results/PREP/{dataset}/annotate.vcf.gz", dataset=list(datasets["dataset_name"])
-        ),
-        expand(
-            "results/PREP/{dataset}/liftover.vcf.gz", dataset=list(datasets["dataset_name"])
-        ),
-
 # group: VALIDATE
 rule strip_INFO_tags:
     """
@@ -279,3 +265,25 @@ rule liftover:
         """
         PicardCommandLine LiftoverVcf I={input[0]} O={output[0]} R={params.ref} C={params.chainFile} REJECT={output[1]} 2>{log}
         """
+
+STart conditional output file list ocnstruction:
+output_files = list()
+
+output_files.append(expand("results/PREP/{dataset}/annotate.vcf.gz", dataset=list(datasets["dataset_name"])))
+
+
+for dataset in samples["dataset"]:
+    if dataset != "GRCh38":
+        output_files.append(
+            f"results/PREP/{dataset}/liftover.vcf.gz"
+        )
+
+rule all:
+    """
+    Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
+    """
+    default_target: True
+    log:
+        "logs/ALL/ALL.log",
+    input:
+        output_files
