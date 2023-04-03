@@ -312,6 +312,10 @@ pulp==2.7.0 \
     --hash=sha256:b6de42c929e80325bf44cc7a2997f02535440800c376b9eb8cb7b4670ed53769 \
     --hash=sha256:e73ee6b32d639c9b8cf4b4aded334ba158be5f8313544e056f796ace0a10ae63
     # via snakemake
+pygments==2.14.0 \
+    --hash=sha256:b3ed06a9e8ac9a9aae5a6f5dbe78a8a58655d17b43b93c078f094ddc476ae297 \
+    --hash=sha256:fa7bd7bd2771287c0de303af8bfdfc731f51bd2c6a47ab69d117138893b82717
+    # via -r requirements.in
 pyrsistent==0.19.3 \
     --hash=sha256:016ad1afadf318eb7911baa24b049909f7f3bb2c5b1ed7b6a8f21db21ea3faa8 \
     --hash=sha256:1a2994773706bbb4995c31a97bc94f1418314923bd1048c6d964837040376440 \
