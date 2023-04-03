@@ -254,7 +254,7 @@ rule liftover:
         "results/PREP/{dataset}/annotate.vcf.gz",
         "results/PREP/{dataset}/annotate.vcf.gz.tbi",
     output:
-        "results/PREP/{dataset}/liftover.vcf.gz"
+        "results/PREP/{dataset}/liftover.vcf.gz",
         "results/PREP/{dataset}/liftover_rejected.vcf.gz"
     log:
         "_logs/PREP/{dataset}/liftover.log"
