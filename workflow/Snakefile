@@ -46,7 +46,7 @@ rule all:
         expand("results/PREP/{dataset}/annotate.vcf.gz", dataset=list(datasets["dataset_name"])
         ),
         expand(
-            "results/LIFTOVER/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])
+            "results/PREP/{dataset}/liftover.vcf.gz", dataset=list(datasets["dataset_name"])
         ),
 
 # group: VALIDATE
