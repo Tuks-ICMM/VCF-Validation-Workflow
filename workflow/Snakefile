@@ -25,6 +25,10 @@ min_version("7")
 configfile: join("config", "config.json")
 
 
+# SET REPORT TEMPLATE
+report: "report/template.rst"
+
+
 # IMPORT DATASET METADATA:
 datasets = read_csv(join("input", "datasets.csv"), header=0)
 
