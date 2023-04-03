@@ -106,7 +106,7 @@ rule strip_INFO_tags:
 #     shell:
 #         """
 #         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
-#         picard-tools -Xmx{params.memory} FixVcfHeader I={input} O={output}
+#         PicardCommandLine -Xmx{params.memory} FixVcfHeader I={input} O={output}
 #         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
 #         """
 
@@ -277,5 +277,5 @@ rule liftover:
         ),
     shell:
         """
-        picard-tools LiftoverVcf I={input[0]} O={output[0]} R={params.ref} C={params.chainFile} REJECT={output[1]} 2>{log}
+        PicardCommandLine LiftoverVcf I={input[0]} O={output[0]} R={params.ref} C={params.chainFile} REJECT={output[1]} 2>{log}
         """
