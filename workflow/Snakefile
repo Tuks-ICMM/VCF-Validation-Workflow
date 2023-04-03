@@ -126,36 +126,6 @@ rule filter:
         """
 
 # group: VALIDATE
-# conditional: true
-rule subset:
-    """
-    Subset samples according to user defined list and remove variants that do not pass QC.
-    """
-    group: "VALIDATE"
-    input:
-        vcf="results/PREP/{dataset}/filter.vcf.gz",
-        samples="input/samples.csv"
-    output:
-        "results/PREP/{dataset}/subset.vcf.gz"
-    log:
-        "_logs/PREP/{dataset}/subset.log"
-    benchmark:
-        "_benchmarks/VALIDATE/subset/{dataset}.benchmark"
-    resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
-    envmodules:
-        config["environment"]["envmodules"]["bcftools"],
-    params:
-        samples=lambda wildcards, input: ",".join(read_csv(join("input", "samples.csv"), header=0)["sample_name"].tolist())
-    shell:
-        """
-        bcftools view -s {params.samples} -O z -o {output} {input.vcf}  2>{log}
-        """
- 
-# group: VALIDATE
 rule normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
@@ -204,11 +174,12 @@ rule annotate:
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     params:
-        memory=search("memory", "VALIDATE")
+        memory=search("memory", "VALIDATE"),
+        copyAnnotations=lambda wildcards: isfile(join("resources", "annotations.vcf.gz"))
     shell:
         # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
-        bcftools annotate --rename-chrs input/rename_chr.txt {input} | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o {output} 2>{log}
+        bcftools annotate {% if params.copyAnnotations %} -c ID -a resources/annotations.vcf.gz {% enfif %}--rename-chrs input/rename_chr.txt {input} | bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o {output} 2>{log}
         """
 
 # group: VALIDATE
