@@ -1,6 +1,7 @@
 Welcome to the ``VCF Validation Workflow``'s results report.
 
 This document displays a summary of your analyses and its outputs. Each result entry contains a breakdown of the figures produced, a caption explaining how it was produced, and other relevant information. The code used to execute the rule is also available via this interface.
+
 ----------
 Navigation
 ----------
