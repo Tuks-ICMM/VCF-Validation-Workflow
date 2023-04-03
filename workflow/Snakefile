@@ -272,7 +272,7 @@ output_files = list()
 output_files.append(expand("results/PREP/{dataset}/annotate.vcf.gz", dataset=list(datasets["dataset_name"])))
 
 
-for dataset in samples["dataset"]:
+for dataset in datasets["reference_genome"]:
     if dataset != "GRCh38":
         output_files.append(
             f"results/PREP/{dataset}/liftover.vcf.gz"
