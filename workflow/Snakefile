@@ -288,7 +288,7 @@ rule stats:
         config["environment"]["envmodules"]["latex"],
         config["environment"]["envmodules"]["bcftools"]
     params:
-        output_path=lambda wildcards, output: output[0].removesuffix(f"/{wildcards.output}.vcf.gz")
+        output_path=lambda wildcards, output: output[0].removesuffix(f"/{wildcards.output}.vcf.gz"),
         output_name=lambda wildcards, output: output[0].removesuffix(f"/{wildcards.output}.vcf.gz")
     shell:
         """
