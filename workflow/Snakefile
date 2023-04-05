@@ -281,9 +281,9 @@ rule stats:
             }
             )
     log: 
-        "_logs/PREP/{dataset}/liftover.log"
+        "_logs/PREP/{dataset}/{operation}_bcfstats.log"
     benchmark: 
-        "_benchmarks/PREP/{dataset}/liftover.benchmark"
+        "_benchmarks/PREP/{dataset}/{operation}_bcfstats.benchmark"
     envmodules:
         config["environment"]["envmodules"]["latex"],
         config["environment"]["envmodules"]["bcftools"]
