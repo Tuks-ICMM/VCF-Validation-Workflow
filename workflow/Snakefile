@@ -46,11 +46,11 @@ rule strip_INFO_tags:
     """
     group: "VALIDATE"
     input:
-        lambda wildcards: datasets.loc[
+        vcf=lambda wildcards: datasets.loc[
             datasets["dataset_name"] == wildcards.dataset, "file"
         ].item(),
     output:
-        "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+        vcf="results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     log:
         "_logs/PREP/{dataset}/strip_INFO_tags.log"
     benchmark:
@@ -64,7 +64,7 @@ rule strip_INFO_tags:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        bcftools annotate -x INFO,FORMAT -Oz -o {output} {input} 2>{log}
+        bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
         """
 
 # group: VALIDATE
@@ -103,9 +103,9 @@ rule filter:
     """
     group: "VALIDATE"
     input:
-        "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+        vcf="results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     output:
-        "results/PREP/{dataset}/filter.vcf.gz"
+        vcf="results/PREP/{dataset}/filter.vcf.gz"
         # pipe("results/PREP/{dataset}/filter.vcf.gz")
     log:
         "_logs/PREP/{dataset}/filter.log"
@@ -122,7 +122,7 @@ rule filter:
         memory=search("memory", "VALIDATE")
     shell:
         """
-        bcftools view -v snps,indels -f PASS -O z -o {output} < {input} 2>{log}
+        bcftools view -v snps,indels -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 # group: VALIDATE
@@ -132,9 +132,9 @@ rule normalize:
     """
     group: "VALIDATE"
     input:
-        "results/PREP/{dataset}/filter.vcf.gz"
+        vcf="results/PREP/{dataset}/filter.vcf.gz"
     output:
-        "results/PREP/{dataset}/normalize.vcf.gz"
+        vcf="results/PREP/{dataset}/normalize.vcf.gz"
         # pipe("results/PREP/{dataset}/normalize.vcf.gz")
     log:
         "_logs/PREP/{dataset}/normalize.log"
@@ -149,7 +149,7 @@ rule normalize:
         config["environment"]["envmodules"]["bcftools"],
     shell:
         """
-        bcftools norm -m -any -O z -o {output} < {input} 2>{log}
+        bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 # group: VALIDATE
@@ -158,10 +158,10 @@ rule annotate:
     """
     group: "VALIDATE"
     input: 
-        "results/PREP/{dataset}/normalize.vcf.gz",
-        "results/PREP/{dataset}/normalize.vcf.gz.tbi"
+        vcf="results/PREP/{dataset}/normalize.vcf.gz",
+        tbi="results/PREP/{dataset}/normalize.vcf.gz.tbi"
     output:
-        "results/PREP/{dataset}/annotate.vcf.gz"
+        vcf="results/PREP/{dataset}/annotate.vcf.gz"
     log:
         "_logs/PREP/{dataset}/annotate.log"
     benchmark:
@@ -176,7 +176,7 @@ rule annotate:
     shell:
         # --rename-chrs input/rename_chr.txt would go here
         """
-        bcftools annotate -c ID -a resources/annotations.vcf.gz -O z -o {output} {input}
+        bcftools annotate -c ID -a resources/annotations.vcf.gz -O z -o {output.vcf} {input.vcf}
         """
 
 # group: VALIDATE
@@ -186,9 +186,10 @@ rule sort:
     """
     group: "VALIDATE"
     input:
-        "results/PREP/{dataset}/annotate.vcf.gz"
+        vcf="results/PREP/{dataset}/annotate.vcf.gz",
+        tbi="results/PREP/{dataset}/annotate.vcf.gz.tbi"
     output:
-        "results/PREP/{dataset}/sort.vcf.gz"
+        vcf="results/PREP/{dataset}/sort.vcf.gz"
     log:
         "_logs/PREP/{dataset}/sort.log"
     benchmark:
@@ -206,7 +207,7 @@ rule sort:
     shell:
         # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
-        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o {output} < {input} 2>{log}
+        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 # group: VALIDATE
@@ -238,11 +239,11 @@ rule tabix:
 rule liftover:
     group: "LIFTOVER"
     input:
-        "results/PREP/{dataset}/sort.vcf.gz",
-        "results/PREP/{dataset}/sort.vcf.gz.tbi",
+        vcf="results/PREP/{dataset}/sort.vcf.gz",
+        tbi="results/PREP/{dataset}/sort.vcf.gz.tbi",
     output:
-        "results/PREP/{dataset}/liftover.vcf.gz",
-        "results/PREP/{dataset}/liftover_rejected.vcf.gz"
+        vcf="results/PREP/{dataset}/liftover.vcf.gz",
+        rejected="results/PREP/{dataset}/liftover_rejected.vcf.gz"
     log:
         "_logs/PREP/{dataset}/liftover.log"
     benchmark:
@@ -260,7 +261,40 @@ rule liftover:
         ),
     shell:
         """
-        PicardCommandLine LiftoverVcf I={input[0]} O={output[0]} R={params.ref} C={params.chainFile} REJECT={output[1]} 2>{log}
+        PicardCommandLine LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
+        """
+
+rule stats:
+    input: 
+        lambda wildacrds: rules.[wildcards.operation].get(**wildcards).input.vcf
+        "results/PREP/{dataset}/{operation}.vcf.gz"
+    output: 
+        report(
+            "results/PREP/{dataset}/{operation}.pdf",
+            category="Data processing and validation",
+            subcategory="{dataset}",
+            caption="report/stats.rst",
+            labels={
+                "Language": "C",
+                "Library/Software": "BCF Tools",
+                "Function": "stats & plot-vcfstats"
+            }
+            )
+    log: 
+        "_logs/PREP/{dataset}/liftover.log"
+    benchmark: 
+        "_benchmarks/PREP/{dataset}/liftover.benchmark"
+    envmodules:
+        config["environment"]["envmodules"]["latex"],
+        config["environment"]["envmodules"]["bcftools"]
+    params:
+        output_path=lambda wildcards, output: output[0].removesuffix(f"/{wildcards.output}.vcf.gz")
+        output_name=lambda wildcards, output: output[0].removesuffix(f"/{wildcards.output}.vcf.gz")
+    shell:
+        """
+        bcftools stats {input[0]} {input[1]} > All.vchk
+        plot-vcfstats -p {params.output_path} All.vchk
+        mv {params.output_path}/summary.pdf {output}
         """
 
 # Start conditional output file list ocnstruction:
@@ -269,7 +303,7 @@ output_files = list()
 output_files.append(expand("results/PREP/{dataset}/annotate.vcf.gz", dataset=list(datasets["dataset_name"])))
 
 
-for dataset in datasets["reference_genome"]:
+for dataset in datasets["reference_genome"].tolist():
     if dataset != "GRCh38":
         output_files.append(
             f"results/PREP/{dataset}/liftover.vcf.gz"
