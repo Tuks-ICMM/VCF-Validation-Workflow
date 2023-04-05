@@ -300,13 +300,14 @@ rule stats:
 # Start conditional output file list ocnstruction:
 output_files = list()
 
-output_files.append(expand("results/PREP/{dataset}/annotate.vcf.gz", dataset=list(datasets["dataset_name"])))
+output_files.append(expand("results/PREP/{dataset}/annotate.{ext}", dataset=list(datasets["dataset_name"], ext=[".vcf.gz", ".pdf"])))
 
 
 for dataset in datasets["reference_genome"].tolist():
     if dataset != "GRCh38":
         output_files.append(
-            f"results/PREP/{dataset}/liftover.vcf.gz"
+            f"results/PREP/{dataset}/liftover.vcf.gz",
+            f"results/PREP/{dataset}/liftover.pdf",
         )
 
 rule all:
