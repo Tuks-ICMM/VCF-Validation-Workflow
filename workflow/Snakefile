@@ -48,7 +48,7 @@ rule strip_INFO_tags:
     input:
         vcf=lambda wildcards: datasets.loc[
             datasets["dataset_name"] == wildcards.dataset, "file"
-        ].item(),
+        ].unique().item(),
     output:
         vcf="results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
     log:
