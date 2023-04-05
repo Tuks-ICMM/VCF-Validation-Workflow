@@ -266,7 +266,7 @@ rule liftover:
 
 rule stats:
     input: 
-        lambda wildacrds: rules.[wildcards.operation].get(**wildcards).input.vcf
+        lambda wildacrds: rules.[wildcards.operation].get(**wildcards).input.vcf,
         "results/PREP/{dataset}/{operation}.vcf.gz"
     output: 
         report(
