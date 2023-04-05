@@ -300,7 +300,7 @@ rule stats:
 # Start conditional output file list ocnstruction:
 output_files = list()
 
-output_files.append(expand("results/PREP/{dataset}/annotate.{ext}", dataset=list(datasets["dataset_name"], ext=[".vcf.gz", ".pdf"])))
+output_files.append(expand("results/PREP/{dataset}/annotate.{ext}", dataset=list(datasets["dataset_name"]), ext=[".vcf.gz", ".pdf"]))
 
 
 for dataset in datasets["reference_genome"].tolist():
