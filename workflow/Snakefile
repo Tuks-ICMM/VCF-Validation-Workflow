@@ -267,7 +267,7 @@ rule liftover:
 rule stats:
     input: 
         final = "results/PREP/{dataset}/{operation}.vcf.gz",
-        initial = lambda wildcards: rules[wildcards.operation].get(dataset=wildcards.dataset).input.vcf
+        initial = lambda wildcards: rules[str(wildcards.operation)].get(dataset=wildcards.dataset).input.vcf
     output: 
         report(
             "results/PREP/{dataset}/{operation}.pdf",
