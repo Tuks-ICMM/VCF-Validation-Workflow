@@ -1,3 +1,4 @@
+# %%
 from json import load
 from os.path import abspath, dirname, join
 from subprocess import run
@@ -34,3 +35,5 @@ with open("run.sh", "w") as file:
     file.writelines("\n".join(PBS_Headers + PBS_Body))
 
 # run(["qsub", ".run.sh"], shell=True)
+
+# %%

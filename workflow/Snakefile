@@ -266,8 +266,8 @@ rule liftover:
 
 rule stats:
     input: 
-        lambda wildacrds: rules.[wildcards.operation].get(**wildcards).input.vcf,
-        "results/PREP/{dataset}/{operation}.vcf.gz"
+        final = "results/PREP/{dataset}/{operation}.vcf.gz",
+        initial = lambda wildacrds: rules.[wildcards.operation].get(**wildcards).input.vcf
     output: 
         report(
             "results/PREP/{dataset}/{operation}.pdf",
@@ -292,7 +292,7 @@ rule stats:
         output_name=lambda wildcards, output: output[0].removesuffix(f"/{wildcards.output}.vcf.gz")
     shell:
         """
-        bcftools stats {input[0]} {input[1]} > All.vchk
+        bcftools stats {input.initial} {input.final} > All.vchk
         plot-vcfstats -p {params.output_path} All.vchk
         mv {params.output_path}/summary.pdf {output}
         """
