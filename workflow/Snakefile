@@ -274,7 +274,9 @@ rule liftover:
 rule stats:
     input: 
         final = "results/PREP/{dataset_name}/{operation}.vcf.gz",
-        initial = lambda wildcards: getattr(rules, str(wildcards.operation)).input.vcf
+        final_tbi = "results/PREP/{dataset_name}/{operation}.vcf.gz.tbi",
+        initial = lambda wildcards: getattr(rules, str(wildcards.operation)).input.vcf,
+        initial_tbi = lambda wildcards: getattr(rules, str(wildcards.operation)).input.tbi
     output: 
         report(
             "results/PREP/{dataset_name}/{operation}.pdf",
