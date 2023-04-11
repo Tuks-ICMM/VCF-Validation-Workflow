@@ -311,7 +311,7 @@ output_files = list()
 output_files.append(
     expand(
         "results/PREP/{dataset_name}/annotate.{ext}", 
-        dataset_name=list(datasets_multiindex[datasets_multiindex.reference_genome.unique()["dataset_name"]), 
+        dataset_name=list(datasets["dataset_name"]), 
         ext=[".vcf.gz", ".pdf"]
         )
 )
