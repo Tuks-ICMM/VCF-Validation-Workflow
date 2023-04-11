@@ -281,7 +281,8 @@ rule stats:
         initial_tbi = lambda wildcards: getattr(rules, str(wildcards.operation)).input.tbi
     output: 
         report(
-            "results/PREP/{dataset_name}/{operation}.pdf",
+            directory("results/PREP/{dataset_name}/{operation}"),
+            patterns=["{name}.png"]
             category="Data processing and validation",
             subcategory="{dataset_name}",
             caption="report/stats.rst",
@@ -305,7 +306,6 @@ rule stats:
         """
         bcftools stats {input.initial} {input.final} > All.vchk
         plot-vcfstats -p {params.output_path} All.vchk
-        mv {params.output_path}/summary.pdf {output}
         """
 
 # Start conditional output file list ocnstruction:
