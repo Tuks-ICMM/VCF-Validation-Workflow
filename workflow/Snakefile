@@ -185,7 +185,7 @@ rule filter:
         """
 
 # group: VALIDATE
-checkpoint annotate: # ?
+rule annotate: # ?
     """
     """
     group: "VALIDATE"
