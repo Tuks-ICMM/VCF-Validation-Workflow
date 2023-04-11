@@ -299,8 +299,8 @@ rule stats:
         config["environment"]["envmodules"]["latex"],
         config["environment"]["envmodules"]["bcftools"]
     params:
-        output_path=lambda wildcards, output: output[0].removesuffix(f"{wildcards.operation}.pdf"),
-        output_name=lambda wildcards, output: output[0].removesuffix(f"{wildcards.operation}.pdf")
+        output_path=lambda wildcards, output: output[0][:-len(str(wildcards.operation))+5], # Here we remove the .pdf, trailing slash and filename from string
+        output_name=lambda wildcards, output: output[0][len(str(output[0]))-len(str(wildcards.operation))+4] # Here we select ONLY the suffix (minus the trailing shash, hence 4 not 5)
     shell:
         """
         bcftools stats {input.initial} {input.final} > All.vchk
