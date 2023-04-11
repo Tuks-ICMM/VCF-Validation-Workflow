@@ -356,6 +356,7 @@ for reference_genome, groupby_subset in datasets.set_index(["reference_genome", 
                 f"results/PREP/{dataset_name}/annotate.pdf",
             )
 print(rules.filter.input.vcf)
+print(getattr(rules, "filter").input.vcf)
 rule all:
     """
     Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
