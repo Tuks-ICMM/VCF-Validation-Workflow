@@ -98,13 +98,71 @@ rule strip_INFO_tags:
 #         """
 
 # group: VALIDATE
+rule normalize:
+    """
+    Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
+    """
+    group: "VALIDATE"
+    input:
+        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
+    output:
+        vcf="results/PREP/{dataset_name}/normalize.vcf.gz"
+        # pipe("results/PREP/{dataset_name}/normalize.vcf.gz")
+    log:
+        "_logs/PREP/{dataset_name}/normalize.log"
+    benchmark:
+        "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    shell:
+        """
+        bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
+
+# group: VALIDATE
+rule sort:
+    """
+    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
+    """
+    group: "VALIDATE"
+    input:
+        vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
+        tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
+    output:
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
+    log:
+        "_logs/PREP/{dataset_name}/sort.log"
+    benchmark:
+        "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    params:
+        memory=search("memory", "VALIDATE"),
+        copyAnnotations=lambda wildcards: isfile(join("resources", "annotations.vcf.gz"))
+    shell:
+        # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
+        """
+        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset_name} -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
+
+# group: VALIDATE
 rule filter:
     """
     Remove variant types we cant yet analyse
     """
     group: "VALIDATE"
     input:
-        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
     output:
         vcf="results/PREP/{dataset_name}/filter.vcf.gz"
         # pipe("results/PREP/{dataset_name}/filter.vcf.gz")
@@ -127,40 +185,13 @@ rule filter:
         """
 
 # group: VALIDATE
-rule normalize:
-    """
-    Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
-    """
-    group: "VALIDATE"
-    input:
-        vcf="results/PREP/{dataset_name}/filter.vcf.gz"
-    output:
-        vcf="results/PREP/{dataset_name}/normalize.vcf.gz"
-        # pipe("results/PREP/{dataset_name}/normalize.vcf.gz")
-    log:
-        "_logs/PREP/{dataset_name}/normalize.log"
-    benchmark:
-        "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
-    resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
-    envmodules:
-        config["environment"]["envmodules"]["bcftools"],
-    shell:
-        """
-        bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
-        """
-
-# group: VALIDATE
 rule annotate:
     """
     """
     group: "VALIDATE"
     input: 
-        vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
-        tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
+        vcf="results/PREP/{dataset_name}/filter.vcf.gz",
+        tbi="results/PREP/{dataset_name}/filter.vcf.gz.tbi"
     output:
         vcf="results/PREP/{dataset_name}/annotate.vcf.gz"
     log:
@@ -178,37 +209,6 @@ rule annotate:
         # --rename-chrs input/rename_chr.txt would go here
         """
         bcftools annotate -c ID -a resources/annotations.vcf.gz -O z -o {output.vcf} {input.vcf}
-        """
-
-# group: VALIDATE
-rule sort:
-    """
-    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
-    """
-    group: "VALIDATE"
-    input:
-        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
-        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi"
-    output:
-        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
-    log:
-        "_logs/PREP/{dataset_name}/sort.log"
-    benchmark:
-        "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
-    resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
-    envmodules:
-        config["environment"]["envmodules"]["bcftools"],
-    params:
-        memory=search("memory", "VALIDATE"),
-        copyAnnotations=lambda wildcards: isfile(join("resources", "annotations.vcf.gz"))
-    shell:
-        # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
-        """
-        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset_name} -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 # group: VALIDATE
@@ -245,8 +245,8 @@ rule tabix:
 rule liftover:
     group: "LIFTOVER"
     input:
-        vcf="results/PREP/{dataset_name}/sort.vcf.gz",
-        tbi="results/PREP/{dataset_name}/sort.vcf.gz.tbi",
+        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
+        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi",
     output:
         vcf="results/PREP/{dataset_name}/liftover.vcf.gz",
         rejected="results/PREP/{dataset_name}/liftover_rejected.vcf.gz"
@@ -294,8 +294,8 @@ rule stats:
         config["environment"]["envmodules"]["latex"],
         config["environment"]["envmodules"]["bcftools"]
     params:
-        output_path=lambda wildcards, output: output[0].removesuffix(f"/{wildcards.output}.vcf.gz"),
-        output_name=lambda wildcards, output: output[0].removesuffix(f"/{wildcards.output}.vcf.gz")
+        output_path=lambda wildcards, output: output[0].removesuffix(f"{wildcards.output}.vcf.gz"),
+        output_name=lambda wildcards, output: output[0].removesuffix(f"{wildcards.output}.vcf.gz")
     shell:
         """
         bcftools stats {input.initial} {input.final} > All.vchk
@@ -308,7 +308,7 @@ output_files = list()
 
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/annotate.{ext}", 
+        "results/PREP/{dataset_name}/sort.{ext}", 
         dataset_name=list(datasets["dataset_name"]), 
         ext=[".vcf.gz", ".pdf"]
         )
