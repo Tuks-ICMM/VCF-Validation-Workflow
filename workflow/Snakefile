@@ -316,6 +316,26 @@ output_files.append(
         )
 )
 
+output_files.append(
+    # [EACH]{QC} add strip_INFO_tags snapshot
+    f"results/PREP/{dataset_name}/strip_INFO_tags.pdf",
+
+    # [EACH]{QC} add normalize snapshot
+    f"results/PREP/{dataset_name}/normalize.pdf",
+
+    # [EACH]{QC} add sort snapshot
+    f"results/PREP/{dataset_name}/sort.pdf",
+
+    # [EACH]{QC} add sort snapshot
+    f"results/PREP/{dataset_name}/sort.pdf",
+
+    # [EACH]{QC} add filter snapshot
+    f"results/PREP/{dataset_name}/filter.pdf",
+
+    # [EACH]{QC} add annotate snapshot
+    f"results/PREP/{dataset_name}/annotate.pdf",
+)
+
 
 # Here, we use a `Pandas` `MultiIndex` to group our datasets by ["reference_genome", "dataset_name"]. This allows
 # us to iterate over both the `reference_genome` columns unique values AND the `dataset_name` columns and access
@@ -338,23 +358,8 @@ for reference_genome, groupby_subset in datasets.set_index(["reference_genome", 
                 # [EACH] add liftover request for the DAG
                 f"results/PREP/{dataset_name}/liftover.vcf.gz",
 
-                # [EACH]{QC} add strip_INFO_tags snapshot
-                f"results/PREP/{dataset_name}/strip_INFO_tags.pdf",
-
-                # [EACH]{QC} add normalize snapshot
-                f"results/PREP/{dataset_name}/normalize.pdf",
-
-                # [EACH]{QC} add sort snapshot
-                f"results/PREP/{dataset_name}/sort.pdf",
-
-                # [EACH]{QC} add sort snapshot
-                f"results/PREP/{dataset_name}/sort.pdf",
-
-                # [EACH]{QC} add filter snapshot
-                f"results/PREP/{dataset_name}/filter.pdf",
-
-                # [EACH]{QC} add annotate snapshot
-                f"results/PREP/{dataset_name}/annotate.pdf",
+                # [EACH]{QC} add liftover snapshot
+                f"results/PREP/{dataset_name}/liftover.pdf",
             )
 rule all:
     """
