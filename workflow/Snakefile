@@ -104,7 +104,8 @@ rule normalize:
     """
     group: "VALIDATE"
     input:
-        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
+        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz",
+        tbi="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz.tbi",
     output:
         vcf="results/PREP/{dataset_name}/normalize.vcf.gz"
         # pipe("results/PREP/{dataset_name}/normalize.vcf.gz")
@@ -162,7 +163,8 @@ rule filter:
     """
     group: "VALIDATE"
     input:
-        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz",
+        tbi="results/PREP/{dataset_name}/sort.vcf.gz.tbi"
     output:
         vcf="results/PREP/{dataset_name}/filter.vcf.gz"
         # pipe("results/PREP/{dataset_name}/filter.vcf.gz")
