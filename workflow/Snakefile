@@ -31,6 +31,9 @@ report: "report/template.rst"
 
 # IMPORT DATASET METADATA:
 datasets = read_csv(join("input", "datasets.csv"), header=0)
+# TODO: Evaluate porting metadata to MultiIndexes where appropriate.
+datasets_multiindex = pd.MultiIndex.from_frame(read_csv(join("input", "datasets.csv"), header=0).set_index("dataset_name"), names=["reference_genome", "file"])
+
 
 
 # IMPORT COMMON FUNCTIONS:
@@ -47,14 +50,14 @@ rule strip_INFO_tags:
     group: "VALIDATE"
     input:
         vcf=lambda wildcards: datasets.loc[
-            datasets["dataset_name"] == wildcards.dataset, "file"
+            datasets["dataset_name"] == wildcards.dataset_name, "file"
         ].unique().item(),
     output:
-        vcf="results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
     log:
-        "_logs/PREP/{dataset}/strip_INFO_tags.log"
+        "_logs/PREP/{dataset_name}/strip_INFO_tags.log"
     benchmark:
-        "_benchmarks/VALIDATE/strip_INFO_tags/{dataset}.benchmark"
+        "_benchmarks/VALIDATE/strip_INFO_tags/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -103,14 +106,14 @@ rule filter:
     """
     group: "VALIDATE"
     input:
-        vcf="results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
     output:
-        vcf="results/PREP/{dataset}/filter.vcf.gz"
-        # pipe("results/PREP/{dataset}/filter.vcf.gz")
+        vcf="results/PREP/{dataset_name}/filter.vcf.gz"
+        # pipe("results/PREP/{dataset_name}/filter.vcf.gz")
     log:
-        "_logs/PREP/{dataset}/filter.log"
+        "_logs/PREP/{dataset_name}/filter.log"
     benchmark:
-        "_benchmarks/VALIDATE/filter/{dataset}.benchmark"
+        "_benchmarks/VALIDATE/filter/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -132,14 +135,14 @@ rule normalize:
     """
     group: "VALIDATE"
     input:
-        vcf="results/PREP/{dataset}/filter.vcf.gz"
+        vcf="results/PREP/{dataset_name}/filter.vcf.gz"
     output:
-        vcf="results/PREP/{dataset}/normalize.vcf.gz"
-        # pipe("results/PREP/{dataset}/normalize.vcf.gz")
+        vcf="results/PREP/{dataset_name}/normalize.vcf.gz"
+        # pipe("results/PREP/{dataset_name}/normalize.vcf.gz")
     log:
-        "_logs/PREP/{dataset}/normalize.log"
+        "_logs/PREP/{dataset_name}/normalize.log"
     benchmark:
-        "results/_benchmarks/VALIDATE/normalize/{dataset}.benchmark"
+        "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -158,14 +161,14 @@ rule annotate:
     """
     group: "VALIDATE"
     input: 
-        vcf="results/PREP/{dataset}/normalize.vcf.gz",
-        tbi="results/PREP/{dataset}/normalize.vcf.gz.tbi"
+        vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
+        tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
     output:
-        vcf="results/PREP/{dataset}/annotate.vcf.gz"
+        vcf="results/PREP/{dataset_name}/annotate.vcf.gz"
     log:
-        "_logs/PREP/{dataset}/annotate.log"
+        "_logs/PREP/{dataset_name}/annotate.log"
     benchmark:
-        "_benchmarks/VALIDATE/annotate/{dataset}.benchmark"
+        "_benchmarks/VALIDATE/annotate/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -186,14 +189,14 @@ rule sort:
     """
     group: "VALIDATE"
     input:
-        vcf="results/PREP/{dataset}/annotate.vcf.gz",
-        tbi="results/PREP/{dataset}/annotate.vcf.gz.tbi"
+        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
+        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi"
     output:
-        vcf="results/PREP/{dataset}/sort.vcf.gz"
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
     log:
-        "_logs/PREP/{dataset}/sort.log"
+        "_logs/PREP/{dataset_name}/sort.log"
     benchmark:
-        "_benchmarks/VALIDATE/sort/{dataset}.benchmark"
+        "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -207,7 +210,7 @@ rule sort:
     shell:
         # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
-        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset} -O z -o {output.vcf} < {input.vcf} 2>{log}
+        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset_name} -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 # group: VALIDATE
@@ -217,13 +220,13 @@ rule tabix:
     """
     group: "VALIDATE"
     input:
-        "results/{operation}/{dataset}/{output}.vcf.gz"
+        "results/{operation}/{dataset_name}/{output}.vcf.gz"
     output:
-        "results/{operation}/{dataset}/{output}.vcf.gz.tbi"
+        "results/{operation}/{dataset_name}/{output}.vcf.gz.tbi"
     log:
-        "_logs/{operation}/{dataset}/{output}.log"
+        "_logs/{operation}/{dataset_name}/{output}.log"
     benchmark:
-        "_benchmarks/{operation}/{dataset}/{output}.benchmark"
+        "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -235,19 +238,24 @@ rule tabix:
         """
         tabix -p vcf {input}
         """
-
+# TODO: Make Liftover process more comprehensive?
+# Possible ideas: 
+#   1. rule to auto-fetch chain files based on provided reference genome versions and compatability:
+# Restrictions:
+#   - Need different reference genomes depending on data genomes provided
+#   - Will require internet connection to retrive and prepare data files
 rule liftover:
     group: "LIFTOVER"
     input:
-        vcf="results/PREP/{dataset}/sort.vcf.gz",
-        tbi="results/PREP/{dataset}/sort.vcf.gz.tbi",
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz",
+        tbi="results/PREP/{dataset_name}/sort.vcf.gz.tbi",
     output:
-        vcf="results/PREP/{dataset}/liftover.vcf.gz",
-        rejected="results/PREP/{dataset}/liftover_rejected.vcf.gz"
+        vcf="results/PREP/{dataset_name}/liftover.vcf.gz",
+        rejected="results/PREP/{dataset_name}/liftover_rejected.vcf.gz"
     log:
-        "_logs/PREP/{dataset}/liftover.log"
+        "_logs/PREP/{dataset_name}/liftover.log"
     benchmark:
-        "_benchmarks/PREP/{dataset}/liftover.benchmark"
+        "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
     envmodules:
         config["environment"]["envmodules"]["piccard"]
     params:
@@ -266,13 +274,13 @@ rule liftover:
 
 rule stats:
     input: 
-        final = "results/PREP/{dataset}/{operation}.vcf.gz",
+        final = "results/PREP/{dataset_name}/{operation}.vcf.gz",
         initial = lambda wildcards: getattr(rules, str(wildcards.operation)).input.vcf
     output: 
         report(
-            "results/PREP/{dataset}/{operation}.pdf",
+            "results/PREP/{dataset_name}/{operation}.pdf",
             category="Data processing and validation",
-            subcategory="{dataset}",
+            subcategory="{dataset_name}",
             caption="report/stats.rst",
             labels={
                 "Language": "C",
@@ -281,9 +289,9 @@ rule stats:
             }
             )
     log: 
-        "_logs/PREP/{dataset}/{operation}_bcfstats.log"
+        "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
     benchmark: 
-        "_benchmarks/PREP/{dataset}/{operation}_bcfstats.benchmark"
+        "_benchmarks/PREP/{dataset_name}/{operation}_bcfstats.benchmark"
     envmodules:
         config["environment"]["envmodules"]["latex"],
         config["environment"]["envmodules"]["bcftools"]
@@ -302,19 +310,33 @@ output_files = list()
 
 output_files.append(
     expand(
-        "results/PREP/{dataset}/annotate.{ext}", 
-        dataset=list(datasets["dataset_name"]), 
+        "results/PREP/{dataset_name}/annotate.{ext}", 
+        dataset_name=list(datasets_multiindex[datasets_multiindex.reference_genome.unique()["dataset_name"]), 
         ext=[".vcf.gz", ".pdf"]
         )
 )
 
 
-for dataset in datasets["reference_genome"].tolist():
-    if dataset != "GRCh38":
-        output_files.append(
-            f"results/PREP/{dataset}/liftover.vcf.gz",
-            f"results/PREP/{dataset}/liftover.pdf",
-        )
+# Here, we use a `Pandas` `MultiIndex` to group our datasets by ["reference_genome", "dataset_name"]. This allows
+# us to iterate over both the `reference_genome` columns unique values AND the `dataset_name` columns and access
+# their unique values.
+#
+# > Think of `MultiIndexes` as an Excel Sheet with the header row and the index columns (Can have more than one)
+# > are fixed. Now take that, but add a Z-dimension to the data in the middle that can stills croll around. It 
+# > now has levels and you go up or down however many levels there are and you get a whole new set of values for 
+# > the colunms and row indexes.
+# > 
+# > This way of working with data helps us select our data in an intuitive way that also filters it by nature, 
+# > since to select the data, you simply need to be able to describe what data you want. This is better for code 
+# > compatability as it relies less heavily on query method implementation, and more on data science principles.
+for reference_genome, groupby_subset in datasets.groupby(level=0): # [FOR] all unqiue (dataset_name and reference_genome) column combinations present
+    if reference_genome != "GRCh38": # [IF] reference genome version
+        for dataset_name in groupby_subset.index.get_level_values("dataset_name"): # [FOR] the column in our MultiIndex that contains the dataset_name's in this subset
+            # [EACH] add liftover request for the DAG
+            output_files.append(
+                f"results/PREP/{dataset_name}/liftover.vcf.gz",
+                f"results/PREP/{dataset_name}/liftover.pdf",
+            )
 
 rule all:
     """
