@@ -1,5 +1,5 @@
 from snakemake.utils import min_version
-from pandas import read_csv
+from pandas import read_csv, MultiIndex
 from os.path import join, isfile
 
 __author__ = "Graeme Ford"
@@ -32,7 +32,7 @@ report: "report/template.rst"
 # IMPORT DATASET METADATA:
 datasets = read_csv(join("input", "datasets.csv"), header=0)
 # TODO: Evaluate porting metadata to MultiIndexes where appropriate.
-datasets_multiindex = pd.MultiIndex.from_frame(read_csv(join("input", "datasets.csv"), header=0).set_index("dataset_name"), names=["reference_genome", "file"])
+datasets_multiindex = MultiIndex.from_frame(read_csv(join("input", "datasets.csv"), header=0).set_index("dataset_name"), names=["reference_genome", "file"])
 
 
 
