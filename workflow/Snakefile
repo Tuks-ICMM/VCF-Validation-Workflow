@@ -185,7 +185,7 @@ rule filter:
         """
 
 # group: VALIDATE
-rule annotate:
+checkpoint annotate: # ?
     """
     """
     group: "VALIDATE"
@@ -270,6 +270,7 @@ rule liftover:
         PicardCommandLine LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
         """
 
+# TODO: Potential gist snippet
 rule stats:
     input: 
         final = "results/PREP/{dataset_name}/{operation}.vcf.gz",
