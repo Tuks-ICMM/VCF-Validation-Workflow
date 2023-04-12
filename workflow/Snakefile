@@ -281,7 +281,7 @@ rule stats:
         initial_tbi = lambda wildcards: getattr(rules, str(wildcards.operation)).input.tbi
     output: 
         report(
-            directory("results/PREP/{dataset_name}/{operation}/"),
+            directory("results/PREP/{dataset_name}/{operation}"),
             patterns=["{name}.png"],
             category="Data processing and validation",
             subcategory="{dataset_name}",
@@ -292,6 +292,9 @@ rule stats:
                 "Function": "stats & plot-vcfstats"
             }
             )
+    wildcard_constraints:
+        operation="[^\.]"
+        dataset_name="[^\.]"
     log: 
         "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
     benchmark: 
