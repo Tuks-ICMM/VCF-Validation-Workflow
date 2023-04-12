@@ -310,14 +310,14 @@ output_files = list()
 
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/sort.{ext}", 
+        "results/PREP/{dataset_name}/sort{ext}", 
         dataset_name=list(datasets["dataset_name"]), 
         ext=[".vcf.gz", ".pdf"]
         )
 )
 
+# [EACH] add qaulity-control snapshot reports
 output_files.append(
-    # [EACH] add qaulity-control snapshot reports
     expand(
         "results/PREP/{dataset_name}/{operation}.pdf", 
         dataset_name=list(datasets["dataset_name"]),
@@ -358,4 +358,4 @@ rule all:
     log:
         "logs/ALL/ALL.log",
     input:
-        output_files
+        output_files,
