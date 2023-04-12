@@ -282,7 +282,7 @@ rule stats:
     output: 
         report(
             directory("results/PREP/{dataset_name}/{operation}"),
-            patterns=["results/PREP/{dataset_name}/{operation}/*.png"],
+            patterns=["{name}.png"],
             category="Data processing and validation",
             subcategory="{dataset_name}",
             caption="report/stats.rst",
@@ -320,7 +320,7 @@ output_files.append(
     expand(
         "results/PREP/{dataset_name}/{operation}/", 
         dataset_name=list(datasets["dataset_name"]),
-        operation=["strip_INFO_tags", "normalize", "sort", "sort", "filter", "annotate"]
+        operation=["normalize", "sort", "sort", "filter", "annotate"]
         )
 )
 
