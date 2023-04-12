@@ -41,7 +41,7 @@ include: "rules/common.py"
 container: "docker://graemeford/pipeline-os"
 
 # group: VALIDATE
-rule strip_INFO_tags:
+checkpoint strip_INFO_tags:
     """
     Strip out INFO tags
     """
@@ -98,7 +98,7 @@ rule strip_INFO_tags:
 #         """
 
 # group: VALIDATE
-rule normalize:
+checkpoint normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
@@ -126,7 +126,7 @@ rule normalize:
         """
 
 # group: VALIDATE
-rule sort:
+checkpoint sort:
     """
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
@@ -157,7 +157,7 @@ rule sort:
         """
 
 # group: VALIDATE
-rule filter:
+checkpoint filter:
     """
     Remove variant types we cant yet analyse
     """
@@ -187,7 +187,7 @@ rule filter:
         """
 
 # group: VALIDATE
-rule annotate: # ?
+checkpoint annotate: # ?
     """
     """
     group: "VALIDATE"
@@ -244,7 +244,7 @@ rule tabix:
 # Restrictions:
 #   - Need different reference genomes depending on data genomes provided
 #   - Will require internet connection to retrive and prepare data files
-rule liftover:
+checkpoint liftover:
     group: "LIFTOVER"
     input:
         vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
