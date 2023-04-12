@@ -282,7 +282,7 @@ rule stats:
     output: 
         report(
             directory("results/PREP/{dataset_name}/{operation}"),
-            patterns=["{name}.png"],
+            patterns=["results/PREP/{dataset_name}/{operation}/{name}.png"],
             category="Data processing and validation",
             subcategory="{dataset_name}",
             caption="report/stats.rst",
