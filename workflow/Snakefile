@@ -289,7 +289,8 @@ rule stats:
             labels={
                 "Language": "C",
                 "Library/Software": "BCF Tools",
-                "Function": "stats & plot-vcfstats"
+                "Dataset": "{dataset_name}",
+                "Operation": "{operation}",
             }
             )
     log: 
