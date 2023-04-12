@@ -319,7 +319,7 @@ output_files.append(
 # [EACH] add qaulity-control snapshot reports
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/{operation}", 
+        "results/PREP/{dataset_name}/{operation}/", 
         dataset_name=list(datasets["dataset_name"]),
         operation=["strip_INFO_tags", "normalize", "sort", "sort", "filter", "annotate"]
         )
