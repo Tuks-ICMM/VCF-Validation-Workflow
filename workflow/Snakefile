@@ -292,9 +292,6 @@ rule stats:
                 "Function": "stats & plot-vcfstats"
             }
             )
-    wildcard_constraints:
-        operation="[^\.]"
-        dataset_name="[^\.]"
     log: 
         "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
     benchmark: 
