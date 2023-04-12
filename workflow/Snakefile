@@ -310,9 +310,8 @@ output_files = list()
 
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/sort{ext}", 
-        dataset_name=list(datasets["dataset_name"]), 
-        ext=[".vcf.gz", ".pdf"]
+        "results/PREP/{dataset_name}/sort.vcf.gz", 
+        dataset_name=list(datasets["dataset_name"])
         )
 )
 
