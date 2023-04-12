@@ -287,8 +287,6 @@ rule stats:
             subcategory="{dataset_name}",
             caption="report/stats.rst",
             labels={
-                "Language": "C",
-                "Library/Software": "BCF Tools",
                 "Dataset": "{dataset_name}",
                 "Operation": "{operation}",
             }

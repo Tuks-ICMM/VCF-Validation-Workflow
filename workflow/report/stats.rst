@@ -1,4 +1,1 @@
----------------------
-BCF-Tools Stats Plots
----------------------
 We used `BCF-Tools` to generate a series of `bcftools stats` plots to provide snapshots of file changes trhoughout the Qaulity-Control process.
