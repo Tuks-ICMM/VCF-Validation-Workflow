@@ -1,3 +1,4 @@
+# %%
 from json import load
 from os.path import abspath, dirname, join
 from subprocess import run
@@ -30,7 +31,9 @@ if "environment" in config:
             PBS_Headers.append("#PBS -M " + config["environment"]["email"]["address"])
 
 
-with open(".run.sh", "w") as file:
+with open("run.sh", "w") as file:
     file.writelines("\n".join(PBS_Headers + PBS_Body))
 
-run(["qsub", ".run.sh"], shell=True)
+# run(["qsub", ".run.sh"], shell=True)
+
+# %%

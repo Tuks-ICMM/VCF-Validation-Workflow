@@ -7,8 +7,8 @@
                 "nlustre",
                 "users",
                 "graeme",
-                "PUBLIC",
-                "GRCh38",
+                "ARCHIVE_Public",
+                "REFERENCE_GRCh38",
                 "GRCh38.fa.gz"
             ]
         }
@@ -43,6 +43,12 @@
                     "PLINK"
                 ]
             }
-        ]
+        ],
+        "envmodules": {
+            "bcftools": "bcftools-1.7",
+            "piccard": "picard-2.17.11",
+            "tabix": "samtools-1.7",
+            "latex": "latex"
+        }
     }
 }

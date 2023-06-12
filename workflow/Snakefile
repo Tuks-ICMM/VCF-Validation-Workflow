@@ -1,6 +1,6 @@
 from snakemake.utils import min_version
-from pandas import read_csv
-from os.path import join
+from pandas import read_csv, MultiIndex
+from os.path import join, isfile
 
 __author__ = "Graeme Ford"
 __credits__ = [
@@ -17,123 +17,343 @@ __maintainer__ = "Graeme Ford"
 __email__ = "graeme.ford@tuks.co.za"
 __status__ = "Development"
 
-
 # ENFORCE SNAKEMAKE VERSION CHECK:
-min_version("6.0")
+min_version("7")
 
 
 # DEFINE CONFIG FILE FOR SNAKEMAKE:
 configfile: join("config", "config.json")
 
 
+# SET REPORT TEMPLATE
+report: "report/template.rst"
+
+
 # IMPORT DATASET METADATA:
 datasets = read_csv(join("input", "datasets.csv"), header=0)
+
 
 
 # IMPORT COMMON FUNCTIONS:
 include: "rules/common.py"
 
+# SET GLOBAL DOCKER RECIPIE TO USE:
+container: "docker://graemeford/pipeline-os"
 
-rule all:
+# group: VALIDATE
+rule strip_INFO_tags:
     """
-    Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
+    Strip out INFO tags
     """
-    log:
-        "logs/ALL/ALL.log",
+    group: "VALIDATE"
     input:
-        expand("results/PREP/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])),
-        expand(
-            "results/LIFTOVER/{dataset}.vcf.gz", dataset=list(datasets["dataset_name"])
-        ),
-
-
-rule VALIDATE:
-    """
-    Perform normalisation of variants, validation of VCF format as well as REF alleles and strip out INFO tags.
-    """
-    log:
-        "logs/VALIDATE/{sample}.log",
-    input:
-        lambda wildcards: datasets.loc[
-            datasets["dataset_name"] == wildcards.sample, "file"
-        ].item(),
+        vcf=lambda wildcards: datasets.loc[
+            datasets["dataset_name"] == wildcards.dataset_name, "file"
+        ].unique().item(),
     output:
-        "results/PREP/{sample}.vcf.gz",
-        "results/PREP/{sample}.vcf.gz.tbi",
-    params:
-        memory=search("memory", "VALIDATE"),
+        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
+    log:
+        "_logs/PREP/{dataset_name}/strip_INFO_tags.log"
+    benchmark:
+        "_benchmarks/VALIDATE/strip_INFO_tags/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
         queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE"),
-    run:
-        # Strip out INFO tags:
-        shell(
-            "module load bcftools-1.7; bcftools annotate -x INFO,FORMAT -O z -o results/PREP/{wildcards.sample}_NO_INFO.vcf.gz {input}"
-        ),
-        # Regenerate and verify the VCF header:
-        shell(
-            "module load picard-2.17.11; java -Xmx{params.memory} -jar $PICARD FixVcfHeader I=results/PREP/{wildcards.sample}_NO_INFO.vcf.gz O=results/PREP/{wildcards.sample}_NEW_INFO.vcf.gz"
-        ),
-        # Remove variant types we cant yet analyse:
-        shell(
-            "module load gatk-4.2.2.0; gatk SelectVariants -V results/PREP/{wildcards.sample}_NEW_INFO.vcf.gz --select-type-to-include SNP --select-type-to-include INDEL --select-type-to-exclude MIXED --select-type-to-exclude MNP --select-type-to-exclude SYMBOLIC --exclude-filtered -O results/PREP/{wildcards.sample}_FILTERED.vcf.gz"
-        ),
-        # Subset samples according to user defined list and remove variants that do not pass QC:
-        shell(
-            "module load bcftools-1.7; bcftools view -S input/{wildcards.sample}_samples_subset.txt -f 'PASS' -O z -o results/PREP/{wildcards.sample}_FILTERED2.vcf.gz results/PREP/{wildcards.sample}_FILTERED.vcf.gz"
-        )
-        # Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
-        shell(
-            "module load bcftools-1.7; bcftools norm -m -any results/PREP/{wildcards.sample}_FILTERED2.vcf.gz -O z -o results/PREP/{wildcards.sample}_NORMALISED.vcf.gz"
-        ),
-        # Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
-        shell(
-            "module load bcftools-1.7; bcftools annotate --rename-chrs input/rename_chr.txt results/PREP/{wildcards.sample}_NORMALISED.vcf.gz | bcftools sort -m 1G -T results/PREP -O z -o results/PREP/{wildcards.sample}.vcf.gz"
-        )
-        shell(
-            "module load samtools-1.7; tabix -p vcf results/PREP/{wildcards.sample}.vcf.gz"
-        )
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    shell:
+        """
+        bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
+        """
 
+# group: VALIDATE
+# TODO: Identify Replacement for Piccards `FixVcfHeader`.
+# rule FixVcfHeader:
+#     """
+#     Validate the VCF header and specification has been followed
+#     """
+#     group: "VALIDATE"
+#     input:
+#         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
+#     output:
+#         "results/PREP/{dataset}/FixVcfHeader.vcf.gz"
+#     benchmark:
+#         "results/_benchmarks/VALIDATE/FixVcfHeader/{dataset}.tsv"
+#     resources:
+#         cpus=search("cores", "VALIDATE"),
+#         nodes=search("nodes", "VALIDATE"),
+#         queue=search("queue", "VALIDATE"),
+#         walltime=search("walltime", "VALIDATE")
+#     envmodules:
+#         config["environment"]["envmodules"]["piccard"],
+#     params:
+#         memory=search("memory", "VALIDATE")
+#     shell:
+#         """
+#         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
+#         PicardCommandLine -Xmx{params.memory} FixVcfHeader I={input} O={output}
+#         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
+#         """
 
-rule LIFTOVER:
+# group: VALIDATE
+rule normalize:
     """
-    Lift Variants onto same Reference build. Otherwise we cant merge them or analyse them in context of each other.
+    Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
-    log:
-        "logs/LIFTOVER/{sample}.log",
+    group: "VALIDATE"
     input:
-        "results/PREP/{sample}.vcf.gz",
-        "results/PREP/{sample}.vcf.gz.tbi",
+        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz",
+        tbi="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz.tbi",
     output:
-        "results/LIFTOVER/{sample}.vcf.gz",
+        vcf="results/PREP/{dataset_name}/normalize.vcf.gz"
+        # pipe("results/PREP/{dataset_name}/normalize.vcf.gz")
+    log:
+        "_logs/PREP/{dataset_name}/normalize.log"
+    benchmark:
+        "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    shell:
+        """
+        bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
+
+# group: VALIDATE
+rule sort:
+    """
+    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
+    """
+    group: "VALIDATE"
+    input:
+        vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
+        tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
+    output:
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
+    log:
+        "_logs/PREP/{dataset_name}/sort.log"
+    benchmark:
+        "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
     params:
-        prefix=lambda wildcards: "results/LIFTOVER/{sample}_LIFTED".format(
-            sample=wildcards.sample
-        ),
-        exclusionList=(
-            lambda wildcards: "results/LIFTOVER/{sample}_EXCLUDE.dat".format(
-                sample=wildcards.sample
-            )
-        ),
+        memory=search("memory", "VALIDATE"),
+        copyAnnotations=lambda wildcards: isfile(join("resources", "annotations.vcf.gz"))
+    shell:
+        # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
+        """
+        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset_name} -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
+
+# group: VALIDATE
+rule filter:
+    """
+    Remove variant types we cant yet analyse
+    """
+    group: "VALIDATE"
+    input:
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz",
+        tbi="results/PREP/{dataset_name}/sort.vcf.gz.tbi"
+    output:
+        vcf="results/PREP/{dataset_name}/filter.vcf.gz"
+        # pipe("results/PREP/{dataset_name}/filter.vcf.gz")
+    log:
+        "_logs/PREP/{dataset_name}/filter.log"
+    benchmark:
+        "_benchmarks/VALIDATE/filter/{dataset_name}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    params:
+        memory=search("memory", "VALIDATE")
+    shell:
+        """
+        bcftools view -v snps,indels -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
+
+# group: VALIDATE
+rule annotate: # ?
+    """
+    """
+    group: "VALIDATE"
+    input: 
+        vcf="results/PREP/{dataset_name}/filter.vcf.gz",
+        tbi="results/PREP/{dataset_name}/filter.vcf.gz.tbi"
+    output:
+        vcf="results/PREP/{dataset_name}/annotate.vcf.gz"
+    log:
+        "_logs/PREP/{dataset_name}/annotate.log"
+    benchmark:
+        "_benchmarks/VALIDATE/annotate/{dataset_name}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    shell:
+        # --rename-chrs input/rename_chr.txt would go here
+        """
+        bcftools annotate -c ID -a resources/annotations.vcf.gz -O z -o {output.vcf} {input.vcf}
+        """
+
+# group: VALIDATE
+rule tabix:
+    """
+    Generate tabix-index.
+    """
+    group: "VALIDATE"
+    input:
+        "results/{operation}/{dataset_name}/{output}.vcf.gz"
+    output:
+        "results/{operation}/{dataset_name}/{output}.vcf.gz.tbi"
+    log:
+        "_logs/{operation}/{dataset_name}/{output}.log"
+    benchmark:
+        "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    shell:
+        """
+        tabix -p vcf {input}
+        """
+# TODO: Make Liftover process more comprehensive?
+# Possible ideas: 
+#   1. rule to auto-fetch chain files based on provided reference genome versions and compatability:
+# Restrictions:
+#   - Need different reference genomes depending on data genomes provided
+#   - Will require internet connection to retrive and prepare data files
+rule liftover:
+    group: "LIFTOVER"
+    input:
+        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
+        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi",
+    output:
+        vcf="results/PREP/{dataset_name}/liftover.vcf.gz",
+        rejected="results/PREP/{dataset_name}/liftover_rejected.vcf.gz"
+    log:
+        "_logs/PREP/{dataset_name}/liftover.log"
+    benchmark:
+        "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
+    envmodules:
+        config["environment"]["envmodules"]["piccard"]
+    params:
         chainFile=join("resources", "hg19ToHg38.over.chain"),
-        LiftOver=join("resources", "liftOverPlink.py"),
-        rmBadLifts=join("resources", "rmBadLifts.py"),
         ref=join(
             *next(
-                i["file_path"]
-                for i in config["reference-genomes"]
-                if i["version"] == "GRCh38"
+                reference_genome["file_path"]
+                for reference_genome in config["reference-genomes"]
+                if reference_genome["version"] == "GRCh38"
             ),
         ),
-        mem=f'-Xmx{search("memory", "LIFTOVER")} ',
-    resources:
-        cpus=search("cores", "LIFTOVER"),
-        nodes=search("nodes", "LIFTOVER"),
-        queue=search("queue", "LIFTOVER"),
-        walltime=search("walltime", "LIFTOVER"),
-    conda:
-        join("envs", "snakemake.yml")
-    script:
-        join("scripts", "00 - LIFTOVER.py")
+    shell:
+        """
+        PicardCommandLine LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
+        """
+
+# TODO: Potential gist snippet
+rule stats:
+    input: 
+        final = "results/PREP/{dataset_name}/{operation}.vcf.gz",
+        final_tbi = "results/PREP/{dataset_name}/{operation}.vcf.gz.tbi",
+        initial = lambda wildcards: getattr(rules, str(wildcards.operation)).input.vcf,
+        initial_tbi = lambda wildcards: getattr(rules, str(wildcards.operation)).input.tbi
+    output: 
+        report(
+            directory("results/PREP/{dataset_name}/{operation}"),
+            patterns=["{name}.png"],
+            category="Data processing and validation",
+            subcategory="{dataset_name}",
+            caption="report/stats.rst",
+            labels={
+                "Dataset": "{dataset_name}",
+                "Operation": "{operation}",
+            }
+            )
+    log: 
+        "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
+    benchmark: 
+        "_benchmarks/PREP/{dataset_name}/{operation}_bcfstats.benchmark"
+    envmodules:
+        config["environment"]["envmodules"]["latex"],
+        config["environment"]["envmodules"]["bcftools"]
+    shell:
+        """
+        bcftools stats {input.initial} {input.final} > All.vchk
+        plot-vcfstats -p {output} All.vchk
+        """
+
+# Start conditional output file list ocnstruction:
+output_files = list()
+
+output_files.append(
+    expand(
+        "results/PREP/{dataset_name}/sort.vcf.gz", 
+        dataset_name=list(datasets["dataset_name"])
+        )
+)
+
+# [EACH] add qaulity-control snapshot reports
+output_files.append(
+    expand(
+        "results/PREP/{dataset_name}/{operation}/", 
+        dataset_name=list(datasets["dataset_name"]),
+        operation=["normalize", "sort", "sort", "filter", "annotate"]
+        )
+)
+
+
+# Here, we use a `Pandas` `MultiIndex` to group our datasets by ["reference_genome", "dataset_name"]. This allows
+# us to iterate over both the `reference_genome` columns unique values AND the `dataset_name` columns and access
+# their unique values.
+#
+# > Think of `MultiIndexes` as an Excel Sheet with the header row and the index columns (Can have more than one)
+# > are fixed. Now take that, but add a Z-dimension to the data in the middle that can stills croll around. It 
+# > now has levels and you go up or down however many levels there are and you get a whole new set of values for 
+# > the colunms and row indexes.
+# > 
+# > This way of working with data helps us select our data in an intuitive way that also filters it by nature, 
+# > since to select the data, you simply need to be able to describe what data you want. This is better for code 
+# > compatability as it relies less heavily on query method implementation, and more on data science principles.
+#
+# TODO: Evaluate porting metadata to MultiIndexes where appropriate.
+for reference_genome, groupby_subset in datasets.set_index(["reference_genome", "file"]).groupby(level=0): # [FOR] all unqiue (dataset_name and reference_genome) column combinations present
+    if reference_genome != "GRCh38" and groupby_subset is not None: # [IF] reference genome version
+        for dataset_name in groupby_subset.index.get_level_values("dataset_name"): # [FOR] the column in our MultiIndex that contains the dataset_name's in this subset
+            output_files.append(
+                # [EACH] add liftover request for the DAG
+                f"results/PREP/{dataset_name}/liftover.vcf.gz",
+
+                # [EACH]{QC} add liftover snapshot
+                f"results/PREP/{dataset_name}/liftover.pdf",
+            )
+rule all:
+    """
+    Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
+    """
+    default_target: True
+    log:
+        "logs/ALL/ALL.log",
+    input:
+        output_files,
