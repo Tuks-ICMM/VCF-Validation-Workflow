@@ -45,17 +45,9 @@ rule wipeInfo:
     """
     Strip out INFO tags
     """
-    group: "VALIDATE"
-    input:
-        vcf=lambda wildcards: datasets.loc[
-            datasets["dataset_name"] == wildcards.dataset_name, "file"
-        ].unique().item(),
-    output:
-        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
-    log:
-        "_logs/PREP/{dataset_name}/strip_INFO_tags.log"
-    benchmark:
-        "_benchmarks/VALIDATE/strip_INFO_tags/{dataset_name}.benchmark"
+    group: "SPEED"
+    log: "_logs/PREP/{dataset_name}/strip_INFO_tags.log"
+    benchmark: "_benchmarks/VALIDATE/strip_INFO_tags/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -63,6 +55,12 @@ rule wipeInfo:
         walltime=search("walltime", "VALIDATE")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
+    input:
+        vcf=lambda wildcards: datasets.loc[
+            datasets["dataset_name"] == wildcards.dataset_name, "file"
+        ].unique().item(),
+    output:
+        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
     shell:
         """
         bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
@@ -73,17 +71,9 @@ rule normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
-    group: "VALIDATE"
-    input:
-        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz",
-        tbi="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz.tbi",
-    output:
-        vcf="results/PREP/{dataset_name}/normalize.vcf.gz"
-        # pipe("results/PREP/{dataset_name}/normalize.vcf.gz")
-    log:
-        "_logs/PREP/{dataset_name}/normalize.log"
-    benchmark:
-        "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
+    group: "STANDARDIZE"
+    log: "_logs/PREP/{dataset_name}/normalize.log"
+    benchmark: "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -91,6 +81,12 @@ rule normalize:
         walltime=search("walltime", "VALIDATE")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
+    input:
+        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz",
+        tbi="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz.tbi",
+    output:
+        vcf="results/PREP/{dataset_name}/normalize.vcf.gz"
+        # pipe("results/PREP/{dataset_name}/normalize.vcf.gz")
     shell:
         """
         bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
@@ -101,16 +97,9 @@ rule sort:
     """
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
-    group: "VALIDATE"
-    input:
-        vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
-        tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
-    output:
-        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
-    log:
-        "_logs/PREP/{dataset_name}/sort.log"
-    benchmark:
-        "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
+    group: "STANDARDIZE"
+    log: "_logs/PREP/{dataset_name}/sort.log"
+    benchmark: "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -121,6 +110,11 @@ rule sort:
     params:
         memory=search("memory", "VALIDATE"),
         copyAnnotations=lambda wildcards: isfile(join("resources", "annotations.vcf.gz"))
+    input:
+        vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
+        tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
+    output:
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
     shell:
         # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
@@ -132,17 +126,9 @@ rule filter:
     """
     Remove variant types we cant yet analyse
     """
-    group: "VALIDATE"
-    input:
-        vcf="results/PREP/{dataset_name}/sort.vcf.gz",
-        tbi="results/PREP/{dataset_name}/sort.vcf.gz.tbi"
-    output:
-        vcf="results/PREP/{dataset_name}/filter.vcf.gz"
-        # pipe("results/PREP/{dataset_name}/filter.vcf.gz")
-    log:
-        "_logs/PREP/{dataset_name}/filter.log"
-    benchmark:
-        "_benchmarks/VALIDATE/filter/{dataset_name}.benchmark"
+    group: "STANDARDIZE"
+    log: "_logs/PREP/{dataset_name}/filter.log"
+    benchmark: "_benchmarks/VALIDATE/filter/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -152,6 +138,12 @@ rule filter:
         config["environment"]["envmodules"]["bcftools"],
     params:
         memory=search("memory", "VALIDATE")
+    input:
+        vcf="results/PREP/{dataset_name}/sort.vcf.gz",
+        tbi="results/PREP/{dataset_name}/sort.vcf.gz.tbi"
+    output:
+        vcf="results/PREP/{dataset_name}/filter.vcf.gz"
+        # pipe("results/PREP/{dataset_name}/filter.vcf.gz")
     shell:
         """
         bcftools view -v snps,indels -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
@@ -160,17 +152,11 @@ rule filter:
 # group: VALIDATE
 rule annotate: # ?
     """
+    This rule uses a VCF file provided by RefSeq to annotate known variants
     """
-    group: "VALIDATE"
-    input: 
-        vcf="results/PREP/{dataset_name}/filter.vcf.gz",
-        tbi="results/PREP/{dataset_name}/filter.vcf.gz.tbi"
-    output:
-        vcf="results/PREP/{dataset_name}/annotate.vcf.gz"
-    log:
-        "_logs/PREP/{dataset_name}/annotate.log"
-    benchmark:
-        "_benchmarks/VALIDATE/annotate/{dataset_name}.benchmark"
+    group: "STANDARDIZE"
+    log: "_logs/PREP/{dataset_name}/annotate.log"
+    benchmark: "_benchmarks/VALIDATE/annotate/{dataset_name}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -178,6 +164,11 @@ rule annotate: # ?
         walltime=search("walltime", "VALIDATE")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
+    input: 
+        vcf="results/PREP/{dataset_name}/filter.vcf.gz",
+        tbi="results/PREP/{dataset_name}/filter.vcf.gz.tbi"
+    output:
+        vcf="results/PREP/{dataset_name}/annotate.vcf.gz"
     shell:
         # --rename-chrs input/rename_chr.txt would go here
         """
@@ -186,17 +177,12 @@ rule annotate: # ?
 
 # group: LIFTOVER
 rule liftover:
+    """
+    This rule helps liftover data from one reference genome to another.
+    """
     group: "LIFTOVER"
-    input:
-        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
-        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi",
-    output:
-        vcf="results/PREP/{dataset_name}/liftover.vcf.gz",
-        rejected="results/PREP/{dataset_name}/liftover_rejected.vcf.gz"
-    log:
-        "_logs/PREP/{dataset_name}/liftover.log"
-    benchmark:
-        "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
+    log: "_logs/PREP/{dataset_name}/liftover.log"
+    benchmark: "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
     envmodules:
         config["environment"]["envmodules"]["piccard"]
     params:
@@ -208,6 +194,12 @@ rule liftover:
                 if reference_genome["version"] == "GRCh38"
             ),
         ),
+    input:
+        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
+        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi",
+    output:
+        vcf="results/PREP/{dataset_name}/liftover.vcf.gz",
+        rejected="results/PREP/{dataset_name}/liftover_rejected.vcf.gz"
     shell:
         """
         PicardCommandLine LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
@@ -218,14 +210,8 @@ rule tabix:
     Generate tabix-index.
     """
     group: "VALIDATE"
-    input:
-        "results/{operation}/{dataset_name}/{output}.vcf.gz"
-    output:
-        "results/{operation}/{dataset_name}/{output}.vcf.gz.tbi"
-    log:
-        "_logs/{operation}/{dataset_name}/{output}.log"
-    benchmark:
-        "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
+    log: "_logs/{operation}/{dataset_name}/{output}.log"
+    benchmark: "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
     resources:
         cpus=search("cores", "VALIDATE"),
         nodes=search("nodes", "VALIDATE"),
@@ -233,6 +219,10 @@ rule tabix:
         walltime=search("walltime", "VALIDATE")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
+    input:
+        "results/{operation}/{dataset_name}/{output}.vcf.gz"
+    output:
+        "results/{operation}/{dataset_name}/{output}.vcf.gz.tbi"
     shell:
         """
         tabix -p vcf {input}
@@ -241,6 +231,11 @@ rule tabix:
 
 # TODO: Potential gist snippet
 rule stats:
+    log:  "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
+    benchmark:  "_benchmarks/PREP/{dataset_name}/{operation}_bcfstats.benchmark"
+    envmodules:
+        config["environment"]["envmodules"]["latex"],
+        config["environment"]["envmodules"]["bcftools"]
     input: 
         final = "results/PREP/{dataset_name}/{operation}.vcf.gz",
         final_tbi = "results/PREP/{dataset_name}/{operation}.vcf.gz.tbi",
@@ -258,13 +253,6 @@ rule stats:
                 "Operation": "{operation}",
             }
             )
-    log: 
-        "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
-    benchmark: 
-        "_benchmarks/PREP/{dataset_name}/{operation}_bcfstats.benchmark"
-    envmodules:
-        config["environment"]["envmodules"]["latex"],
-        config["environment"]["envmodules"]["bcftools"]
     shell:
         """
         bcftools stats {input.initial} {input.final} > All.vchk
