@@ -41,7 +41,7 @@ include: "rules/common.py"
 container: "docker://graemeford/pipeline-os"
 
 # group: VALIDATE
-rule strip_INFO_tags:
+rule wipeInfo:
     """
     Strip out INFO tags
     """
@@ -67,35 +67,6 @@ rule strip_INFO_tags:
         """
         bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
         """
-
-# group: VALIDATE
-# TODO: Identify Replacement for Piccards `FixVcfHeader`.
-# rule FixVcfHeader:
-#     """
-#     Validate the VCF header and specification has been followed
-#     """
-#     group: "VALIDATE"
-#     input:
-#         "results/PREP/{dataset}/strip_INFO_tags.vcf.gz"
-#     output:
-#         "results/PREP/{dataset}/FixVcfHeader.vcf.gz"
-#     benchmark:
-#         "results/_benchmarks/VALIDATE/FixVcfHeader/{dataset}.tsv"
-#     resources:
-#         cpus=search("cores", "VALIDATE"),
-#         nodes=search("nodes", "VALIDATE"),
-#         queue=search("queue", "VALIDATE"),
-#         walltime=search("walltime", "VALIDATE")
-#     envmodules:
-#         config["environment"]["envmodules"]["piccard"],
-#     params:
-#         memory=search("memory", "VALIDATE")
-#     shell:
-#         """
-#         echo -e "--- LOG SECTION START | GATK 'FixVcfHeader' ---" 1>&2
-#         PicardCommandLine -Xmx{params.memory} FixVcfHeader I={input} O={output}
-#         echo -e "--- LOG SECTION END | GATK 'FixVcfHeader' ---\n" 1>&2
-#         """
 
 # group: VALIDATE
 rule normalize:
@@ -213,37 +184,7 @@ rule annotate: # ?
         bcftools annotate -c ID -a resources/annotations.vcf.gz -O z -o {output.vcf} {input.vcf}
         """
 
-# group: VALIDATE
-rule tabix:
-    """
-    Generate tabix-index.
-    """
-    group: "VALIDATE"
-    input:
-        "results/{operation}/{dataset_name}/{output}.vcf.gz"
-    output:
-        "results/{operation}/{dataset_name}/{output}.vcf.gz.tbi"
-    log:
-        "_logs/{operation}/{dataset_name}/{output}.log"
-    benchmark:
-        "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
-    resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
-    envmodules:
-        config["environment"]["envmodules"]["bcftools"],
-    shell:
-        """
-        tabix -p vcf {input}
-        """
-# TODO: Make Liftover process more comprehensive?
-# Possible ideas: 
-#   1. rule to auto-fetch chain files based on provided reference genome versions and compatability:
-# Restrictions:
-#   - Need different reference genomes depending on data genomes provided
-#   - Will require internet connection to retrive and prepare data files
+# group: LIFTOVER
 rule liftover:
     group: "LIFTOVER"
     input:
@@ -271,6 +212,32 @@ rule liftover:
         """
         PicardCommandLine LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
         """
+# group: VALIDATE
+rule tabix:
+    """
+    Generate tabix-index.
+    """
+    group: "VALIDATE"
+    input:
+        "results/{operation}/{dataset_name}/{output}.vcf.gz"
+    output:
+        "results/{operation}/{dataset_name}/{output}.vcf.gz.tbi"
+    log:
+        "_logs/{operation}/{dataset_name}/{output}.log"
+    benchmark:
+        "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
+    resources:
+        cpus=search("cores", "VALIDATE"),
+        nodes=search("nodes", "VALIDATE"),
+        queue=search("queue", "VALIDATE"),
+        walltime=search("walltime", "VALIDATE")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    shell:
+        """
+        tabix -p vcf {input}
+        """
+
 
 # TODO: Potential gist snippet
 rule stats:
