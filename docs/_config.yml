@@ -24,7 +24,7 @@ email: graeme.ford@tuks.co.za
 description: >- # this means to ignore newlines until "domain:"
   A computational pipeline to validate VCF files.
 domain: "tuks-icmm.github.io"
-baseurl: "/Vcf-Validation" # the subpath of your site, e.g. /blog
+baseurl: "/Vcf-Validation-Workflow" # the subpath of your site, e.g. /blog
 url: "https://tuks-icmm.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 github_username: G-Kodes
 
