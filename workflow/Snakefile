@@ -109,7 +109,6 @@ rule sort:
         config["environment"]["envmodules"]["bcftools"],
     params:
         memory=search("memory", "VALIDATE"),
-        copyAnnotations=lambda wildcards: isfile(join("resources", "annotations.vcf.gz"))
     input:
         vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
         tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
@@ -166,13 +165,14 @@ rule annotate: # ?
         config["environment"]["envmodules"]["bcftools"],
     input: 
         vcf="results/PREP/{dataset_name}/filter.vcf.gz",
-        tbi="results/PREP/{dataset_name}/filter.vcf.gz.tbi"
+        tbi="results/PREP/{dataset_name}/filter.vcf.gz.tbi",
+        annotations="resources/annotations.vcf.gz"
     output:
         vcf="results/PREP/{dataset_name}/annotate.vcf.gz"
     shell:
         # --rename-chrs input/rename_chr.txt would go here
         """
-        bcftools annotate -c ID -a resources/annotations.vcf.gz -O z -o {output.vcf} {input.vcf}
+        bcftools annotate -c ID -a {input.annotations} -O z -o {output.vcf} {input.vcf}
         """
 
 # group: LIFTOVER
@@ -204,6 +204,7 @@ rule liftover:
         """
         PicardCommandLine LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
         """
+
 # group: VALIDATE
 rule tabix:
     """
