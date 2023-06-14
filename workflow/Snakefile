@@ -300,7 +300,8 @@ for reference_genome, groupby_subset in datasets.set_index(["reference_genome", 
             output_files.append(
                 # [EACH] add liftover request for the DAG
                 f"results/PREP/{dataset_name}/liftover.vcf.gz",
-
+            )
+            output_files.append(
                 # [EACH]{QC} add liftover snapshot
                 f"results/PREP/{dataset_name}/liftover.pdf",
             )
