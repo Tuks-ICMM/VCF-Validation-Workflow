@@ -32,7 +32,9 @@ report: "report/template.rst"
 # IMPORT DATASET METADATA:
 datasets = read_csv(join("input", "datasets.csv"), header=0)
 
-
+# LD_LIBRARY_PATH is required to inform Python where OpenSSL library files are located. This is included otherwise none of the rules queued on the system will have this variable set.
+envvars:
+    "LD_LIBRARY_PATH"
 
 # IMPORT COMMON FUNCTIONS:
 include: "rules/common.py"
