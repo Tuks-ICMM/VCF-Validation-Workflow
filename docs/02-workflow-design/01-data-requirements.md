@@ -1,21 +1,18 @@
 ---
-title: Quickstart
+title: Workflow Design
 layout: page
-permalink: reference-material/quickstart
+permalink: workflow-design/data-requirements
 nav_order: 1
-parent: Reference Material
+parent: Workflow Design
 ---
 
-# Quickstart
+# Data Requirements
 {: .no_toc }
 
-A series of reference resources aimed at end-users.
+A summary of all data required in order to use this workflow.
 {: .fs-6 .fw-300 }
 
-Quickstart
-{: .label }
-
-Quick Reference
+Metadata
 {: .label }
 
 <details markdown="block">

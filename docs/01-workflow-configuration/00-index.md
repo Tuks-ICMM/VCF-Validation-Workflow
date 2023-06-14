@@ -17,9 +17,10 @@ Reference Genome Configuration
 
 ---
 
-The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-spesific. This file contains a top-level `object` to record the configuration options. A bare-bones template is provided below:
+The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level `object` to record the configuration options. A bare-bones template is provided below:
 
 ```json
+
 ```
 
 ## Reference Genomes
