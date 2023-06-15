@@ -280,6 +280,14 @@ output_files.append(
         )
 )
 
+# Include output for rule 'normalize'
+output_files.append(
+    expand(
+        "results/PREP/{dataset_name}/normalize.vcf.gz", 
+        dataset_name=list(datasets["dataset_name"])
+        )
+)
+
 # [EACH] add qaulity-control snapshot reports
 output_files.append(
     expand(
