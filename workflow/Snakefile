@@ -271,6 +271,12 @@ output_files.append(
         dataset_name=list(datasets["dataset_name"])
         )
 )
+output_files.append(
+    expand(
+        "results/PREP/{dataset_name}/sort.vcf.gz.tbi", 
+        dataset_name=list(datasets["dataset_name"])
+        )
+)
 
 # Include output for rule 'annotate'
 output_files.append(
@@ -279,11 +285,23 @@ output_files.append(
         dataset_name=list(datasets["dataset_name"])
         )
 )
+output_files.append(
+    expand(
+        "results/PREP/{dataset_name}/annotate.vcf.gz.tbi", 
+        dataset_name=list(datasets["dataset_name"])
+        )
+)
 
 # Include output for rule 'normalize'
 output_files.append(
     expand(
         "results/PREP/{dataset_name}/normalize.vcf.gz", 
+        dataset_name=list(datasets["dataset_name"])
+        )
+)
+output_files.append(
+    expand(
+        "results/PREP/{dataset_name}/normalize.vcf.gz.tbi", 
         dataset_name=list(datasets["dataset_name"])
         )
 )
