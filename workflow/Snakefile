@@ -212,7 +212,7 @@ rule tabix:
     """
     Generate tabix-index.
     """
-    group: "VALIDATE"
+    group: "TABIX"
     log: "_logs/{operation}/{dataset_name}/{output}.log"
     benchmark: "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
     resources:
