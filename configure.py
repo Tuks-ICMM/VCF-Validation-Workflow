@@ -17,7 +17,7 @@ PBS_Body = [
     "module load python-3.11.3",
     f"cd {dirname(abspath(__file__))};",
     f"source {dirname(abspath(__file__))}/venv/bin/activate",
-    "snakemake --profile config/PBS-Torque-Profile --use-envmodules --keep-going",
+    "snakemake --profile config/PBS-Torque-Profile --use-envmodules --force",
 ]
 
 if "environment" in config:
