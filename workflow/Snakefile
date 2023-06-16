@@ -47,7 +47,6 @@ rule wipeInfo:
     """
     Strip out INFO tags
     """
-    group: "SPEED"
     log: "_logs/PREP/{dataset_name}/strip_INFO_tags.log"
     benchmark: "_benchmarks/VALIDATE/strip_INFO_tags/{dataset_name}.benchmark"
     resources:
@@ -73,7 +72,6 @@ rule normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
-    group: "STANDARDIZE"
     log: "_logs/PREP/{dataset_name}/normalize.log"
     benchmark: "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
     resources:
@@ -99,7 +97,6 @@ rule sort:
     """
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
-    group: "STANDARDIZE"
     log: "_logs/PREP/{dataset_name}/sort.log"
     benchmark: "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
     resources:
@@ -127,7 +124,6 @@ rule filter:
     """
     Remove variant types we cant yet analyse
     """
-    group: "STANDARDIZE"
     log: "_logs/PREP/{dataset_name}/filter.log"
     benchmark: "_benchmarks/VALIDATE/filter/{dataset_name}.benchmark"
     resources:
@@ -151,11 +147,10 @@ rule filter:
         """
 
 # group: VALIDATE
-rule annotate: # ?
+rule annotate:
     """
     This rule uses a VCF file provided by RefSeq to annotate known variants
     """
-    group: "STANDARDIZE"
     log: "_logs/PREP/{dataset_name}/annotate.log"
     benchmark: "_benchmarks/VALIDATE/annotate/{dataset_name}.benchmark"
     resources:
@@ -182,7 +177,6 @@ rule liftover:
     """
     This rule helps liftover data from one reference genome to another.
     """
-    group: "LIFTOVER"
     log: "_logs/PREP/{dataset_name}/liftover.log"
     benchmark: "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
     envmodules:
@@ -212,7 +206,6 @@ rule tabix:
     """
     Generate tabix-index.
     """
-    group: "TABIX"
     log: "_logs/{operation}/{dataset_name}/{output}.log"
     benchmark: "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
     resources:
@@ -364,4 +357,4 @@ rule all:
     log:
         "logs/ALL/ALL.log",
     input:
-        output_files,
+        [item for sublist in output_files for item in sublist],
