@@ -129,22 +129,6 @@ If your PBS/Torque systems email notifications have been configured, you may con
 
 {::options parse_block_html="false" /}
 
----
-#### `working-directory` (`string`)
-This property is used to denote the current working directory for internal reference purposes.
-
-{::options parse_block_html="true" /}
-
-<details><summary class="text-delta" markdown="span">Example <code>'working-directory'</code> entry</summary>
-```json
-{
-  "working-directory": "/my/path/"
-}
-```
-</details>
-
-{::options parse_block_html="false" /}
-
 #### `queues`
 The PBS-Torque batch scheduling system manages per-installation generic resources like memory, time, and cpus which are available for request by users. The _{{ site.title }}_ has been designed to take advantage of the granularity provided by these scheduler systems. Each rule in the workflow can be split into a separate job submissions on a cluster. As a result, it is possible to parallelize the analysis and assign cluster resources on a per-rule basis.
 

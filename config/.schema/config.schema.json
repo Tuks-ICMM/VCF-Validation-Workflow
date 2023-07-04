@@ -146,10 +146,6 @@
                             "items": {
                                 "type": "string"
                             }
-                        },
-                        "working-directory": {
-                            "description": "A full file path to the current/desired working directory where the pipeline will look for this configuration",
-                            "type": "string"
                         }
                     },
                     "queues": {
@@ -183,7 +179,6 @@
                 }
             },
             "required": [
-                "working-directory",
                 "queues"
             ]
         }

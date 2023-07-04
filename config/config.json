@@ -21,7 +21,6 @@
                 "e"
             ]
         },
-        "working-directory": "/nlustre/users/graeme/PUBLIC/GnomeAD_pipeline_test/",
         "queues": [
             {
                 "queue": "long",

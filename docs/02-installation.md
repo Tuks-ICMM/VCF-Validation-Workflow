@@ -52,7 +52,6 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
                 "e"
             ]
         },
-        "working-directory": "/path/to/my/working/directory/",
         "queues": [
             {
                 "queue": "long",
