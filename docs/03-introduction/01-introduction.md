@@ -3,10 +3,10 @@ title: Workflow Overview
 layout: page
 permalink: workflow-design/analysis
 nav_order: 1
-parent: Workflow Design
+parent: Introduction
 ---
 
-# Workflow Overview
+# Introduction
 {: .no_toc }
 
 A breakdown of the analyses performed by this workflow.
@@ -26,7 +26,7 @@ A breakdown of the analyses performed by this workflow.
 
 ---
 
-The {{ site.title }} design follows the following order-of-events graph:
+The <i>{{ site.title }}</i> design follows the following order-of-events graph:
 
 ```mermaid
 timeline

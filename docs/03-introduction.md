@@ -1,7 +1,7 @@
 ---
-title: Workflow Design
+title: Introduction
 layout: page
-permalink: workflow-design
+permalink: introduction
 nav_order: 3
 has_children: true
 ---
