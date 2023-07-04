@@ -39,7 +39,7 @@ Many thanks to the following individuals who have been instrumental to the succe
       <hr />
       <h4>
         <strong>
-          <a href="https://www.linkedin.com/in/graeme-ford/" target="_blank">
+          <a href="https://www.linkedin.com/in/graeme-ford/" target="_blank" rel="author">
             Graeme Ford
           </a>
         </strong>
@@ -87,6 +87,13 @@ Many thanks to the following individuals who have been instrumental to the succe
           </a>
         </strong>
       </h4>
+      <h6>
+        <italic>
+          <a href="https://github.com/orgs/Tuks-ICMM/people/MichaelSPepper" target="_blank">
+            MichaelSPepper
+          </a>
+        </italic>
+      </h6>
     </td>
   </tr>
   <tr>

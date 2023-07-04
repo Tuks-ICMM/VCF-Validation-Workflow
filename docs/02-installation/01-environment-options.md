@@ -16,13 +16,4 @@ How to connect software and use batch schedulers
 [Cheat-Sheets](/cheat-sheets/quickstart)
 {: .label .label-yellow }
 
-<details markdown="block">
-  <summary>
-    Table of contents
-  </summary>
-  {: .text-delta }
-1. TOC
-{:toc}
-</details>
-
 ---
