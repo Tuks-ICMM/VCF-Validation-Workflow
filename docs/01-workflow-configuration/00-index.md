@@ -22,9 +22,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 
 {::options parse_block_html="true" /}
 
-<details>
-  <summary class="text-delta">Example <code>config.json</code> file</summary>
-
+<details><summary class="text-delta">Example <code>config.json</code> file</summary>
 ```json
 {
     "reference-genomes": [
@@ -81,7 +79,6 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
     }
 }
 ```
-
 </details>
 
 {::options parse_block_html="false" /}
@@ -118,10 +115,7 @@ You may configure a list to describe available reference genomes in the form of 
 
 {::options parse_block_html="true" /}
 
-<details>
-  <summary class="text-delta">Example <code>"reference_genome"</code> entry</summary>
-
-
+<details><summary class="text-delta">Example <code>"reference_genome"</code> entry</summary>
 ```json
 {
   "reference_genome": [
@@ -136,7 +130,6 @@ You may configure a list to describe available reference genomes in the form of 
   ]
 }
 ```
-
 </details>
 
 {::options parse_block_html="false" /}
@@ -180,10 +173,7 @@ If your PBS/Torque systems email notifications have been configured, you may con
 
 {::options parse_block_html="true" /}
 
-<details>
-  <summary class="text-delta">Example <code>'email'</code> entry</summary>
-
-
+<details><summary class="text-delta">Example <code>'email'</code> entry</summary>
 ```json
 {
     "email": {
@@ -192,7 +182,6 @@ If your PBS/Torque systems email notifications have been configured, you may con
     }
 }
 ```
-
 </details>
 
 {::options parse_block_html="false" /}
@@ -203,16 +192,12 @@ This property is used to denote the current working directory for internal refer
 
 {::options parse_block_html="true" /}
 
-<details>
-  <summary class="text-delta">Example <code>'working-directory'</code> entry</summary>
-
-
+<details><summary class="text-delta">Example <code>'working-directory'</code> entry</summary>
 ```json
 {
   "working-directory": "/my/path/"
 }
 ```
-
 </details>
 
 {::options parse_block_html="false" /}
@@ -257,9 +242,7 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 
 {::options parse_block_html="true" /}
 
-<details>
-  <summary class="text-delta">Example <code>'queues'</code> entry </summary>
-
+<details><summary class="text-delta">Example <code>'queues'</code> entry </summary>
 ```json
 {
   "queues": [
@@ -286,7 +269,6 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
   ]
 }
 ```
-
 </details>
 
 {::options parse_block_html="false" /}
@@ -307,9 +289,7 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
 
 {::options parse_block_html="true" /}
 
-<details>
-  <summary class="text-delta">Example <code>'envmodules'</code> entry</summary>
-
+<details><summary class="text-delta">Example <code>'envmodules'</code> entry</summary>
 ```json
 {
   "envmodules": {
@@ -326,7 +306,6 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
   }
 }
 ```
-
 </details>
 
 {::options parse_block_html="false" /}
