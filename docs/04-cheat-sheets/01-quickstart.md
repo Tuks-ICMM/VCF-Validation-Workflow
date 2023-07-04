@@ -15,7 +15,7 @@ A series of reference resources aimed at end-users.
 Quickstart
 {: .label }
 
-Quick Reference
+Templates
 {: .label }
 
 ---

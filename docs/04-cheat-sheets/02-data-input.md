@@ -1,5 +1,5 @@
 ---
-title: data-input
+title: Data Input
 layout: page
 parent: Cheat Sheets
 nav_order: 2
