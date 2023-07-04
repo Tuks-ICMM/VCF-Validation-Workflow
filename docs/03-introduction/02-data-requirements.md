@@ -13,7 +13,7 @@ A summary of all data required in order to use this workflow.
 {: .fs-6 .fw-300 }
 
 [Cheat-Sheets](/cheat-sheets/quickstart)
-{: .label .label-blue }
+{: .label .label-yellow }
 
 <details markdown="block">
   <summary>

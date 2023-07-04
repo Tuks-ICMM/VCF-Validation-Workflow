@@ -13,7 +13,7 @@ A breakdown of the analyses performed by this workflow.
 {: .fs-6 .fw-300 }
 
 [Cheat-Sheets](/cheat-sheets/quickstart)
-{: .label .label-blue }
+{: .label .label-yellow }
 
 <details markdown="block">
   <summary>
@@ -30,7 +30,7 @@ The {{ site.title }} design follows the following order-of-events graph:
 
 ```mermaid
 timeline
-    section VCF Validation Workflow
-        PREPARE : Remove INFO column : Normalize INDELs : Sort Variants: Filter QUAL scores: Annotate
-        LIFTOVER : Liftover
+  section VCF Validation Workflow
+      PREPARE : Remove INFO column : Normalize INDELs : Sort Variants: Filter QUAL scores: Annotate
+      LIFTOVER : Liftover
 ```

@@ -16,17 +16,11 @@ Reference Genome Configuration
 {: .label }
 
 [Cheat-Sheets](/cheat-sheets/quickstart)
-{: .label .label-blue }
+{: .label .label-yellow }
 
 ---
 
-The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level JSON `object` to record the configuration options. These broadly include:
-
-- [Environment Options](installation/environment-related)
-  - [Scheduler Profiles](installation/scheduler-profiles)
-  - [Software](installation/scheduler-profiles)
-- [Reference Genomes](installation/reference-genomes)
-
+The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level JSON `object` to record the configuration options.
 
 
 

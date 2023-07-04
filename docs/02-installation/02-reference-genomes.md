@@ -14,7 +14,7 @@ How to declare a reference-genome for use
 {: .fs-6 .fw-300 }
 
 [Cheat-Sheets](/cheat-sheets/quickstart)
-{: .label .label-blue }
+{: .label .label-yellow }
 
 <details markdown="block">
   <summary>

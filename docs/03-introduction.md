@@ -14,7 +14,7 @@ How the workflow has been designed and what it needs to run
 
 
 [Cheat-Sheets](/cheat-sheets/quickstart)
-{: .label .label-blue }
+{: .label .label-yellow }
 
 <details markdown="block">
   <summary>
