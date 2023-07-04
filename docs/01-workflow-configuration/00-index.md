@@ -19,14 +19,14 @@ Reference Genome Configuration
 
 The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level `object` to record the configuration options. A bare-bones template is provided below:
 
-{::options parse_block_html="true" /}  # Sets parse_block_html option to true
+{::options parse_block_html="true" /}
 
 <details>
   <summary class="text-delta">
     Example <code>config.json</code> file
   </summary>
 
-  <div markdown="1">
+  <div>
 
     ```json
     {
@@ -89,7 +89,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 
 </details>
 
-{::options parse_block_html="false" /} # Sets parse_block_html option to false
+{::options parse_block_html="false" /}
 
 ## Reference Genomes
 You may configure a list to describe available reference genomes in the form of an `array` of `objects`. Each object requires the following information:
