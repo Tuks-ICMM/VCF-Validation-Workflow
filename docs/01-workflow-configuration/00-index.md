@@ -19,12 +19,14 @@ Reference Genome Configuration
 
 The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level `object` to record the configuration options. A bare-bones template is provided below:
 
-{::options parse_block_html="true" /}
+
 
 <details>
   <summary class="text-delta">
-    Example `config.json` file
+    Example <code>config.json<code> file
   </summary>
+
+{::options parse_block_html="true" /}
 
 ```json
 {
@@ -83,9 +85,10 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 }
 ```
 
+{::options parse_block_html="false" /}
+
 </details>
 
-{::options parse_block_html="false" /}
 
 ## Reference Genomes
 You may configure a list to describe available reference genomes in the form of an `array` of `objects`. Each object requires the following information:
@@ -122,22 +125,24 @@ You may configure a list to describe available reference genomes in the form of 
     Example <code>"reference_genome"</code> entry
   </summary>
 
-  <pre>
-    <code>
-      {
-        "reference_genome": [
-          {
-            "version": "GRCh38",
-            "file_path": ["/", "reference", "human", "GRCh38.fa.gz"]
-          },
-          {
-            "version": "GRCh37",
-            "file_path": ["/", "reference", "human", "GRCh37.fa.gz"]
-          }
-        ]
-      }
-    </code>
-  </pre>
+{::options parse_block_html="true" /}
+
+```json
+{
+  "reference_genome": [
+    {
+      "version": "GRCh38",
+      "file_path": ["/", "reference", "human", "GRCh38.fa.gz"]
+    },
+    {
+      "version": "GRCh37",
+      "file_path": ["/", "reference", "human", "GRCh37.fa.gz"]
+    }
+  ]
+}
+```
+
+{::options parse_block_html="false" /}
 
 </details>
 
@@ -184,16 +189,18 @@ If your PBS/Torque systems email notifications have been configured, you may con
     Example <code>'email'</code> entry
   </summary>
 
-  <pre>
-    <code>
-      {
-          "email": {
-              "email": "jane.doe@university.com",
-              "conditions": ["o", "e"],
-          }
-      }
-    </code>
-  </pre>
+{::options parse_block_html="true" /}
+
+```json
+{
+    "email": {
+        "email": "jane.doe@university.com",
+        "conditions": ["o", "e"],
+    }
+}
+```
+
+{::options parse_block_html="false" /}
 
 </details>
 ---
@@ -205,13 +212,16 @@ This property is used to denote the current working directory for internal refer
     Example <code>'working-directory'</code> entry
   </summary>
 
-  <pre>
-    <code>
-      {
-        "working-directory": "/my/path/"
-      }
-    </code>
-  </pre>
+{::options parse_block_html="true" /}
+
+```json
+{
+  "working-directory": "/my/path/"
+}
+```
+
+{::options parse_block_html="false" /}
+
 </details>
 
 #### `queues`
@@ -257,34 +267,36 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
     Example <code>'queues'</code> entry 
   </summary>
 
-  <pre>
-    <code>
-      {
-        "queues": [
-          {
-            "queue": "long",
-            "walltime": "900:00:00",
-            "memory": "128G",
-            "cores": "10",
-            "nodes": "1",
-            "rules": [
-              "all",
-              "VALIDATE",
-              "LIFTOVER",
-              "COLLATE",
-              "ALL_COLLATE",
-              "ANNOTATE",
-              "ADMIXTURE",
-              "TRIM_AND_NAME",
-              "FILTER",
-              "TRANSPILE_CLUSTERS",
-              "PLINK"
-            ]
-          }
-        ]
-      }
-    </code>
-  </pre>
+{::options parse_block_html="true" /}
+
+```json
+{
+  "queues": [
+    {
+      "queue": "long",
+      "walltime": "900:00:00",
+      "memory": "128G",
+      "cores": "10",
+      "nodes": "1",
+      "rules": [
+        "all",
+        "VALIDATE",
+        "LIFTOVER",
+        "COLLATE",
+        "ALL_COLLATE",
+        "ANNOTATE",
+        "ADMIXTURE",
+        "TRIM_AND_NAME",
+        "FILTER",
+        "TRANSPILE_CLUSTERS",
+        "PLINK"
+      ]
+    }
+  ]
+}
+```
+
+{::options parse_block_html="false" /}
 
 </details>
 
@@ -307,23 +319,25 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
     Example <code>'envmodules'</code> entry
   </summary>
 
-  <pre>
-    <code>
-      {
-        "envmodules": {
-          "plink-2": "plink-2",
-          "plink-1.9": "plink-1.9",
-          "bcftools": "bcftools",
-          "samtools": "samtools",
-          "piccard": "piccard",
-          "structure": "structure",
-          "admixture-1.3": "admixture-1.3",
-          "python-3": "python-3",
-          "r": "r",
-          "latex": "latex"
-        }
-      }
-    </code>
-  </pre>
+{::options parse_block_html="true" /}
+
+```json
+{
+  "envmodules": {
+    "plink-2": "plink-2",
+    "plink-1.9": "plink-1.9",
+    "bcftools": "bcftools",
+    "samtools": "samtools",
+    "piccard": "piccard",
+    "structure": "structure",
+    "admixture-1.3": "admixture-1.3",
+    "python-3": "python-3",
+    "r": "r",
+    "latex": "latex"
+  }
+}
+```
+
+{::options parse_block_html="false" /}
 
 </details>
