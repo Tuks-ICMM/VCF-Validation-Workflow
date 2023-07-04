@@ -33,6 +33,9 @@ mermaid:
   # Pick an available version from https://cdn.jsdelivr.net/npm/mermaid/
   version: "9.3.0"
 
+# For copy button on code
+enable_copy_code_button: true
+
 # Build settings
 remote_theme: just-the-docs/just-the-docs@v0.5.2
 plugins:

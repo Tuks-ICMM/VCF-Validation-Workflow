@@ -21,12 +21,65 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 
 <details markdown="block">
   <summary>
-    Example `config.json` file
+    Example <pre><code>config.json<code></pre> file
   </summary>
   {: .text-delta }
 
 ```json
-
+{
+    "reference-genomes": [
+        {
+            "version": "GRCh38",
+            "file_path": [
+                "/",
+                "path",
+                "to",
+                "my",
+                "copy",
+                "of",
+                "GRCh38.fa.gz"
+            ]
+        }
+    ],
+    "environment": {
+        "email": {
+            "address": "jane.doe@tuks.co.za",
+            "conditions": [
+                "o",
+                "e"
+            ]
+        },
+        "working-directory": "/path/to/my/working/directory/",
+        "queues": [
+            {
+                "queue": "long",
+                "walltime": "900:00:00",
+                "memory": "128G",
+                "cores": "10",
+                "nodes": "1",
+                "rules": [
+                    "all",
+                    "VALIDATE",
+                    "LIFTOVER",
+                    "COLLATE",
+                    "ALL_COLLATE",
+                    "ANNOTATE",
+                    "ADMIXTURE",
+                    "TRIM_AND_NAME",
+                    "FILTER",
+                    "TRANSPILE_CLUSTERS",
+                    "PLINK"
+                ]
+            }
+        ],
+        "envmodules": {
+            "bcftools": "bcftools-1.7",
+            "piccard": "picard-2.17.11",
+            "tabix": "samtools-1.7",
+            "latex": "latex"
+        }
+    }
+}
 ```
 
 </details>
@@ -62,7 +115,15 @@ You may configure a list to describe available reference genomes in the form of 
 {: .normal }
 > We use the built-in python function `os.path` to generate platform-specific paths. Should you wish to provide a path from root, you may do so by setting the first element in the array to the drive reference for your OS. \***\*Linux E.g. ["/", ...]\*\***
 
-**Example:**
+<details>
+  <summary>
+  Example
+    <pre>
+      <code>"reference_genome"</code>
+    </pre>
+    entry
+  </summary>
+  {: .text-delta }
 
 ```json
 {
@@ -78,6 +139,8 @@ You may configure a list to describe available reference genomes in the form of 
   ]
 }
 ```
+
+</details>
 
 {: .normal-title }
 > Performance Tips
@@ -116,7 +179,11 @@ If your PBS/Torque systems email notifications have been configured, you may con
   <dd>An array of mail-options which indicates when you should receive a notification email for this pipeline execution. <code>a</code> indicates mail should be sent when job is aborted, <code>b</code> indicates mail should be sent when job begins and <code>e</code> indicates mail should be sent when job terminates.</dd>
 </dl>
 
-##### `email` example
+
+<details>
+  <summary>Example <pre><code>'email'</code></pre> entry</summary>
+  {: .text-delta }
+
 ```json
 {
     "email": {
@@ -125,16 +192,23 @@ If your PBS/Torque systems email notifications have been configured, you may con
     }
 }
 ```
+
+</details>
 ---
 #### `working-directory` (`string`)
 This property is used to denote the current working directory for internal reference purposes.
 
-##### `working-directory` example
+<details>
+  <summary>Example <pre><code>'working-directory'</code></pre> entry</summary>
+  {: .text-delta }
+
 ```json
 {
   "working-directory": "/my/path/"
 }
 ```
+
+</details>
 
 #### `queues`
 The PBS-Torque batch scheduling system manages per-installation generic resources like memory, time, and cpus which are available for request by users. The _{{ site.title }}_ has been designed to take advantage of the granularity provided by these scheduler systems. Each rule in the workflow can be split into a separate job submissions on a cluster. As a result, it is possible to parallelize the analysis and assign cluster resources on a per-rule basis.
@@ -174,7 +248,10 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 </dl>
 
 
-##### `queues` example
+<details>
+  <summary>Example <pre><code>'queues'</code></pre> entry </summary>
+  {: .text-delta }
+
 ```json
 {
   "queues": [
@@ -202,6 +279,8 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 }
 ```
 
+</details>
+
 #### `envmodules`
 The `envmodules` key allows users to provide [Environment Modules]() accessor names. These are used internally by snakemake to execute the required `module load` commands before queued rule execution. `module load` name accessors will be needed for the following command-line tools: 
 - plink-2
@@ -216,7 +295,10 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
 - latex
 
 
-##### `envmodules` example
+<details>
+  <summary>Example <pre><code>'envmodules'</code></pre> entry</summary>
+  {: .text-delta }
+
 ```json
 {
   "envmodules": {
@@ -233,3 +315,5 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
   }
 }
 ```
+
+</details>
