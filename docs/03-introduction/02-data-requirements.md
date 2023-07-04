@@ -12,7 +12,8 @@ parent: Data Requirements
 A summary of all data required in order to use this workflow.
 {: .fs-6 .fw-300 }
 
-<a href="{{ site.baseurl }}/cheat-sheets/quickstart" class="label label-yellow">Cheat-Sheets</a>
+<a href="{{ site.baseurl }}/cheat-sheets/quickstart" style="color: white; text-decoration: none;"><strong><i>Cheat-Sheets</i></strong></a>
+{: .label .label-yellow }
 
 <details markdown="block">
   <summary>
