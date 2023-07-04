@@ -21,7 +21,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 
 <details>
   <summary>
-    Example <code>config.json<code> file
+    Example <code>config.json</code> file
   </summary>
   {: .text-delta }
 
