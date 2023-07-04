@@ -21,7 +21,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 
 <details markdown="block">
   <summary>
-    Example <pre><code>config.json<code></pre> file
+    Example <code>config.json<code> file
   </summary>
   {: .text-delta }
 
@@ -118,9 +118,9 @@ You may configure a list to describe available reference genomes in the form of 
 <details>
   <summary>
   Example
-    <pre>
+    
       <code>"reference_genome"</code>
-    </pre>
+    
     entry
   </summary>
   {: .text-delta }
@@ -181,7 +181,7 @@ If your PBS/Torque systems email notifications have been configured, you may con
 
 
 <details>
-  <summary>Example <pre><code>'email'</code></pre> entry</summary>
+  <summary>Example <code>'email'</code> entry</summary>
   {: .text-delta }
 
 ```json
@@ -199,7 +199,7 @@ If your PBS/Torque systems email notifications have been configured, you may con
 This property is used to denote the current working directory for internal reference purposes.
 
 <details>
-  <summary>Example <pre><code>'working-directory'</code></pre> entry</summary>
+  <summary>Example <code>'working-directory'</code> entry</summary>
   {: .text-delta }
 
 ```json
@@ -249,7 +249,7 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 
 
 <details>
-  <summary>Example <pre><code>'queues'</code></pre> entry </summary>
+  <summary>Example <code>'queues'</code> entry </summary>
   {: .text-delta }
 
 ```json
@@ -296,7 +296,7 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
 
 
 <details>
-  <summary>Example <pre><code>'envmodules'</code></pre> entry</summary>
+  <summary>Example <code>'envmodules'</code> entry</summary>
   {: .text-delta }
 
 ```json
