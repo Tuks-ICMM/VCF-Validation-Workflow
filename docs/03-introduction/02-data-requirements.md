@@ -3,7 +3,7 @@ title: Data Requirements
 layout: page
 permalink: introduction/data-requirements
 nav_order: 2
-parent: Data Requirements
+parent: Introduction
 ---
 
 # Data Requirements
