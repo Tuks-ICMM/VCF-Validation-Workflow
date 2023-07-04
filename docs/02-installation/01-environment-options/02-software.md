@@ -1,9 +1,11 @@
 ---
 title: Software
 layout: page
-permalink: workflow-configuration/software
+permalink: installation/software
 nav_order: 2
-parent: Workflow configuration
+grand_parent: Installation
+parent: Installation
+has_children: false
 ---
 
 # Software
@@ -23,6 +25,9 @@ Tabix
 
 Snakemake
 {: .label }
+
+[Cheat-Sheets](/cheat-sheets/quickstart)
+{: .label .label-blue }
 
 <details markdown="block">
   <summary>

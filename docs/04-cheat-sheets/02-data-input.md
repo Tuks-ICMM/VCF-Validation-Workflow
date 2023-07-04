@@ -1,9 +1,9 @@
 ---
 title: data-input
 layout: page
-parent: Reference Material
+parent: Cheat Sheets
 nav_order: 2
-permalink: reference-material/data-input
+permalink: cheat-sheets/data-input
 ---
 
 # Data Input

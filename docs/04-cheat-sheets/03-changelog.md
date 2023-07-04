@@ -1,9 +1,9 @@
 ---
 layout: page
 title: Changelog
-parent: Reference Material
+parent: Cheat Sheets
 nav_order: 3
-permalink: reference-material/changelog
+permalink: cheat-sheets/changelog
 ---
 
 # Changelog

@@ -1,19 +1,20 @@
 ---
 title: Workflow Design
 layout: page
-permalink: workflow-design/data-requirements
-nav_order: 1
-parent: Workflow Design
+permalink: workflow-design
+nav_order: 3
+has_children: true
 ---
 
-# Data Requirements
+# Introduction
 {: .no_toc }
 
-A summary of all data required in order to use this workflow.
+How the workflow has been designed and what it needs to run
 {: .fs-6 .fw-300 }
 
-Metadata
-{: .label }
+
+[Cheat-Sheets](/cheat-sheets/quickstart)
+{: .label .label-blue }
 
 <details markdown="block">
   <summary>
