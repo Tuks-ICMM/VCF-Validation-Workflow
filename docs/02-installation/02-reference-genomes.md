@@ -132,7 +132,7 @@ If your PBS/Torque systems email notifications have been configured, you may con
 #### `queues`
 The PBS-Torque batch scheduling system manages per-installation generic resources like memory, time, and cpus which are available for request by users. The _{{ site.title }}_ has been designed to take advantage of the granularity provided by these scheduler systems. Each rule in the workflow can be split into a separate job submissions on a cluster. As a result, it is possible to parallelize the analysis and assign cluster resources on a per-rule basis.
 
-To do this, you may use the `queue` key to describing the available PBS-Torque resources and queues youo would like to use. These can be described as follows:
+To do this, you may use the `queue` key to describing the available PBS-Torque resources and queues you would like to use. These can be described as follows:
 
 {: .normal-title }
 > Custom core and node selections
