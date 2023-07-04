@@ -1,7 +1,7 @@
 ---
-title: Workflow Overview
+title: Introduction
 layout: page
-permalink: workflow-design/analysis
+permalink: introduction/analysis
 nav_order: 1
 parent: Introduction
 ---
@@ -12,9 +12,8 @@ parent: Introduction
 A breakdown of the analyses performed by this workflow.
 {: .fs-6 .fw-300 }
 
-<a href="{{ site.baseurl }}/cheat-sheets/quickstart">
-  <p class="label label-yellow">Cheat-Sheets</p>
-</a>
+<a href="{{ site.baseurl }}/cheat-sheets/quickstart" style="color: #44434d; text-decoration: none;"><strong><i>Cheat-Sheets</i></strong></a>
+{: .label .label-yellow }
 
 <details markdown="block">
   <summary>
