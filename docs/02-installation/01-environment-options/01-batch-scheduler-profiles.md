@@ -20,4 +20,5 @@ A summary of the available profiles and support when working in a many-user/queu
 PBS-Torque
 {: .label }
 
-<a href="{{ site.baseurl }}/cheat-sheets/quickstart" class="label label-yellow">Cheat-Sheets</a>
+<a href="{{ site.baseurl }}/cheat-sheets/quickstart">Cheat-Sheets</a>
+{: .label .label-yellow }
