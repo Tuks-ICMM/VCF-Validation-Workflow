@@ -25,6 +25,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
   </summary>
 
   <div markdown="1">
+
     ```json
     {
         "reference-genomes": [
@@ -81,6 +82,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
         }
     }
     ```
+    
   </div>
 
 </details>
