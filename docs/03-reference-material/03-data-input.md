@@ -1,9 +1,9 @@
 ---
 title: data-input
 layout: page
-permalink: reference-material/data-input
-nav_order: 1
 parent: Reference Material
+nav_order: 1
+permalink: reference-material/data-input
 ---
 
 # Data Input

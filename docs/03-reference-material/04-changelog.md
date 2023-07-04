@@ -1,8 +1,9 @@
 ---
 layout: page
 title: Changelog
-permalink: changelog
+parent: Reference Material
 nav_order: 4
+permalink: reference-material/changelog
 ---
 
 # Changelog

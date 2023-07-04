@@ -1,9 +1,9 @@
 ---
 title: Software
 layout: page
-permalink: environment/software
+permalink: workflow-configuration/software
 nav_order: 1
-parent: Workflow Configuration
+parent: Workflow configuration
 ---
 
 # Software
