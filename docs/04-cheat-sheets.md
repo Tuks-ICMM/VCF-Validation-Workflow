@@ -15,14 +15,3 @@ How the workflow has been designed and what it needs to run
 
 Cheat-Sheets
 {: .label }
-
-<details markdown="block">
-  <summary>
-    Table of contents
-  </summary>
-  {: .text-delta }
-1. TOC
-{:toc}
-</details>
-
----
