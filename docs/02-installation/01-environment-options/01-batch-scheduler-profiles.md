@@ -22,5 +22,3 @@ PBS-Torque
 
 [Cheat-Sheets](/cheat-sheets/quickstart)
 {: .label .label-yellow }
-
----
