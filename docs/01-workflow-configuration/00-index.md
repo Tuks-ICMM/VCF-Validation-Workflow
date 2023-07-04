@@ -22,7 +22,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 
 {::options parse_block_html="true" /}
 
-<details><summary class="text-delta">Example <code>config.json</code> file</summary>
+<details><summary class="text-delta" markdown="span">Example <code>config.json</code> file</summary>
 ```json
 {
     "reference-genomes": [
@@ -115,7 +115,7 @@ You may configure a list to describe available reference genomes in the form of 
 
 {::options parse_block_html="true" /}
 
-<details><summary class="text-delta">Example <code>"reference_genome"</code> entry</summary>
+<details><summary class="text-delta" markdown="span">Example <code>"reference_genome"</code> entry</summary>
 ```json
 {
   "reference_genome": [
@@ -173,7 +173,7 @@ If your PBS/Torque systems email notifications have been configured, you may con
 
 {::options parse_block_html="true" /}
 
-<details><summary class="text-delta">Example <code>'email'</code> entry</summary>
+<details><summary class="text-delta" markdown="span">Example <code>'email'</code> entry</summary>
 ```json
 {
     "email": {
@@ -192,7 +192,7 @@ This property is used to denote the current working directory for internal refer
 
 {::options parse_block_html="true" /}
 
-<details><summary class="text-delta">Example <code>'working-directory'</code> entry</summary>
+<details><summary class="text-delta" markdown="span">Example <code>'working-directory'</code> entry</summary>
 ```json
 {
   "working-directory": "/my/path/"
@@ -242,7 +242,7 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 
 {::options parse_block_html="true" /}
 
-<details><summary class="text-delta">Example <code>'queues'</code> entry </summary>
+<details><summary class="text-delta" markdown="span">Example <code>'queues'</code> entry </summary>
 ```json
 {
   "queues": [
@@ -289,7 +289,7 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
 
 {::options parse_block_html="true" /}
 
-<details><summary class="text-delta">Example <code>'envmodules'</code> entry</summary>
+<details><summary class="text-delta" markdown="span">Example <code>'envmodules'</code> entry</summary>
 ```json
 {
   "envmodules": {
