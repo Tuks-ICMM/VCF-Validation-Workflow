@@ -9,7 +9,7 @@ has_children: true
 # {{ page.title }}
 {: .no_toc }
 
-How the workflow has been designed and what it needs to run
+Quick reference code snippets
 {: .fs-6 .fw-300 }
 
 

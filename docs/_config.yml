@@ -62,8 +62,8 @@ aux_links_new_tab: true
 
 excerpt_separator: "<!--end sample-->"
 
-# ga_tracking: G-5BE9TP7NV4
-# ga_tracking_anonymize_ip: true
+ga_tracking: G-FVJFZJ7LNW
+ga_tracking_anonymize_ip: true
 
 callouts:
   warning:

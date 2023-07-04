@@ -9,7 +9,7 @@ has_children: true
 # Introduction
 {: .no_toc }
 
-How the workflow has been designed and what it needs to run
+Workflow design and input requirements
 {: .fs-6 .fw-300 }
 
 

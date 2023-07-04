@@ -1,7 +1,7 @@
 ---
 title: Data Requirements
 layout: page
-permalink: workflow-design/data-requirements
+permalink: introduction/data-requirements
 nav_order: 2
 parent: Data Requirements
 ---

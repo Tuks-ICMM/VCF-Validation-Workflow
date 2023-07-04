@@ -1,7 +1,7 @@
 ---
 title: Workflow Overview
 layout: page
-permalink: workflow-design/analysis
+permalink: introduction/workflow-overview
 nav_order: 1
 parent: Introduction
 ---

@@ -9,7 +9,7 @@ has_children: true
 # How to configure the workflow
 {: .no_toc }
 
-How to set up infrastructure-related settings and provide standard analysis-agnostic data files like reference genomes, etc.
+Infrastructure-related settings, standard analysis-agnostic data files, etc
 {: .fs-6 .fw-300 }
 
 Reference Genome Configuration
@@ -20,4 +20,4 @@ Reference Genome Configuration
 
 ---
 
-The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level JSON `object` to record the configuration options.
+The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level JSON `object` to record the configuration options. These have been broken down and are accessible via the table of contents below.
