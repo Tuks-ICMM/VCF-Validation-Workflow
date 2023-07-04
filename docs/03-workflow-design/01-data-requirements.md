@@ -1,19 +1,19 @@
 ---
-title: Analysis
+title: Workflow Design
 layout: page
-permalink: workflow-design/analysis
-nav_order: 3
+permalink: workflow-design/data-requirements
+nav_order: 1
 parent: Workflow Design
 ---
 
-# Analysis
+# Data Requirements
 {: .no_toc }
 
-A breakdown of the analyses performed by this workflow.
+A summary of all data required in order to use this workflow.
 {: .fs-6 .fw-300 }
 
-<!-- Analysis
-{: .label } -->
+Metadata
+{: .label }
 
 <details markdown="block">
   <summary>

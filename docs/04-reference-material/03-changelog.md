@@ -2,7 +2,7 @@
 layout: page
 title: Changelog
 parent: Reference Material
-nav_order: 4
+nav_order: 3
 permalink: reference-material/changelog
 ---
 

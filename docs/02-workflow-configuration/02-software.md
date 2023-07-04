@@ -2,7 +2,7 @@
 title: Software
 layout: page
 permalink: workflow-configuration/software
-nav_order: 1
+nav_order: 2
 parent: Workflow configuration
 ---
 
