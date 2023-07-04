@@ -33,8 +33,14 @@ mermaid:
   # Pick an available version from https://cdn.jsdelivr.net/npm/mermaid/
   version: "9.3.0"
 
-# For copy button on code
+# For copy button on code and syntax highlighting css classes with Rouge
 enable_copy_code_button: true
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+      # Use existing pygments syntax highlighting css
+      css_class: 'highlight'
 
 # Build settings
 remote_theme: just-the-docs/just-the-docs@v0.5.2
