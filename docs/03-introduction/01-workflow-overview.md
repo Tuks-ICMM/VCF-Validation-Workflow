@@ -30,7 +30,9 @@ The {{ site.title }} design follows the following order-of-events graph:
 
 ```mermaid
 timeline
-  section VCF Validation Workflow
-      PREPARE : Remove INFO column : Normalize INDELs : Sort Variants: Filter QUAL scores: Annotate
-      LIFTOVER : Liftover
+    title Workflow Design
+
+    section VCF Validation Workflow
+        PREPARE : Remove INFO column : Normalize INDELs : Sort Variants: Filter QUAL scores: Annotate
+        LIFTOVER : Liftover
 ```
