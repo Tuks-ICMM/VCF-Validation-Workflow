@@ -20,13 +20,12 @@ Reference Genome Configuration
 The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level `object` to record the configuration options. A bare-bones template is provided below:
 
 
+{::options parse_block_html="true" /}
 
 <details>
   <summary class="text-delta">
     Example <code>config.json</code> file
   </summary>
-
-{::options parse_block_html="true" /}
 
 ```json
 {
@@ -85,10 +84,9 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 }
 ```
 
-{::options parse_block_html="false" /}
-
 </details>
 
+{::options parse_block_html="false" /}
 
 ## Reference Genomes
 You may configure a list to describe available reference genomes in the form of an `array` of `objects`. Each object requires the following information:
@@ -120,12 +118,13 @@ You may configure a list to describe available reference genomes in the form of 
 {: .normal }
 > We use the built-in python function `os.path` to generate platform-specific paths. Should you wish to provide a path from root, you may do so by setting the first element in the array to the drive reference for your OS. \***\*Linux E.g. ["/", ...]\*\***
 
+{::options parse_block_html="true" /}
+
 <details>
   <summary class="text-delta">
     Example <code>"reference_genome"</code> entry
   </summary>
 
-{::options parse_block_html="true" /}
 
 ```json
 {
@@ -142,9 +141,9 @@ You may configure a list to describe available reference genomes in the form of 
 }
 ```
 
-{::options parse_block_html="false" /}
-
 </details>
+
+{::options parse_block_html="false" /}
 
 {: .normal-title }
 > Performance Tips
@@ -183,13 +182,13 @@ If your PBS/Torque systems email notifications have been configured, you may con
   <dd>An array of mail-options which indicates when you should receive a notification email for this pipeline execution. <code>a</code> indicates mail should be sent when job is aborted, <code>b</code> indicates mail should be sent when job begins and <code>e</code> indicates mail should be sent when job terminates.</dd>
 </dl>
 
+{::options parse_block_html="true" /}
 
 <details>
   <summary class="text-delta">
     Example <code>'email'</code> entry
   </summary>
 
-{::options parse_block_html="true" /}
 
 ```json
 {
@@ -200,19 +199,21 @@ If your PBS/Torque systems email notifications have been configured, you may con
 }
 ```
 
+</details>
+
 {::options parse_block_html="false" /}
 
-</details>
 ---
 #### `working-directory` (`string`)
 This property is used to denote the current working directory for internal reference purposes.
+
+{::options parse_block_html="true" /}
 
 <details>
   <summary class="text-delta">
     Example <code>'working-directory'</code> entry
   </summary>
 
-{::options parse_block_html="true" /}
 
 ```json
 {
@@ -220,9 +221,9 @@ This property is used to denote the current working directory for internal refer
 }
 ```
 
-{::options parse_block_html="false" /}
-
 </details>
+
+{::options parse_block_html="false" /}
 
 #### `queues`
 The PBS-Torque batch scheduling system manages per-installation generic resources like memory, time, and cpus which are available for request by users. The _{{ site.title }}_ has been designed to take advantage of the granularity provided by these scheduler systems. Each rule in the workflow can be split into a separate job submissions on a cluster. As a result, it is possible to parallelize the analysis and assign cluster resources on a per-rule basis.
@@ -262,12 +263,12 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 </dl>
 
 
+{::options parse_block_html="true" /}
+
 <details>
   <summary class="text-delta">
     Example <code>'queues'</code> entry 
   </summary>
-
-{::options parse_block_html="true" /}
 
 ```json
 {
@@ -296,9 +297,9 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 }
 ```
 
-{::options parse_block_html="false" /}
-
 </details>
+
+{::options parse_block_html="false" /}
 
 #### `envmodules`
 The `envmodules` key allows users to provide [Environment Modules]() accessor names. These are used internally by snakemake to execute the required `module load` commands before queued rule execution. `module load` name accessors will be needed for the following command-line tools: 
@@ -314,12 +315,12 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
 - latex
 
 
+{::options parse_block_html="true" /}
+
 <details>
   <summary class="text-delta">
     Example <code>'envmodules'</code> entry
   </summary>
-
-{::options parse_block_html="true" /}
 
 ```json
 {
@@ -338,6 +339,6 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
 }
 ```
 
-{::options parse_block_html="false" /}
-
 </details>
+
+{::options parse_block_html="false" /}
