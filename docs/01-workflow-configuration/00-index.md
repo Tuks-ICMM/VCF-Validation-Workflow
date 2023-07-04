@@ -81,6 +81,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
       }
   }
   ```
+
 </details>
 
 
@@ -134,6 +135,7 @@ You may configure a list to describe available reference genomes in the form of 
     ]
   }
   ```
+
 </details>
 
 {: .normal-title }
@@ -188,6 +190,7 @@ If your PBS/Torque systems email notifications have been configured, you may con
       }
   }
   ```
+
 </details>
 ---
 #### `working-directory` (`string`)
@@ -276,6 +279,7 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
     ]
   }
   ```
+
 </details>
 
 #### `envmodules`
@@ -314,4 +318,5 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
     }
   }
   ```
+
 </details>
