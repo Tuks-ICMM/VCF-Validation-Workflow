@@ -19,69 +19,68 @@ Reference Genome Configuration
 
 The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level `object` to record the configuration options. A bare-bones template is provided below:
 
-<details markdown="block">
+<details>
   <summary>
     Example <code>config.json<code> file
   </summary>
   {: .text-delta }
 
-```json
-{
-    "reference-genomes": [
-        {
-            "version": "GRCh38",
-            "file_path": [
-                "/",
-                "path",
-                "to",
-                "my",
-                "copy",
-                "of",
-                "GRCh38.fa.gz"
-            ]
-        }
-    ],
-    "environment": {
-        "email": {
-            "address": "jane.doe@tuks.co.za",
-            "conditions": [
-                "o",
-                "e"
-            ]
-        },
-        "working-directory": "/path/to/my/working/directory/",
-        "queues": [
-            {
-                "queue": "long",
-                "walltime": "900:00:00",
-                "memory": "128G",
-                "cores": "10",
-                "nodes": "1",
-                "rules": [
-                    "all",
-                    "VALIDATE",
-                    "LIFTOVER",
-                    "COLLATE",
-                    "ALL_COLLATE",
-                    "ANNOTATE",
-                    "ADMIXTURE",
-                    "TRIM_AND_NAME",
-                    "FILTER",
-                    "TRANSPILE_CLUSTERS",
-                    "PLINK"
-                ]
-            }
-        ],
-        "envmodules": {
-            "bcftools": "bcftools-1.7",
-            "piccard": "picard-2.17.11",
-            "tabix": "samtools-1.7",
-            "latex": "latex"
-        }
-    }
-}
-```
-
+  ```json
+  {
+      "reference-genomes": [
+          {
+              "version": "GRCh38",
+              "file_path": [
+                  "/",
+                  "path",
+                  "to",
+                  "my",
+                  "copy",
+                  "of",
+                  "GRCh38.fa.gz"
+              ]
+          }
+      ],
+      "environment": {
+          "email": {
+              "address": "jane.doe@tuks.co.za",
+              "conditions": [
+                  "o",
+                  "e"
+              ]
+          },
+          "working-directory": "/path/to/my/working/directory/",
+          "queues": [
+              {
+                  "queue": "long",
+                  "walltime": "900:00:00",
+                  "memory": "128G",
+                  "cores": "10",
+                  "nodes": "1",
+                  "rules": [
+                      "all",
+                      "VALIDATE",
+                      "LIFTOVER",
+                      "COLLATE",
+                      "ALL_COLLATE",
+                      "ANNOTATE",
+                      "ADMIXTURE",
+                      "TRIM_AND_NAME",
+                      "FILTER",
+                      "TRANSPILE_CLUSTERS",
+                      "PLINK"
+                  ]
+              }
+          ],
+          "envmodules": {
+              "bcftools": "bcftools-1.7",
+              "piccard": "picard-2.17.11",
+              "tabix": "samtools-1.7",
+              "latex": "latex"
+          }
+      }
+  }
+  ```
 </details>
 
 
@@ -117,29 +116,24 @@ You may configure a list to describe available reference genomes in the form of 
 
 <details>
   <summary>
-  Example
-    
-      <code>"reference_genome"</code>
-    
-    entry
+    Example <code>"reference_genome"</code> entry
   </summary>
   {: .text-delta }
 
-```json
-{
-  "reference_genome": [
-    {
-      "version": "GRCh38",
-      "file_path": ["/", "reference", "human", "GRCh38.fa.gz"]
-    },
-    {
-      "version": "GRCh37",
-      "file_path": ["/", "reference", "human", "GRCh37.fa.gz"]
-    }
-  ]
-}
-```
-
+  ```json
+  {
+    "reference_genome": [
+      {
+        "version": "GRCh38",
+        "file_path": ["/", "reference", "human", "GRCh38.fa.gz"]
+      },
+      {
+        "version": "GRCh37",
+        "file_path": ["/", "reference", "human", "GRCh37.fa.gz"]
+      }
+    ]
+  }
+  ```
 </details>
 
 {: .normal-title }
@@ -181,33 +175,35 @@ If your PBS/Torque systems email notifications have been configured, you may con
 
 
 <details>
-  <summary>Example <code>'email'</code> entry</summary>
+  <summary>
+    Example <code>'email'</code> entry
+  </summary>
   {: .text-delta }
 
-```json
-{
-    "email": {
-        "email": "jane.doe@university.com",
-        "conditions": ["o", "e"],
-    }
-}
-```
-
+  ```json
+  {
+      "email": {
+          "email": "jane.doe@university.com",
+          "conditions": ["o", "e"],
+      }
+  }
+  ```
 </details>
 ---
 #### `working-directory` (`string`)
 This property is used to denote the current working directory for internal reference purposes.
 
 <details>
-  <summary>Example <code>'working-directory'</code> entry</summary>
+  <summary>
+    Example <code>'working-directory'</code> entry
+  </summary>
   {: .text-delta }
 
-```json
-{
-  "working-directory": "/my/path/"
-}
-```
-
+  ```json
+  {
+    "working-directory": "/my/path/"
+  }
+  ```
 </details>
 
 #### `queues`
@@ -249,36 +245,37 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 
 
 <details>
-  <summary>Example <code>'queues'</code> entry </summary>
+  <summary>
+    Example <code>'queues'</code> entry 
+  </summary>
   {: .text-delta }
 
-```json
-{
-  "queues": [
-    {
-      "queue": "long",
-      "walltime": "900:00:00",
-      "memory": "128G",
-      "cores": "10",
-      "nodes": "1",
-      "rules": [
-        "all",
-        "VALIDATE",
-        "LIFTOVER",
-        "COLLATE",
-        "ALL_COLLATE",
-        "ANNOTATE",
-        "ADMIXTURE",
-        "TRIM_AND_NAME",
-        "FILTER",
-        "TRANSPILE_CLUSTERS",
-        "PLINK"
-      ]
-    }
-  ]
-}
-```
-
+  ```json
+  {
+    "queues": [
+      {
+        "queue": "long",
+        "walltime": "900:00:00",
+        "memory": "128G",
+        "cores": "10",
+        "nodes": "1",
+        "rules": [
+          "all",
+          "VALIDATE",
+          "LIFTOVER",
+          "COLLATE",
+          "ALL_COLLATE",
+          "ANNOTATE",
+          "ADMIXTURE",
+          "TRIM_AND_NAME",
+          "FILTER",
+          "TRANSPILE_CLUSTERS",
+          "PLINK"
+        ]
+      }
+    ]
+  }
+  ```
 </details>
 
 #### `envmodules`
@@ -296,24 +293,25 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
 
 
 <details>
-  <summary>Example <code>'envmodules'</code> entry</summary>
+  <summary>
+    Example <code>'envmodules'</code> entry
+  </summary>
   {: .text-delta }
 
-```json
-{
-  "envmodules": {
-    "plink-2": "plink-2",
-    "plink-1.9": "plink-1.9",
-    "bcftools": "bcftools",
-    "samtools": "samtools",
-    "piccard": "piccard",
-    "structure": "structure",
-    "admixture-1.3": "admixture-1.3",
-    "python-3": "python-3",
-    "r": "r",
-    "latex": "latex"
+  ```json
+  {
+    "envmodules": {
+      "plink-2": "plink-2",
+      "plink-1.9": "plink-1.9",
+      "bcftools": "bcftools",
+      "samtools": "samtools",
+      "piccard": "piccard",
+      "structure": "structure",
+      "admixture-1.3": "admixture-1.3",
+      "python-3": "python-3",
+      "r": "r",
+      "latex": "latex"
+    }
   }
-}
-```
-
+  ```
 </details>
