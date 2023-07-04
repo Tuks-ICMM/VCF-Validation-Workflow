@@ -1,5 +1,5 @@
 ---
-title: Software
+title: Environments
 layout: page
 permalink: workflow-configuration/environment
 nav_order: 1

@@ -1,5 +1,5 @@
 ---
-title: Software
+title: PBS Torque
 layout: page
 permalink: workflow-configuration/environment/pbs-torque
 nav_order: 2
