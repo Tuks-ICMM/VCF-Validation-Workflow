@@ -20,67 +20,68 @@ Reference Genome Configuration
 The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level `object` to record the configuration options. A bare-bones template is provided below:
 
 <details>
-  <summary>
+  <summary class="text-delta">
     Example <code>config.json</code> file
   </summary>
-  {: .text-delta }
 
-  ```json
-  {
-      "reference-genomes": [
-          {
-              "version": "GRCh38",
-              "file_path": [
-                  "/",
-                  "path",
-                  "to",
-                  "my",
-                  "copy",
-                  "of",
-                  "GRCh38.fa.gz"
-              ]
-          }
-      ],
-      "environment": {
-          "email": {
-              "address": "jane.doe@tuks.co.za",
-              "conditions": [
-                  "o",
-                  "e"
-              ]
-          },
-          "working-directory": "/path/to/my/working/directory/",
-          "queues": [
+  <pre>
+    <code>
+      {
+          "reference-genomes": [
               {
-                  "queue": "long",
-                  "walltime": "900:00:00",
-                  "memory": "128G",
-                  "cores": "10",
-                  "nodes": "1",
-                  "rules": [
-                      "all",
-                      "VALIDATE",
-                      "LIFTOVER",
-                      "COLLATE",
-                      "ALL_COLLATE",
-                      "ANNOTATE",
-                      "ADMIXTURE",
-                      "TRIM_AND_NAME",
-                      "FILTER",
-                      "TRANSPILE_CLUSTERS",
-                      "PLINK"
+                  "version": "GRCh38",
+                  "file_path": [
+                      "/",
+                      "path",
+                      "to",
+                      "my",
+                      "copy",
+                      "of",
+                      "GRCh38.fa.gz"
                   ]
               }
           ],
-          "envmodules": {
-              "bcftools": "bcftools-1.7",
-              "piccard": "picard-2.17.11",
-              "tabix": "samtools-1.7",
-              "latex": "latex"
+          "environment": {
+              "email": {
+                  "address": "jane.doe@tuks.co.za",
+                  "conditions": [
+                      "o",
+                      "e"
+                  ]
+              },
+              "working-directory": "/path/to/my/working/directory/",
+              "queues": [
+                  {
+                      "queue": "long",
+                      "walltime": "900:00:00",
+                      "memory": "128G",
+                      "cores": "10",
+                      "nodes": "1",
+                      "rules": [
+                          "all",
+                          "VALIDATE",
+                          "LIFTOVER",
+                          "COLLATE",
+                          "ALL_COLLATE",
+                          "ANNOTATE",
+                          "ADMIXTURE",
+                          "TRIM_AND_NAME",
+                          "FILTER",
+                          "TRANSPILE_CLUSTERS",
+                          "PLINK"
+                      ]
+                  }
+              ],
+              "envmodules": {
+                  "bcftools": "bcftools-1.7",
+                  "piccard": "picard-2.17.11",
+                  "tabix": "samtools-1.7",
+                  "latex": "latex"
+              }
           }
       }
-  }
-  ```
+    </code>
+  </pre>
 
 </details>
 
@@ -116,25 +117,26 @@ You may configure a list to describe available reference genomes in the form of 
 > We use the built-in python function `os.path` to generate platform-specific paths. Should you wish to provide a path from root, you may do so by setting the first element in the array to the drive reference for your OS. \***\*Linux E.g. ["/", ...]\*\***
 
 <details>
-  <summary>
+  <summary class="text-delta">
     Example <code>"reference_genome"</code> entry
   </summary>
-  {: .text-delta }
 
-  ```json
-  {
-    "reference_genome": [
+  <pre>
+    <code>
       {
-        "version": "GRCh38",
-        "file_path": ["/", "reference", "human", "GRCh38.fa.gz"]
-      },
-      {
-        "version": "GRCh37",
-        "file_path": ["/", "reference", "human", "GRCh37.fa.gz"]
+        "reference_genome": [
+          {
+            "version": "GRCh38",
+            "file_path": ["/", "reference", "human", "GRCh38.fa.gz"]
+          },
+          {
+            "version": "GRCh37",
+            "file_path": ["/", "reference", "human", "GRCh37.fa.gz"]
+          }
+        ]
       }
-    ]
-  }
-  ```
+    </code>
+  </pre>
 
 </details>
 
@@ -177,19 +179,20 @@ If your PBS/Torque systems email notifications have been configured, you may con
 
 
 <details>
-  <summary>
+  <summary class="text-delta">
     Example <code>'email'</code> entry
   </summary>
-  {: .text-delta }
 
-  ```json
-  {
-      "email": {
-          "email": "jane.doe@university.com",
-          "conditions": ["o", "e"],
+  <pre>
+    <code>
+      {
+          "email": {
+              "email": "jane.doe@university.com",
+              "conditions": ["o", "e"],
+          }
       }
-  }
-  ```
+    </code>
+  </pre>
 
 </details>
 ---
@@ -197,16 +200,17 @@ If your PBS/Torque systems email notifications have been configured, you may con
 This property is used to denote the current working directory for internal reference purposes.
 
 <details>
-  <summary>
+  <summary class="text-delta">
     Example <code>'working-directory'</code> entry
   </summary>
-  {: .text-delta }
 
-  ```json
-  {
-    "working-directory": "/my/path/"
-  }
-  ```
+  <pre>
+    <code>
+      {
+        "working-directory": "/my/path/"
+      }
+    </code>
+  </pre>
 </details>
 
 #### `queues`
@@ -248,37 +252,38 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
 
 
 <details>
-  <summary>
+  <summary class="text-delta">
     Example <code>'queues'</code> entry 
   </summary>
-  {: .text-delta }
 
-  ```json
-  {
-    "queues": [
+  <pre>
+    <code>
       {
-        "queue": "long",
-        "walltime": "900:00:00",
-        "memory": "128G",
-        "cores": "10",
-        "nodes": "1",
-        "rules": [
-          "all",
-          "VALIDATE",
-          "LIFTOVER",
-          "COLLATE",
-          "ALL_COLLATE",
-          "ANNOTATE",
-          "ADMIXTURE",
-          "TRIM_AND_NAME",
-          "FILTER",
-          "TRANSPILE_CLUSTERS",
-          "PLINK"
+        "queues": [
+          {
+            "queue": "long",
+            "walltime": "900:00:00",
+            "memory": "128G",
+            "cores": "10",
+            "nodes": "1",
+            "rules": [
+              "all",
+              "VALIDATE",
+              "LIFTOVER",
+              "COLLATE",
+              "ALL_COLLATE",
+              "ANNOTATE",
+              "ADMIXTURE",
+              "TRIM_AND_NAME",
+              "FILTER",
+              "TRANSPILE_CLUSTERS",
+              "PLINK"
+            ]
+          }
         ]
       }
-    ]
-  }
-  ```
+    </code>
+  </pre>
 
 </details>
 
@@ -297,26 +302,27 @@ The `envmodules` key allows users to provide [Environment Modules]() accessor na
 
 
 <details>
-  <summary>
+  <summary class="text-delta">
     Example <code>'envmodules'</code> entry
   </summary>
-  {: .text-delta }
 
-  ```json
-  {
-    "envmodules": {
-      "plink-2": "plink-2",
-      "plink-1.9": "plink-1.9",
-      "bcftools": "bcftools",
-      "samtools": "samtools",
-      "piccard": "piccard",
-      "structure": "structure",
-      "admixture-1.3": "admixture-1.3",
-      "python-3": "python-3",
-      "r": "r",
-      "latex": "latex"
-    }
-  }
-  ```
+  <pre>
+    <code>
+      {
+        "envmodules": {
+          "plink-2": "plink-2",
+          "plink-1.9": "plink-1.9",
+          "bcftools": "bcftools",
+          "samtools": "samtools",
+          "piccard": "piccard",
+          "structure": "structure",
+          "admixture-1.3": "admixture-1.3",
+          "python-3": "python-3",
+          "r": "r",
+          "latex": "latex"
+        }
+      }
+    </code>
+  </pre>
 
 </details>
