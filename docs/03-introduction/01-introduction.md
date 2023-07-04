@@ -12,8 +12,7 @@ parent: Introduction
 A breakdown of the analyses performed by this workflow.
 {: .fs-6 .fw-300 }
 
-[Cheat-Sheets](/cheat-sheets/quickstart)
-{: .label .label-yellow }
+<a href="{{ site.baseurl }}/cheat-sheets/quickstart"><p class="label label-yellow">Cheat-Sheets</p></a>
 
 <details markdown="block">
   <summary>

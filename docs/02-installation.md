@@ -15,8 +15,7 @@ How to set up infrastructure-related settings and provide standard analysis-agno
 Reference Genome Configuration
 {: .label }
 
-[Cheat-Sheets](/cheat-sheets/quickstart)
-{: .label .label-yellow }
+<a href="{{ site.baseurl }}/cheat-sheets/quickstart"><p class="label label-yellow">Cheat-Sheets</p></a>
 
 ---
 

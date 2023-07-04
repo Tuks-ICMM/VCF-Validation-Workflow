@@ -13,8 +13,7 @@ has_children: false
 How to declare a reference-genome for use
 {: .fs-6 .fw-300 }
 
-[Cheat-Sheets](/cheat-sheets/quickstart)
-{: .label .label-yellow }
+<a href="{{ site.baseurl }}/cheat-sheets/quickstart"><p class="label label-yellow">Cheat-Sheets</p></a>
 
 <details markdown="block">
   <summary>
