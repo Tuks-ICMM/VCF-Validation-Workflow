@@ -13,5 +13,5 @@ How the workflow has been designed and what it needs to run
 {: .fs-6 .fw-300 }
 
 
-<a href="{{ site.baseurl }}/cheat-sheets/quickstart" style="color: #44434d; text-decoration: none;"><strong><i>Cheat-Sheets</i></strong></a>
+<a href="{{ site.baseurl }}/cheat-sheets/quickstart" style="color: #44434d; text-decoration: none;" target="_blank"><strong><i>Cheat-Sheets</i></strong></a>
 {: .label .label-yellow }

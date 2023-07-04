@@ -26,7 +26,7 @@ Tabix
 Snakemake
 {: .label }
 
-<a href="{{ site.baseurl }}/cheat-sheets/quickstart" style="color: #44434d; text-decoration: none;"><strong><i>Cheat-Sheets</i></strong></a>
+<a href="{{ site.baseurl }}/cheat-sheets/quickstart" style="color: #44434d; text-decoration: none;" target="_blank"><strong><i>Cheat-Sheets</i></strong></a>
 {: .label .label-yellow }
 
 <details markdown="block">
