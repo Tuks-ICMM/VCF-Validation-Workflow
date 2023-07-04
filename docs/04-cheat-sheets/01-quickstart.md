@@ -83,18 +83,15 @@ Templates
 
 {::options parse_block_html="false" /}
 
-
 {::options parse_block_html="true" /}
 
-<details><summary markdown="span"><code>"reference_genome"</code></summary>
+<details><summary markdown="span"><code>email</code> value</summary>
 ```json
 {
-    "version": "GRCh38",
-    "file_path": [
-        "/",
-        "path",
-        "here",
-        "GRCh38.fa.gz"
+    "address": "your_email",
+    "conditions": [
+        "o",
+        "e"
     ]
 }
 ```
@@ -104,13 +101,31 @@ Templates
 
 {::options parse_block_html="true" /}
 
-<details><summary markdown="span"><code>"email"</code> value</summary>
+<details><summary markdown="span"><code>envmodules</code> value</summary>
 ```json
 {
-    "address": "your_email",
-    "conditions": [
-        "o",
-        "e"
+    "bcftools": "bcftools-1.7",
+    "piccard": "picard-2.17.11",
+    "tabix": "samtools-1.7",
+    "latex": "latex"
+}
+```
+</details>
+
+{::options parse_block_html="false" /}
+
+
+{::options parse_block_html="true" /}
+
+<details><summary markdown="span"><code>reference_genome</code> list item</summary>
+```json
+{
+    "version": "GRCh38",
+    "file_path": [
+        "/",
+        "path",
+        "here",
+        "GRCh38.fa.gz"
     ]
 }
 ```
@@ -141,21 +156,6 @@ Templates
         "TRANSPILE_CLUSTERS",
         "PLINK"
     ]
-}
-```
-</details>
-
-{::options parse_block_html="false" /}
-
-{::options parse_block_html="true" /}
-
-<details><summary markdown="span"><code>envmodules</code> value</summary>
-```json
-{
-    "bcftools": "bcftools-1.7",
-    "piccard": "picard-2.17.11",
-    "tabix": "samtools-1.7",
-    "latex": "latex"
 }
 ```
 </details>
