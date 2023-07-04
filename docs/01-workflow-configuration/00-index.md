@@ -24,64 +24,64 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
     Example <code>config.json</code> file
   </summary>
 
-  <pre>
-    <code class="json">
-      {
-          "reference-genomes": [
-              {
-                  "version": "GRCh38",
-                  "file_path": [
-                      "/",
-                      "path",
-                      "to",
-                      "my",
-                      "copy",
-                      "of",
-                      "GRCh38.fa.gz"
-                  ]
-              }
-          ],
-          "environment": {
-              "email": {
-                  "address": "jane.doe@tuks.co.za",
-                  "conditions": [
-                      "o",
-                      "e"
-                  ]
-              },
-              "working-directory": "/path/to/my/working/directory/",
-              "queues": [
-                  {
-                      "queue": "long",
-                      "walltime": "900:00:00",
-                      "memory": "128G",
-                      "cores": "10",
-                      "nodes": "1",
-                      "rules": [
-                          "all",
-                          "VALIDATE",
-                          "LIFTOVER",
-                          "COLLATE",
-                          "ALL_COLLATE",
-                          "ANNOTATE",
-                          "ADMIXTURE",
-                          "TRIM_AND_NAME",
-                          "FILTER",
-                          "TRANSPILE_CLUSTERS",
-                          "PLINK"
-                      ]
-                  }
-              ],
-              "envmodules": {
-                  "bcftools": "bcftools-1.7",
-                  "piccard": "picard-2.17.11",
-                  "tabix": "samtools-1.7",
-                  "latex": "latex"
-              }
-          }
-      }
-    </code>
-  </pre>
+  <div markdown="1">
+    ```json
+    {
+        "reference-genomes": [
+            {
+                "version": "GRCh38",
+                "file_path": [
+                    "/",
+                    "path",
+                    "to",
+                    "my",
+                    "copy",
+                    "of",
+                    "GRCh38.fa.gz"
+                ]
+            }
+        ],
+        "environment": {
+            "email": {
+                "address": "jane.doe@tuks.co.za",
+                "conditions": [
+                    "o",
+                    "e"
+                ]
+            },
+            "working-directory": "/path/to/my/working/directory/",
+            "queues": [
+                {
+                    "queue": "long",
+                    "walltime": "900:00:00",
+                    "memory": "128G",
+                    "cores": "10",
+                    "nodes": "1",
+                    "rules": [
+                        "all",
+                        "VALIDATE",
+                        "LIFTOVER",
+                        "COLLATE",
+                        "ALL_COLLATE",
+                        "ANNOTATE",
+                        "ADMIXTURE",
+                        "TRIM_AND_NAME",
+                        "FILTER",
+                        "TRANSPILE_CLUSTERS",
+                        "PLINK"
+                    ]
+                }
+            ],
+            "envmodules": {
+                "bcftools": "bcftools-1.7",
+                "piccard": "picard-2.17.11",
+                "tabix": "samtools-1.7",
+                "latex": "latex"
+            }
+        }
+    }
+    ```
+  </div>
 
 </details>
 
