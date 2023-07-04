@@ -23,7 +23,7 @@ The <i>{{site.title}}</i> uses a global configuration located in `config/config.
 
 <details>
   <summary class="text-delta">
-    Example <code>config.json<code> file
+    Example <code>config.json</code> file
   </summary>
 
 {::options parse_block_html="true" /}
