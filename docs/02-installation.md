@@ -16,6 +16,8 @@ Reference Genome Configuration
 {: .label }
 
 <a href="{{ site.baseurl }}/cheat-sheets/quickstart" style="color: #44434d; text-decoration: none;"><strong><i>Cheat-Sheets</i></strong></a>
+{: .label .label-yellow }
+
 ---
 
 The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level JSON `object` to record the configuration options.
