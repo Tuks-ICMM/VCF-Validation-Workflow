@@ -5,7 +5,7 @@ permalink: installation/environment/batch-scheduler-profiles
 nav_order: 1
 grand_parent: Installation
 parent: Environment Options
-has_children: true
+has_children: false
 ---
 
 # Batch Scheduler Profiles
