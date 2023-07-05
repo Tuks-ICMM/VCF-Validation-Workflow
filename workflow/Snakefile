@@ -75,10 +75,10 @@ rule normalize:
     log: "_logs/PREP/{dataset_name}/normalize.log"
     benchmark: "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
     resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
+        cpus=search("cores", "normalize"),
+        nodes=search("nodes", "normalize"),
+        queue=search("queue", "normalize"),
+        walltime=search("walltime", "normalize")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
@@ -179,6 +179,11 @@ rule liftover:
     """
     log: "_logs/PREP/{dataset_name}/liftover.log"
     benchmark: "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
+    resources:
+        cpus=search("cores", "liftover"),
+        nodes=search("nodes", "liftover"),
+        queue=search("queue", "liftover"),
+        walltime=search("walltime", "liftover")
     envmodules:
         config["environment"]["envmodules"]["piccard"]
     params:
@@ -229,6 +234,11 @@ rule tabix:
 rule stats:
     log:  "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
     benchmark:  "_benchmarks/PREP/{dataset_name}/{operation}_bcfstats.benchmark"
+    resources:
+        cpus=search("cores", "stats"),
+        nodes=search("nodes", "stats"),
+        queue=search("queue", "stats"),
+        walltime=search("walltime", "stats")
     envmodules:
         config["environment"]["envmodules"]["latex"],
         config["environment"]["envmodules"]["bcftools"]
