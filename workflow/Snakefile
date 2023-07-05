@@ -50,10 +50,10 @@ rule wipeInfo:
     log: "_logs/PREP/{dataset_name}/strip_INFO_tags.log"
     benchmark: "_benchmarks/VALIDATE/strip_INFO_tags/{dataset_name}.benchmark"
     resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
+        cpus=search("cores", "wipeInfo"),
+        nodes=search("nodes", "wipeInfo"),
+        queue=search("queue", "wipeInfo"),
+        walltime=search("walltime", "wipeInfo")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
@@ -75,10 +75,10 @@ rule normalize:
     log: "_logs/PREP/{dataset_name}/normalize.log"
     benchmark: "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
     resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
+        cpus=search("cores", "normalize"),
+        nodes=search("nodes", "normalize"),
+        queue=search("queue", "normalize"),
+        walltime=search("walltime", "normalize")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
@@ -100,14 +100,14 @@ rule sort:
     log: "_logs/PREP/{dataset_name}/sort.log"
     benchmark: "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
     resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
+        cpus=search("cores", "sort"),
+        nodes=search("nodes", "sort"),
+        queue=search("queue", "sort"),
+        walltime=search("walltime", "sort")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     params:
-        memory=search("memory", "VALIDATE"),
+        memory=search("memory", "sort"),
     input:
         vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
         tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
@@ -127,14 +127,14 @@ rule filter:
     log: "_logs/PREP/{dataset_name}/filter.log"
     benchmark: "_benchmarks/VALIDATE/filter/{dataset_name}.benchmark"
     resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
+        cpus=search("cores", "filter"),
+        nodes=search("nodes", "filter"),
+        queue=search("queue", "filter"),
+        walltime=search("walltime", "filter")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     params:
-        memory=search("memory", "VALIDATE")
+        memory=search("memory", "filter")
     input:
         vcf="results/PREP/{dataset_name}/sort.vcf.gz",
         tbi="results/PREP/{dataset_name}/sort.vcf.gz.tbi"
@@ -154,10 +154,10 @@ rule annotate:
     log: "_logs/PREP/{dataset_name}/annotate.log"
     benchmark: "_benchmarks/VALIDATE/annotate/{dataset_name}.benchmark"
     resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
+        cpus=search("cores", "annotate"),
+        nodes=search("nodes", "annotate"),
+        queue=search("queue", "annotate"),
+        walltime=search("walltime", "annotate")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input: 
@@ -179,6 +179,11 @@ rule liftover:
     """
     log: "_logs/PREP/{dataset_name}/liftover.log"
     benchmark: "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
+    resources:
+        cpus=search("cores", "liftover"),
+        nodes=search("nodes", "liftover"),
+        queue=search("queue", "liftover"),
+        walltime=search("walltime", "liftover")
     envmodules:
         config["environment"]["envmodules"]["picard"]
     params:
@@ -209,10 +214,10 @@ rule tabix:
     log: "_logs/{operation}/{dataset_name}/{output}.log"
     benchmark: "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
     resources:
-        cpus=search("cores", "VALIDATE"),
-        nodes=search("nodes", "VALIDATE"),
-        queue=search("queue", "VALIDATE"),
-        walltime=search("walltime", "VALIDATE")
+        cpus=search("cores", "tabix"),
+        nodes=search("nodes", "tabix"),
+        queue=search("queue", "tabix"),
+        walltime=search("walltime", "tabix")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
@@ -229,6 +234,11 @@ rule tabix:
 rule stats:
     log:  "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
     benchmark:  "_benchmarks/PREP/{dataset_name}/{operation}_bcfstats.benchmark"
+    resources:
+        cpus=search("cores", "stats"),
+        nodes=search("nodes", "stats"),
+        queue=search("queue", "stats"),
+        walltime=search("walltime", "stats")
     envmodules:
         config["environment"]["envmodules"]["latex"],
         config["environment"]["envmodules"]["bcftools"]
