@@ -30,16 +30,14 @@
                 "nodes": "1",
                 "rules": [
                     "all",
-                    "VALIDATE",
-                    "LIFTOVER",
-                    "COLLATE",
-                    "ALL_COLLATE",
-                    "ANNOTATE",
-                    "ADMIXTURE",
-                    "TRIM_AND_NAME",
-                    "FILTER",
-                    "TRANSPILE_CLUSTERS",
-                    "PLINK"
+                    "wipeInfo",
+                    "normalize",
+                    "sort",
+                    "filter",
+                    "annotate",
+                    "liftover",
+                    "tabix",
+                    "stats"
                 ]
             }
         ],
