@@ -45,7 +45,7 @@
         ],
         "envmodules": {
             "bcftools": "bcftools-1.7",
-            "piccard": "picard-2.17.11",
+            "picard": "picard-2.17.11",
             "tabix": "samtools-1.7",
             "latex": "latex"
         }

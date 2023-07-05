@@ -180,7 +180,7 @@ rule liftover:
     log: "_logs/PREP/{dataset_name}/liftover.log"
     benchmark: "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
     envmodules:
-        config["environment"]["envmodules"]["piccard"]
+        config["environment"]["envmodules"]["picard"]
     params:
         chainFile=join("resources", "hg19ToHg38.over.chain"),
         ref=join(
