@@ -203,7 +203,7 @@ rule liftover:
         rejected="results/PREP/{dataset_name}/liftover_rejected.vcf.gz"
     shell:
         """
-        LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
+        java -jar $PICARD LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
         """
 
 # group: VALIDATE
