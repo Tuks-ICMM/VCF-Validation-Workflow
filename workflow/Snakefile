@@ -186,8 +186,8 @@ rule annotateUnknown:
     params:
         output=lambda wildcards, output: output.vcf[-7]
     input: 
-        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
-        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi"
+        vcf="results/PREP/{dataset_name}/annotateKnown.vcf.gz",
+        tbi="results/PREP/{dataset_name}/annotateKnown.vcf.gz.tbi"
     output:
         vcf="results/PREP/{dataset_name}/annotateUnknown.vcf.gz"
     shell:
