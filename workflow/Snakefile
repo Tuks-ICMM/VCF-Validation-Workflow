@@ -140,11 +140,11 @@ rule filter:
         # pipe("results/PREP/{dataset_name}/filter.vcf.gz")
     shell:
         """
-        bcftools view -v snps,indels -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
+        bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 # group: VALIDATE
-rule annotate:
+rule annotateKnown:
     """
     This rule uses a VCF file provided by RefSeq to annotate known variants
     """
@@ -162,11 +162,38 @@ rule annotate:
         tbi="results/PREP/{dataset_name}/filter.vcf.gz.tbi",
         annotations="resources/annotations.vcf.gz"
     output:
-        vcf="results/PREP/{dataset_name}/annotate.vcf.gz"
+        vcf="results/PREP/{dataset_name}/annotateKnown.vcf.gz"
     shell:
         # --rename-chrs input/rename_chr.txt would go here
         """
         bcftools annotate -c ID -a {input.annotations} -O z -o {output.vcf} {input.vcf}
+        """
+
+# group: VALIDATE
+rule annotateUnknown:
+    """
+    This rule uses a VCF file provided by RefSeq to annotate known variants
+    """
+    log: "_logs/PREP/{dataset_name}/annotate.log"
+    benchmark: "_benchmarks/VALIDATE/annotate/{dataset_name}.benchmark"
+    resources:
+        cpus=search("cores", "annotate"),
+        nodes=search("nodes", "annotate"),
+        queue=search("queue", "annotate"),
+        walltime=search("walltime", "annotate")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    params:
+        output=lambda wildcards, output: output.vcf[-7]
+    input: 
+        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
+        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi"
+    output:
+        vcf="results/PREP/{dataset_name}/annotateUnknown.vcf.gz"
+    shell:
+        # --rename-chrs input/rename_chr.txt would go here
+        """
+        plink --vcf {input.vcf} --set-missing-var-ids @:#\$1-\$2 --new-id-max-allele-len 200 --out {params.output}
         """
 
 # group: LIFTOVER
@@ -193,8 +220,8 @@ rule liftover:
             ),
         ),
     input:
-        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
-        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi",
+        vcf="results/PREP/{dataset_name}/annotateUnknown.vcf.gz",
+        tbi="results/PREP/{dataset_name}/annotateUnknown.vcf.gz.tbi",
     output:
         vcf="results/PREP/{dataset_name}/liftover.vcf.gz",
         rejected="results/PREP/{dataset_name}/liftover_rejected.vcf.gz"
