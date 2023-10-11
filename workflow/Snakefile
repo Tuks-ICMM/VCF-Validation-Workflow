@@ -278,30 +278,16 @@ output_files.append(
         )
 )
 
-# Include output for rule 'annotateKnown'
+# Include output for rule 'annotate'
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/annotateKnown.vcf.gz", 
+        "results/PREP/{dataset_name}/annotate.vcf.gz", 
         dataset_name=list(datasets["dataset_name"])
         )
 )
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/annotateKnown.vcf.gz.tbi", 
-        dataset_name=list(datasets["dataset_name"])
-        )
-)
-
-# Include output for rule 'annotateUnknown'
-output_files.append(
-    expand(
-        "results/PREP/{dataset_name}/annotateUnknown.vcf.gz", 
-        dataset_name=list(datasets["dataset_name"])
-        )
-)
-output_files.append(
-    expand(
-        "results/PREP/{dataset_name}/annotateUnknown.vcf.gz.tbi", 
+        "results/PREP/{dataset_name}/annotate.vcf.gz.tbi", 
         dataset_name=list(datasets["dataset_name"])
         )
 )
