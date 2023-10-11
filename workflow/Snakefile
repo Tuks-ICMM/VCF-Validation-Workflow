@@ -166,7 +166,7 @@ rule annotate:
     shell:
         # --rename-chrs input/rename_chr.txt would go here
         """
-        bcftools annotate -c ID -a {input.annotations} -I +'%CHROM:%POS\%REF-%FIRST_ALT' -O z -o {output.vcf} {input.vcf}
+        bcftools annotate -c ID -a {input.annotations} -I +'%CHROM:%POS%REF-%FIRST_ALT' -O z -o {output.vcf} {input.vcf}
         """
 
 # group: LIFTOVER
