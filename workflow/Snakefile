@@ -9,7 +9,6 @@ __credits__ = [
     "Prof. Fourie Joubert",
     "Antionette Colic",
     "Fatima Barmania",
-    "Sarah Turner",
     "Megan Holborn",
 ]
 __version__ = "1.0.0"
@@ -44,8 +43,8 @@ rule wipeInfo:
     """
     Strip out INFO tags
     """
-    log: "_logs/PREP/{dataset_name}/strip_INFO_tags.log"
-    benchmark: "_benchmarks/VALIDATE/strip_INFO_tags/{dataset_name}.benchmark"
+    log: "results/tmp/wipeInfo/{dataset_name}_wipeInfo.log"
+    benchmark: "resuts/tmp/wipeInfo/{dataset_name}_wipeInfo.benchmark"
     resources:
         cpus=search("cores", "wipeInfo"),
         nodes=search("nodes", "wipeInfo"),
@@ -58,7 +57,7 @@ rule wipeInfo:
             datasets["dataset_name"] == wildcards.dataset_name, "file"
         ].unique().item(),
     output:
-        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz"
+        vcf="results/tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz"
     shell:
         """
         bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
@@ -69,8 +68,8 @@ rule normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
-    log: "_logs/PREP/{dataset_name}/normalize.log"
-    benchmark: "results/_benchmarks/VALIDATE/normalize/{dataset_name}.benchmark"
+    log: "results/tmp/normalize/{dataset_name}_normalize.log"
+    benchmark: "results/tmp/normalize/{dataset_name}_normalize.benchmark"
     resources:
         cpus=search("cores", "normalize"),
         nodes=search("nodes", "normalize"),
@@ -79,11 +78,11 @@ rule normalize:
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
-        vcf="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz",
-        tbi="results/PREP/{dataset_name}/strip_INFO_tags.vcf.gz.tbi",
+        vcf="results/tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz",
+        tbi="results/tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz.tbi",
     output:
-        vcf="results/PREP/{dataset_name}/normalize.vcf.gz"
-        # pipe("results/PREP/{dataset_name}/normalize.vcf.gz")
+        vcf="results/tmp/normalize/{dataset_name}_normalize.vcf.gz"
+        # pipe("results/tmp/normalize/{dataset_name}_normalize.vcf.gz")
     shell:
         """
         bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
@@ -94,8 +93,8 @@ rule sort:
     """
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
-    log: "_logs/PREP/{dataset_name}/sort.log"
-    benchmark: "_benchmarks/VALIDATE/sort/{dataset_name}.benchmark"
+    log: "results/tmp/sort/{dataset_name}_sort.log"
+    benchmark: "results/tmp/sort/{dataset_name}_sort.benchmark"
     resources:
         cpus=search("cores", "sort"),
         nodes=search("nodes", "sort"),
@@ -106,10 +105,10 @@ rule sort:
     params:
         memory=search("memory", "sort"),
     input:
-        vcf="results/PREP/{dataset_name}/normalize.vcf.gz",
-        tbi="results/PREP/{dataset_name}/normalize.vcf.gz.tbi"
+        vcf="results/tmp/normalize/{dataset_name}_normalize.vcf.gz",
+        tbi="results/tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi"
     output:
-        vcf="results/PREP/{dataset_name}/sort.vcf.gz"
+        vcf="results/tmp/sort/{dataset_name}_sort.vcf.gz"
     shell:
         # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
@@ -121,8 +120,8 @@ rule filter:
     """
     Remove variant types we cant yet analyse
     """
-    log: "_logs/PREP/{dataset_name}/filter.log"
-    benchmark: "_benchmarks/VALIDATE/filter/{dataset_name}.benchmark"
+    log: "results/tmp/filter/{dataset_name}_filter.log"
+    benchmark: "results/tmp/filter/{dataset_name}_filter.benchmark"
     resources:
         cpus=search("cores", "filter"),
         nodes=search("nodes", "filter"),
@@ -133,49 +132,50 @@ rule filter:
     params:
         memory=search("memory", "filter")
     input:
-        vcf="results/PREP/{dataset_name}/sort.vcf.gz",
-        tbi="results/PREP/{dataset_name}/sort.vcf.gz.tbi"
+        vcf="results/tmp/sort/{dataset_name}_sort.vcf.gz",
+        tbi="results/tmp/sort/{dataset_name}_sort.vcf.gz.tbi"
     output:
-        vcf="results/PREP/{dataset_name}/filter.vcf.gz"
+        vcf="results/tmp/filter/{dataset_name}_filter.vcf.gz"
         # pipe("results/PREP/{dataset_name}/filter.vcf.gz")
     shell:
         """
         bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
-# group: VALIDATE
-rule annotate:
-    """
-    This rule uses a VCF file provided by RefSeq to annotate known variants
-    """
-    log: "_logs/PREP/{dataset_name}/annotate.log"
-    benchmark: "_benchmarks/VALIDATE/annotate/{dataset_name}.benchmark"
-    resources:
-        cpus=search("cores", "annotate"),
-        nodes=search("nodes", "annotate"),
-        queue=search("queue", "annotate"),
-        walltime=search("walltime", "annotate")
-    envmodules:
-        config["environment"]["envmodules"]["bcftools"],
-    input: 
-        vcf="results/PREP/{dataset_name}/filter.vcf.gz",
-        tbi="results/PREP/{dataset_name}/filter.vcf.gz.tbi",
-        annotations="resources/annotations.vcf.gz"
-    output:
-        vcf="results/PREP/{dataset_name}/annotate.vcf.gz"
-    shell:
-        # --rename-chrs input/rename_chr.txt would go here
-        """
-        bcftools annotate -c ID -a {input.annotations} -I +'%CHROM:%POS|%REF-%FIRST_ALT' -O z -o {output.vcf} {input.vcf}
-        """
+# # group: VALIDATE
+# # TODO: Remove this step in favour of E! Ensembl annotations
+# rule annotate:
+#     """
+#     This rule uses a VCF file provided by RefSeq to annotate known variants
+#     """
+#     log: "results/tmp/annotate/{dataset_name}_annotate.log"
+#     benchmark: "results/tmp/annotate/{dataset_name}_annotate.benchmark"
+#     resources:
+#         cpus=search("cores", "annotate"),
+#         nodes=search("nodes", "annotate"),
+#         queue=search("queue", "annotate"),
+#         walltime=search("walltime", "annotate")
+#     envmodules:
+#         config["environment"]["envmodules"]["bcftools"],
+#     input: 
+#         vcf="results/tmp/filter/{dataset_name}_filter.vcf.gz",
+#         tbi="results/tmp/filter/{dataset_name}_filter.vcf.gz.tbi",
+#         annotations="resources/annotations.vcf.gz"
+#     output:
+#         vcf="results/tmp/annotate/{dataset_name}_annotate.vcf.gz"
+#     shell:
+#         # --rename-chrs input/rename_chr.txt would go here
+#         """
+#         bcftools annotate -c ID -a {input.annotations} -I +'%CHROM:%POS|%REF-%FIRST_ALT' -O z -o {output.vcf} {input.vcf}
+#         """
 
 # group: LIFTOVER
 rule liftover:
     """
     This rule helps liftover data from one reference genome to another.
     """
-    log: "_logs/PREP/{dataset_name}/liftover.log"
-    benchmark: "_benchmarks/PREP/{dataset_name}/liftover.benchmark"
+    log: "results/tmp/liftover/{dataset_name}_liftover.log"
+    benchmark: "results/tmp/liftover/{dataset_name}_liftover.benchmark"
     resources:
         cpus=search("cores", "liftover"),
         nodes=search("nodes", "liftover"),
@@ -193,11 +193,11 @@ rule liftover:
             ),
         ),
     input:
-        vcf="results/PREP/{dataset_name}/annotate.vcf.gz",
-        tbi="results/PREP/{dataset_name}/annotate.vcf.gz.tbi",
+        vcf="results/tmp/filter/{dataset_name}_filter.vcf.gz",
+        tbi="results/tmp/filter/{dataset_name}_filter.vcf.gz.tbi",
     output:
-        vcf="results/PREP/{dataset_name}/liftover.vcf.gz",
-        rejected="results/PREP/{dataset_name}/liftover_rejected.vcf.gz"
+        vcf="results/tmp/liftover/{dataset_name}_liftover.vcf.gz",
+        rejected="results/tmp_liftover/{dataset_name}_liftover_rejected.vcf.gz"
     shell:
         """
         java -jar $PICARD LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
@@ -208,8 +208,8 @@ rule tabix:
     """
     Generate tabix-index.
     """
-    log: "_logs/{operation}/{dataset_name}/{output}.log"
-    benchmark: "_benchmarks/{operation}/{dataset_name}/{output}.benchmark"
+    log: "results/tmp/{operation}/{dataset_name}_tabix.log"
+    benchmark: "results/tmp/{operation}/{dataset_name}_tabix.benchmark"
     resources:
         cpus=search("cores", "tabix"),
         nodes=search("nodes", "tabix"),
@@ -218,9 +218,9 @@ rule tabix:
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
-        "results/{operation}/{dataset_name}/{output}.vcf.gz"
+        "results/tmp/{operation}/{dataset_name}_{operation}.vcf.gz"
     output:
-        "results/{operation}/{dataset_name}/{output}.vcf.gz.tbi"
+        "results/tmp/{operation}/{dataset_name}_{operation}.vcf.gz.tbi"
     shell:
         """
         tabix -p vcf {input}
@@ -228,80 +228,80 @@ rule tabix:
 
 
 # TODO: Potential gist snippet
-rule stats:
-    log:  "_logs/PREP/{dataset_name}/{operation}_bcfstats.log"
-    benchmark:  "_benchmarks/PREP/{dataset_name}/{operation}_bcfstats.benchmark"
-    resources:
-        cpus=search("cores", "stats"),
-        nodes=search("nodes", "stats"),
-        queue=search("queue", "stats"),
-        walltime=search("walltime", "stats")
-    envmodules:
-        config["environment"]["envmodules"]["latex"],
-        config["environment"]["envmodules"]["bcftools"]
-    input: 
-        final = "results/PREP/{dataset_name}/{operation}.vcf.gz",
-        final_tbi = "results/PREP/{dataset_name}/{operation}.vcf.gz.tbi",
-        initial = lambda wildcards: getattr(rules, str(wildcards.operation)).input.vcf,
-        initial_tbi = lambda wildcards: getattr(rules, str(wildcards.operation)).input.tbi
-    output: 
-        report(
-            directory("results/PREP/{dataset_name}/{operation}"),
-            patterns=["{name}.png"],
-            category="Data processing and validation",
-            subcategory="{dataset_name}",
-            caption="report/stats.rst",
-            labels={
-                "Dataset": "{dataset_name}",
-                "Operation": "{operation}",
-            }
-            )
-    shell:
-        """
-        bcftools stats {input.initial} {input.final} > All.vchk
-        plot-vcfstats -p {output} All.vchk
-        """
+# rule stats:
+#     log:  "results/tmp/{operation}/{dataset_name}_bcfstats.log"
+#     benchmark:  "results/tmp/{operation}/{dataset_name}_bcfstats.benchmark"
+#     resources:
+#         cpus=search("cores", "stats"),
+#         nodes=search("nodes", "stats"),
+#         queue=search("queue", "stats"),
+#         walltime=search("walltime", "stats")
+#     envmodules:
+#         config["environment"]["envmodules"]["latex"],
+#         config["environment"]["envmodules"]["bcftools"]
+#     input: 
+#         final = "results/tmp/{operation}/{dataset_name}_{operation}.vcf.gz",
+#         final_tbi = "results/tmp/{operation}/{dataset_name}_{operation}.vcf.gz.tbi",
+#         initial = lambda wildcards: getattr(rules, str(wildcards.operation)).input.vcf,
+#         initial_tbi = lambda wildcards: getattr(rules, str(wildcards.operation)).input.tbi
+#     output: 
+#         report(
+#             directory("results/tmp/{operation}/"),
+#             patterns=["{dataset_name}_{operation}.png"],
+#             category="Data processing and validation",
+#             subcategory="{dataset_name}",
+#             caption="report/stats.rst",
+#             labels={
+#                 "Dataset": "{dataset_name}",
+#                 "Operation": "{operation}",
+#             }
+#             )
+#     shell:
+#         """
+#         bcftools stats {input.initial} {input.final} > All.vchk
+#         plot-vcfstats -p {output} All.vchk
+#         """
 
 # Start conditional output file list ocnstruction:
 output_files = list()
 
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/sort.vcf.gz", 
+        "results/tmp/sort/{dataset_name}_sort.vcf.gz", 
         dataset_name=list(datasets["dataset_name"])
         )
 )
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/sort.vcf.gz.tbi", 
+        "results/tmp/sort/{dataset_name}_sort.vcf.gz.tbi", 
         dataset_name=list(datasets["dataset_name"])
         )
 )
 
 # Include output for rule 'annotate'
-output_files.append(
-    expand(
-        "results/PREP/{dataset_name}/annotate.vcf.gz", 
-        dataset_name=list(datasets["dataset_name"])
-        )
-)
-output_files.append(
-    expand(
-        "results/PREP/{dataset_name}/annotate.vcf.gz.tbi", 
-        dataset_name=list(datasets["dataset_name"])
-        )
-)
+# output_files.append(
+#     expand(
+#         "results/tmp/annotate/{dataset_name}_annotate.vcf.gz", 
+#         dataset_name=list(datasets["dataset_name"])
+#         )
+# )
+# output_files.append(
+#     expand(
+#         "results/tmp/annotate/{dataset_name}_annotate.vcf.gz.tbi", 
+#         dataset_name=list(datasets["dataset_name"])
+#         )
+# )
 
 # Include output for rule 'normalize'
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/normalize.vcf.gz", 
+        "results/tmp/normalize/{dataset_name}_normalize.vcf.gz", 
         dataset_name=list(datasets["dataset_name"])
         )
 )
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/normalize.vcf.gz.tbi", 
+        "results/tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi", 
         dataset_name=list(datasets["dataset_name"])
         )
 )
@@ -310,13 +310,13 @@ output_files.append(
 # Include output for rule 'filter'
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/filter.vcf.gz", 
+        "results/tmp/filter/{dataset_name}_filter.vcf.gz", 
         dataset_name=list(datasets["dataset_name"])
         )
 )
 output_files.append(
     expand(
-        "results/PREP/{dataset_name}/filter.vcf.gz.tbi", 
+        "results/tmp/filter/{dataset_name}_filter.vcf.gz.tbi", 
         dataset_name=list(datasets["dataset_name"])
         )
 )

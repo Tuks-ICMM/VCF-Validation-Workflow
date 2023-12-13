@@ -1,4 +1,3 @@
 dataset_name,reference_genome,file
-HG002,GRCh38,input/HG002.vcf.gz
-HG003,GRCh38,input/HG003.vcf.gz
-HG004,GRCh38,input/HG004.vcf.gz
+GnomAD,GRCh38,/mnt/ICMM_HDD_12TB/DATASET_Gnomad/gnomad.genomes.v3.1.2.hgdp_tgp.ALL.vcf.bgz
+SAHGP,GRCh38,/mnt/ICMM_HDD_12TB/DATASET_SAHGP/SAHGP.vcf.gz
