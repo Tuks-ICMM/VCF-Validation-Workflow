@@ -104,6 +104,7 @@ rule sort:
         config["environment"]["envmodules"]["bcftools"],
     params:
         memory=search("memory", "sort"),
+        tmp=lambda wildcards,output: output["vcf"][:-7]
     input:
         vcf="results/tmp/normalize/{dataset_name}_normalize.vcf.gz",
         tbi="results/tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi"
@@ -112,7 +113,7 @@ rule sort:
     shell:
         # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
-        bcftools sort -m {params.memory} -T results/PREP/{wildcards.dataset_name} -O z -o {output.vcf} < {input.vcf} 2>{log}
+        bcftools sort -m {params.memory} -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 # group: VALIDATE
