@@ -88,33 +88,6 @@ rule normalize:
         bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
-# group: VALIDATE
-rule sort:
-    """
-    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
-    """
-    log: outputDir("tmp/sort/{dataset_name}_sort.log")
-    benchmark: outputDir("tmp/sort/{dataset_name}_sort.benchmark")
-    resources:
-        cpus=search("cores", "sort"),
-        nodes=search("nodes", "sort"),
-        queue=search("queue", "sort"),
-        walltime=search("walltime", "sort")
-    envmodules:
-        config["environment"]["envmodules"]["bcftools"],
-    params:
-        memory=search("memory", "sort"),
-        tmp=lambda wildcards,output: output["vcf"][:-7]
-    input:
-        vcf=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz"),
-        tbi=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi")
-    output:
-        vcf=outputDir("tmp/sort/{dataset_name}_sort.vcf.gz")
-    shell:
-        # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
-        """
-        bcftools sort -m {params.memory} -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
-        """
 
 # group: VALIDATE
 rule filter:
@@ -133,8 +106,8 @@ rule filter:
     params:
         memory=search("memory", "filter")
     input:
-        vcf=outputDir("tmp/sort/{dataset_name}_sort.vcf.gz"),
-        tbi=outputDir("tmp/sort/{dataset_name}_sort.vcf.gz.tbi")
+        vcf=outputDir("tmp/sort/{dataset_name}_normalize.vcf.gz"),
+        tbi=outputDir("tmp/sort/{dataset_name}_normalize.vcf.gz.tbi")
     output:
         vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz")
         # pipe(outputDir("PREP/{dataset_name}/filter.vcf.gz"))
@@ -143,6 +116,33 @@ rule filter:
         bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
+# group: VALIDATE
+rule sort:
+    """
+    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
+    """
+    log: outputDir("tmp/sort/{dataset_name}_sort.log")
+    benchmark: outputDir("tmp/sort/{dataset_name}_sort.benchmark")
+    resources:
+        cpus=search("cores", "sort"),
+        nodes=search("nodes", "sort"),
+        queue=search("queue", "sort"),
+        walltime=search("walltime", "sort")
+    envmodules:
+        config["environment"]["envmodules"]["bcftools"],
+    params:
+        memory=search("memory", "sort"),
+        tmp=lambda wildcards,output: output["vcf"][:-7]
+    input:
+        vcf=outputDir("tmp/normalize/{dataset_name}_filter.vcf.gz"),
+        tbi=outputDir("tmp/normalize/{dataset_name}_filter.vcf.gz.tbi")
+    output:
+        vcf=outputDir("tmp/sort/{dataset_name}_sort.vcf.gz")
+    shell:
+        # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
+        """
+        bcftools sort -m {params.memory} -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
 # # group: VALIDATE
 # # TODO: Remove this step in favour of E! Ensembl annotations
 # rule annotate:
@@ -194,8 +194,8 @@ rule liftover:
             ),
         ),
     input:
-        vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz"),
-        tbi=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz.tbi"),
+        vcf=outputDir("tmp/filter/{dataset_name}_sort.vcf.gz"),
+        tbi=outputDir("tmp/filter/{dataset_name}_sort.vcf.gz.tbi"),
     output:
         vcf=outputDir("tmp/liftover/{dataset_name}_liftover.vcf.gz"),
         rejected=outputDir("tmp_liftover/{dataset_name}_liftover_rejected.vcf.gz")
