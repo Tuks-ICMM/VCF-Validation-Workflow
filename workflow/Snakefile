@@ -106,8 +106,8 @@ rule filter:
     params:
         memory=search("memory", "filter")
     input:
-        vcf=outputDir("tmp/sort/{dataset_name}_normalize.vcf.gz"),
-        tbi=outputDir("tmp/sort/{dataset_name}_normalize.vcf.gz.tbi")
+        vcf=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz"),
+        tbi=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi")
     output:
         vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz")
         # pipe(outputDir("PREP/{dataset_name}/filter.vcf.gz"))
@@ -134,8 +134,8 @@ rule sort:
         memory=search("memory", "sort"),
         tmp=lambda wildcards,output: output["vcf"][:-7]
     input:
-        vcf=outputDir("tmp/normalize/{dataset_name}_filter.vcf.gz"),
-        tbi=outputDir("tmp/normalize/{dataset_name}_filter.vcf.gz.tbi")
+        vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz"),
+        tbi=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz.tbi")
     output:
         vcf=outputDir("tmp/sort/{dataset_name}_sort.vcf.gz")
     shell:
