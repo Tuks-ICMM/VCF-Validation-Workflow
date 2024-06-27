@@ -7,7 +7,6 @@ __credits__ = [
     "Graeme Ford",
     "Prof. Michael S. Pepper",
     "Prof. Fourie Joubert",
-    "Antionette Colic",
     "Fatima Barmania",
     "Megan Holborn",
 ]
@@ -38,7 +37,7 @@ include: "rules/common.smk"
 # SET GLOBAL DOCKER RECIPIE TO USE:
 container: "docker://graemeford/pipeline-os"
 
-# group: VALIDATE
+
 rule wipeInfo:
     """
     Strip out INFO tags
@@ -63,7 +62,7 @@ rule wipeInfo:
         bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
         """
 
-# group: VALIDATE
+
 rule normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
@@ -82,14 +81,12 @@ rule normalize:
         tbi=outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz.tbi"),
     output:
         vcf=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz")
-        # pipe(outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz"))
     shell:
         """
         bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 
-# group: VALIDATE
 rule filter:
     """
     Remove variant types we cant yet analyse
@@ -116,7 +113,7 @@ rule filter:
         bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
-# group: VALIDATE
+
 rule sort:
     """
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
@@ -143,45 +140,14 @@ rule sort:
         """
         bcftools sort -m {params.memory} -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
-# # group: VALIDATE
-# # TODO: Remove this step in favour of E! Ensembl annotations
-# rule annotate:
-#     """
-#     This rule uses a VCF file provided by RefSeq to annotate known variants
-#     """
-#     log: outputDir("tmp/annotate/{dataset_name}_annotate.log")
-#     benchmark: outputDir("tmp/annotate/{dataset_name}_annotate.benchmark")
-#     resources:
-#         cpus=search("cores", "annotate"),
-#         nodes=search("nodes", "annotate"),
-#         queue=search("queue", "annotate"),
-#         walltime=search("walltime", "annotate")
-#     envmodules:
-#         config["environment"]["envmodules"]["bcftools"],
-#     input: 
-#         vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz"),
-#         tbi=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz.tbi"),
-#         annotations="resources/annotations.vcf.gz"
-#     output:
-#         vcf=outputDir("tmp/annotate/{dataset_name}_annotate.vcf.gz")
-#     shell:
-#         # --rename-chrs input/rename_chr.txt would go here
-#         """
-#         bcftools annotate -c ID -a {input.annotations} -I +'%CHROM:%POS|%REF-%FIRST_ALT' -O z -o {output.vcf} {input.vcf}
-#         """
+        
 
-# group: LIFTOVER
 rule liftover:
     """
     This rule helps liftover data from one reference genome to another.
     """
     log: outputDir("tmp/liftover/{dataset_name}_liftover.log")
     benchmark: outputDir("tmp/liftover/{dataset_name}_liftover.benchmark")
-    resources:
-        cpus=search("cores", "liftover"),
-        nodes=search("nodes", "liftover"),
-        queue=search("queue", "liftover"),
-        walltime=search("walltime", "liftover")
     envmodules:
         config["environment"]["envmodules"]["picard"]
     params:
@@ -204,18 +170,13 @@ rule liftover:
         java -jar $PICARD LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
         """
 
-# group: VALIDATE
+
 rule tabix:
     """
     Generate tabix-index.
     """
     log: outputDir("tmp/{operation}/{dataset_name}_tabix.log")
     benchmark: outputDir("tmp/{operation}/{dataset_name}_tabix.benchmark")
-    resources:
-        cpus=search("cores", "tabix"),
-        nodes=search("nodes", "tabix"),
-        queue=search("queue", "tabix"),
-        walltime=search("walltime", "tabix")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
@@ -227,41 +188,6 @@ rule tabix:
         tabix -p vcf {input}
         """
 
-
-# TODO: Potential gist snippet
-# rule stats:
-#     log:  outputDir("tmp/{operation}/{dataset_name}_bcfstats.log"
-#     benchmark:  outputDir("tmp/{operation}/{dataset_name}_bcfstats.benchmark"
-#     resources:
-#         cpus=search("cores", "stats"),
-#         nodes=search("nodes", "stats"),
-#         queue=search("queue", "stats"),
-#         walltime=search("walltime", "stats")
-#     envmodules:
-#         config["environment"]["envmodules"]["latex"],
-#         config["environment"]["envmodules"]["bcftools"]
-#     input: 
-#         final = outputDir("tmp/{operation}/{dataset_name}_{operation}.vcf.gz",
-#         final_tbi = outputDir("tmp/{operation}/{dataset_name}_{operation}.vcf.gz.tbi",
-#         initial = lambda wildcards: getattr(rules, str(wildcards.operation)).input.vcf,
-#         initial_tbi = lambda wildcards: getattr(rules, str(wildcards.operation)).input.tbi
-#     output: 
-#         report(
-#             directory(outputDir("tmp/{operation}/"),
-#             patterns=["{dataset_name}_{operation}.png"],
-#             category="Data processing and validation",
-#             subcategory="{dataset_name}",
-#             caption="report/stats.rst",
-#             labels={
-#                 "Dataset": "{dataset_name}",
-#                 "Operation": "{operation}",
-#             }
-#             )
-#     shell:
-#         """
-#         bcftools stats {input.initial} {input.final} > All.vchk
-#         plot-vcfstats -p {output} All.vchk
-#         """
 
 # Start conditional output file list ocnstruction:
 output_files = list()
@@ -278,20 +204,6 @@ output_files.append(
         dataset_name=list(datasets["dataset_name"])
         )
 )
-
-# Include output for rule 'annotate'
-# output_files.append(
-#     expand(
-#         outputDir("tmp/annotate/{dataset_name}_annotate.vcf.gz", 
-#         dataset_name=list(datasets["dataset_name"])
-#         )
-# )
-# output_files.append(
-#     expand(
-#         outputDir("tmp/annotate/{dataset_name}_annotate.vcf.gz.tbi", 
-#         dataset_name=list(datasets["dataset_name"])
-#         )
-# )
 
 # Include output for rule 'normalize'
 output_files.append(
@@ -321,15 +233,6 @@ output_files.append(
         dataset_name=list(datasets["dataset_name"])
         )
 )
-
-# [EACH] add qaulity-control snapshot reports
-# output_files.append(
-#     expand(
-#         outputDir("PREP/{dataset_name}/{operation}/", 
-#         dataset_name=list(datasets["dataset_name"]),
-#         operation=["normalize", "sort", "sort", "filter", "annotate"]
-#         )
-# )
 
 
 # Here, we use a `Pandas` `MultiIndex` to group our datasets by ["reference_genome", "dataset_name"]. This allows
@@ -362,7 +265,7 @@ rule all:
     Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
     """
     default_target: True
-    log:
-        "logs/ALL/ALL.log",
+    log: outputDir("all.log"),
+    benchmark: outputDir("all.benchmark")
     input:
         [item for sublist in output_files for item in sublist],
