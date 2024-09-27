@@ -38,76 +38,75 @@ include: "rules/common.smk"
 container: "docker://graemeford/pipeline-os"
 
 
-rule wipeInfo:
+rule clear_annotations:
     """
     Strip out INFO tags
     """
-    log: outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.log")
-    benchmark: outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.benchmark")
+    log: outputDir("tmp/cleared_annotations/{contig}/{dataset_name}_cleared_annotations.log")
+    benchmark: outputDir("tmp/cleared_annotations/{contig}/{dataset_name}_cleared_annotations.benchmark")
     input:
         vcf=lambda wildcards: datasets.loc[
             (datasets["dataset_name"] == wildcards.dataset_name) &
              (datasets["contig"] == wildcards.contig), "file"
         ].item(),
     output:
-        vcf=outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.vcf.gz")
+        vcf=outputDir("tmp/cleared_annotations/{contig}/{dataset_name}_cleared_annotations.vcf.gz")
     shell:
         """
         bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
         """
 
 
-rule normalize:
+rule normalize_variant_records:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
-    log: outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.log")
-    benchmark: outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.benchmark")
+    log: outputDir("tmp/normalized_variant_records/{contig}/{dataset_name}_normalized_variant_records.log")
+    benchmark: outputDir("tmp/normalized_variant_records/{contig}/{dataset_name}_normalized_variant_records.benchmark")
     input:
-        vcf=outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.vcf.gz"),
-        tbi=outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.vcf.gz.tbi"),
+        vcf=outputDir("tmp/cleared_annotations/{contig}/{dataset_name}_cleared_annotations.vcf.gz"),
+        tbi=outputDir("tmp/cleared_annotations/{contig}/{dataset_name}_cleared_annotations.vcf.gz.tbi"),
     output:
-        vcf=outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz")
+        vcf=outputDir("tmp/normalized_variant_records/{contig}/{dataset_name}_normalized_variant_records.vcf.gz")
     shell:
         """
         bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 
-rule filter:
+rule filter_variant_types:
     """
     Remove variant types we cant yet analyse
     """
-    log: outputDir("tmp/filter/{contig}/{dataset_name}_filter.log")
-    benchmark: outputDir("tmp/filter/{contig}/{dataset_name}_filter.benchmark")
+    log: outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_filtered_variant_types.log")
+    benchmark: outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_filtered_variant_types.benchmark")
     input:
-        vcf=outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz"),
-        tbi=outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz.tbi")
+        vcf=outputDir("tmp/normalized_variant_records/{contig}/{dataset_name}_normalized_variant_records.vcf.gz"),
+        tbi=outputDir("tmp/normalized_variant_records/{contig}/{dataset_name}_normalized_variant_records.vcf.gz.tbi")
     output:
-        vcf=outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz")
+        vcf=outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_filtered_variant_types.vcf.gz")
     shell:
         """
         bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 
-rule sort:
+rule sort_variant_records:
     """
-    Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
+    Ensure consistency of chromosome nomenclature for each dataset and sorted_variant_records by chromosome
     """
-    log: outputDir("tmp/sort/{contig}/{dataset_name}_sort.log")
-    benchmark: outputDir("tmp/sort/{contig}/{dataset_name}_sort.benchmark")
+    log: outputDir("tmp/sorted_variant_records/{contig}/{dataset_name}_sorted_variant_records.log")
+    benchmark: outputDir("tmp/sorted_variant_records/{contig}/{dataset_name}_sorted_variant_records.benchmark")
     params:
-        memory=search("memory", "sort"),
         tmp=lambda wildcards,output: output["vcf"][:-7] # TODO: Convert to more scalable method using string `split()` or similar approach
     input:
-        vcf=outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz"),
-        tbi=outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz.tbi")
+        vcf=outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_filtered_variant_types.vcf.gz"),
+        tbi=outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_filtered_variant_types.vcf.gz.tbi")
     output:
-        vcf=outputDir("tmp/sort/{contig}/{dataset_name}_sort.vcf.gz")
+        vcf=outputDir("tmp/sorted_variant_records/{contig}/{dataset_name}_sorted_variant_records.vcf.gz")
     shell:
         """
-        bcftools sort -m {params.memory} -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
+        bcftools sort -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 
@@ -127,8 +126,8 @@ rule liftover:
             ),
         ),
     input:
-        vcf=outputDir("tmp/filter/{contig}/{dataset_name}_sort.vcf.gz"),
-        tbi=outputDir("tmp/filter/{contig}/{dataset_name}_sort.vcf.gz.tbi"),
+        vcf=outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_sorted_variant_records.vcf.gz"),
+        tbi=outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_sorted_variant_records.vcf.gz.tbi"),
     output:
         vcf=outputDir("tmp/liftover/{contig}/{dataset_name}_liftover.vcf.gz"),
         rejected=outputDir("tmp/liftover/{contig}/{dataset_name}_liftover_rejected.vcf.gz")
@@ -159,47 +158,47 @@ output_files = list()
 
 output_files.extend(
     expand(
-        outputDir("tmp/sort/{contig}/{dataset_name}_sort.vcf.gz"), 
+        outputDir("tmp/sorted_variant_records/{contig}/{dataset_name}_sorted_variant_records.vcf.gz"), 
         dataset_name=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
 )
 output_files.extend(
     expand(
-        outputDir("tmp/sort/{contig}/{dataset_name}_sort.vcf.gz.tbi"), 
-        dataset_name=datasets["dataset_name"].unique().tolist(),
-        contig=datasets["contig"].unique().tolist()
-        )
-)
-
-# Include output for rule 'normalize'
-output_files.extend(
-    expand(
-        outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz"), 
-        dataset_name=datasets["dataset_name"].unique().tolist(),
-        contig=datasets["contig"].unique().tolist()
-        )
-)
-output_files.extend(
-    expand(
-        outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz.tbi"),
+        outputDir("tmp/sorted_variant_records/{contig}/{dataset_name}_sorted_variant_records.vcf.gz.tbi"), 
         dataset_name=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
 )
 
-
-# Include output for rule 'filter'
+# Include output for rule 'normalized_variant_records'
 output_files.extend(
     expand(
-        outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz"), 
+        outputDir("tmp/normalized_variant_records/{contig}/{dataset_name}_normalized_variant_records.vcf.gz"), 
         dataset_name=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
 )
 output_files.extend(
     expand(
-        outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz.tbi"), 
+        outputDir("tmp/normalized_variant_records/{contig}/{dataset_name}_normalized_variant_records.vcf.gz.tbi"),
+        dataset_name=datasets["dataset_name"].unique().tolist(),
+        contig=datasets["contig"].unique().tolist()
+        )
+)
+
+
+# Include output for rule 'filtered_variant_types'
+output_files.extend(
+    expand(
+        outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_filtered_variant_types.vcf.gz"), 
+        dataset_name=datasets["dataset_name"].unique().tolist(),
+        contig=datasets["contig"].unique().tolist()
+        )
+)
+output_files.extend(
+    expand(
+        outputDir("tmp/filtered_variant_types/{contig}/{dataset_name}_filtered_variant_types.vcf.gz.tbi"), 
         dataset_name=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
