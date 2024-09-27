@@ -44,6 +44,9 @@ rule clear_annotations:
     """
     log: outputDir("tmp/{contig}/{dataset}/cleared_annotations.log")
     benchmark: outputDir("tmp/{contig}/{dataset}/cleared_annotations.benchmark")
+    wildcard_constraints:
+        contig=r"[0-9]{1,2}", # TODO: Make this configurable
+        dataset=r"[a-zA-Z0-9\-]"
     input:
         vcf=lambda wildcards: datasets.loc[
             (datasets["dataset_name"] == wildcards.dataset) &
@@ -63,6 +66,9 @@ rule normalize_variant_records:
     """
     log: outputDir("tmp/normalized_variant_records/{contig}/{dataset}_normalized_variant_records.log")
     benchmark: outputDir("tmp/normalized_variant_records/{contig}/{dataset}_normalized_variant_records.benchmark")
+    wildcard_constraints:
+        contig=r"[0-9]{1,2}", # TODO: Make this configurable
+        dataset=r"[a-zA-Z0-9\-]"
     input:
         vcf=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz"),
         tbi=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz.tbi"),
@@ -80,6 +86,9 @@ rule filter_variant_types:
     """
     log: outputDir("tmp/{contig}/{dataset}/filtered_variant_types.log")
     benchmark: outputDir("tmp/{contig}/{dataset}/filtered_variant_types.benchmark")
+    wildcard_constraints:
+        contig=r"[0-9]{1,2}", # TODO: Make this configurable
+        dataset=r"[a-zA-Z0-9\-]"
     input:
         vcf=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz"),
         tbi=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz.tbi")
@@ -97,6 +106,9 @@ rule sort_variant_records:
     """
     log: outputDir("tmp/{contig}/{dataset}/sorted_variant_records.log")
     benchmark: outputDir("tmp/{contig}/{dataset}/sorted_variant_records.benchmark")
+    wildcard_constraints:
+        contig=r"[0-9]{1,2}", # TODO: Make this configurable
+        dataset=r"[a-zA-Z0-9\-]"
     params:
         tmp=lambda wildcards,output: output["vcf"][:-7] # TODO: Convert to more scalable method using string `split()` or similar approach
     input:
@@ -108,33 +120,6 @@ rule sort_variant_records:
         """
         bcftools sort -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
-
-
-# rule liftover:
-#     """
-#     This rule helps liftover data from one reference genome to another.
-#     """
-#     log: outputDir("tmp/liftover/{contig}/{dataset}_liftover.log")
-#     benchmark: outputDir("tmp/liftover/{contig}/{dataset}_liftover.benchmark")
-#     params:
-#         chainFile=join("resources", "hg19ToHg38.over.chain"),
-#         ref=join(
-#             *next(
-#                 reference_genome["file_path"]
-#                 for reference_genome in config["reference-genomes"]
-#                 if reference_genome["version"] == "GRCh38"
-#             ),
-#         ),
-#     input:
-#         vcf=outputDir("tmp/filtered_variant_types/{contig}/{dataset}_sorted_variant_records.vcf.gz"),
-#         tbi=outputDir("tmp/filtered_variant_types/{contig}/{dataset}_sorted_variant_records.vcf.gz.tbi"),
-#     output:
-#         vcf=outputDir("tmp/liftover/{contig}/{dataset}_liftover.vcf.gz"),
-#         rejected=outputDir("tmp/liftover/{contig}/{dataset}_liftover_rejected.vcf.gz")
-#     shell:
-#         """
-#         java -jar $PICARD LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
-#         """
 
 
 rule tabix:
