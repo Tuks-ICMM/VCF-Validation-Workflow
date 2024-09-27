@@ -76,8 +76,8 @@ rule clear_annotations:
 
 
 rule normalize_variant_records:
-    log: outputDir("tmp/normalized_variant_records/{contig}/{dataset}_normalized_variant_records.log")
-    benchmark: outputDir("tmp/normalized_variant_records/{contig}/{dataset}_normalized_variant_records.benchmark")
+    log: outputDir("tmp/{contig}/{dataset}/normalized_variant_records.log")
+    benchmark: outputDir("tmp/{contig}/{dataset}/normalized_variant_records.benchmark")
     wildcard_constraints:
         contig=r"[0-9]{1,2}", # TODO: Make this configurable
         dataset=r"[a-zA-Z0-9\-]+"
