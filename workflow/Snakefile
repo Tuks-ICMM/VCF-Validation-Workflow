@@ -28,7 +28,7 @@ report: "report/template.rst"
 
 
 # IMPORT DATASET METADATA:
-datasets = read_csv(join("input", "datasets.csv"), header=0)
+datasets = read_csv(join("input", "datasets.csv"), header=0, dtype=dict(dataset_name=str, reference_genome=str, contig=str, file=str))
 
 
 # IMPORT COMMON FUNCTIONS:
@@ -38,116 +38,222 @@ include: "rules/common.smk"
 container: "docker://graemeford/pipeline-os"
 
 
+# rule wipeInfo:
+#     """
+#     Strip out INFO tags
+#     """
+#     log: outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.log")
+#     benchmark: outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.benchmark")
+#     resources:
+#         cpus=search("cores", "wipeInfo"),
+#         nodes=search("nodes", "wipeInfo"),
+#         queue=search("queue", "wipeInfo"),
+#         walltime=search("walltime", "wipeInfo")
+#     envmodules:
+#         config["environment"]["envmodules"]["bcftools"],
+#     input:
+#         vcf=lambda wildcards: datasets.loc[
+#             datasets["dataset_name"] == wildcards.dataset_name, "file"
+#         ].unique().item(),
+#     output:
+#         vcf=outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz")
+#     shell:
+#         """
+#         bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
+#         """
+
 rule wipeInfo:
     """
     Strip out INFO tags
     """
-    log: outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.log")
-    benchmark: outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.benchmark")
-    resources:
-        cpus=search("cores", "wipeInfo"),
-        nodes=search("nodes", "wipeInfo"),
-        queue=search("queue", "wipeInfo"),
-        walltime=search("walltime", "wipeInfo")
+    log: outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.log")
+    benchmark: outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.benchmark")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
         vcf=lambda wildcards: datasets.loc[
-            datasets["dataset_name"] == wildcards.dataset_name, "file"
-        ].unique().item(),
+            (datasets["dataset_name"] == wildcards.dataset_name) &
+             (datasets["contig"] == wildcards.contig), "file"
+        ].item(),
     output:
-        vcf=outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz")
+        vcf=outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.vcf.gz")
     shell:
         """
         bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
         """
 
 
+# rule normalize:
+#     """
+#     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
+#     """
+#     log: outputDir("tmp/normalize/{dataset_name}_normalize.log")
+#     benchmark: outputDir("tmp/normalize/{dataset_name}_normalize.benchmark")
+#     resources:
+#         cpus=search("cores", "normalize"),
+#         nodes=search("nodes", "normalize"),
+#         queue=search("queue", "normalize"),
+#         walltime=search("walltime", "normalize")
+#     envmodules:
+#         config["environment"]["envmodules"]["bcftools"],
+#     input:
+#         vcf=outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz"),
+#         tbi=outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz.tbi"),
+#     output:
+#         vcf=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz")
+#     shell:
+#         """
+#         bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
+#         """
+
 rule normalize:
     """
     Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
     """
-    log: outputDir("tmp/normalize/{dataset_name}_normalize.log")
-    benchmark: outputDir("tmp/normalize/{dataset_name}_normalize.benchmark")
-    resources:
-        cpus=search("cores", "normalize"),
-        nodes=search("nodes", "normalize"),
-        queue=search("queue", "normalize"),
-        walltime=search("walltime", "normalize")
+    log: outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.log")
+    benchmark: outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.benchmark")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
-        vcf=outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz"),
-        tbi=outputDir("tmp/wipeInfo/{dataset_name}_wipeInfo.vcf.gz.tbi"),
+        vcf=outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.vcf.gz"),
+        tbi=outputDir("tmp/wipeInfo/{contig}/{dataset_name}_wipeInfo.vcf.gz.tbi"),
     output:
-        vcf=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz")
+        vcf=outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz")
     shell:
         """
         bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 
+# rule filter:
+#     """
+#     Remove variant types we cant yet analyse
+#     """
+#     log: outputDir("tmp/filter/{dataset_name}_filter.log")
+#     benchmark: outputDir("tmp/filter/{dataset_name}_filter.benchmark")
+#     resources:
+#         cpus=search("cores", "filter"),
+#         nodes=search("nodes", "filter"),
+#         queue=search("queue", "filter"),
+#         walltime=search("walltime", "filter")
+#     envmodules:
+#         config["environment"]["envmodules"]["bcftools"],
+#     params:
+#         memory=search("memory", "filter")
+#     input:
+#         vcf=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz"),
+#         tbi=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi")
+#     output:
+#         vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz")
+#         # pipe(outputDir("PREP/{dataset_name}/filter.vcf.gz"))
+#     shell:
+#         """
+#         bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
+#         """
+
 rule filter:
     """
     Remove variant types we cant yet analyse
     """
-    log: outputDir("tmp/filter/{dataset_name}_filter.log")
-    benchmark: outputDir("tmp/filter/{dataset_name}_filter.benchmark")
-    resources:
-        cpus=search("cores", "filter"),
-        nodes=search("nodes", "filter"),
-        queue=search("queue", "filter"),
-        walltime=search("walltime", "filter")
+    log: outputDir("tmp/filter/{contig}/{dataset_name}_filter.log")
+    benchmark: outputDir("tmp/filter/{contig}/{dataset_name}_filter.benchmark")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
-    params:
-        memory=search("memory", "filter")
     input:
-        vcf=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz"),
-        tbi=outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi")
+        vcf=outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz"),
+        tbi=outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz.tbi")
     output:
-        vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz")
-        # pipe(outputDir("PREP/{dataset_name}/filter.vcf.gz"))
+        vcf=outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz")
     shell:
         """
         bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
 
 
+# rule sort:
+#     """
+#     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
+#     """
+#     log: outputDir("tmp/sort/{dataset_name}_sort.log")
+#     benchmark: outputDir("tmp/sort/{dataset_name}_sort.benchmark")
+#     resources:
+#         cpus=search("cores", "sort"),
+#         nodes=search("nodes", "sort"),
+#         queue=search("queue", "sort"),
+#         walltime=search("walltime", "sort")
+#     envmodules:
+#         config["environment"]["envmodules"]["bcftools"],
+#     params:
+#         memory=search("memory", "sort"),
+#         tmp=lambda wildcards,output: output["vcf"][:-7]
+#     input:
+#         vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz"),
+#         tbi=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz.tbi")
+#     output:
+#         vcf=outputDir("tmp/sort/{dataset_name}_sort.vcf.gz")
+#     shell:
+#         # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
+#         """
+#         bcftools sort -m {params.memory} -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
+#         """
+
+
 rule sort:
     """
     Ensure consistency of chromosome nomenclature for each dataset and sort by chromosome
     """
-    log: outputDir("tmp/sort/{dataset_name}_sort.log")
-    benchmark: outputDir("tmp/sort/{dataset_name}_sort.benchmark")
-    resources:
-        cpus=search("cores", "sort"),
-        nodes=search("nodes", "sort"),
-        queue=search("queue", "sort"),
-        walltime=search("walltime", "sort")
+    log: outputDir("tmp/sort/{contig}/{dataset_name}_sort.log")
+    benchmark: outputDir("tmp/sort/{contig}/{dataset_name}_sort.benchmark")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     params:
         memory=search("memory", "sort"),
-        tmp=lambda wildcards,output: output["vcf"][:-7]
+        tmp=lambda wildcards,output: output["vcf"][:-7] # TODO: Convert to more scalable method using string `split()` or similar approach
     input:
-        vcf=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz"),
-        tbi=outputDir("tmp/filter/{dataset_name}_filter.vcf.gz.tbi")
+        vcf=outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz"),
+        tbi=outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz.tbi")
     output:
-        vcf=outputDir("tmp/sort/{dataset_name}_sort.vcf.gz")
+        vcf=outputDir("tmp/sort/{contig}/{dataset_name}_sort.vcf.gz")
     shell:
-        # TODO: Break up this internal piping and use modular rules. Especially with sort operations which have different memory requirements, worthy of consideration in a data streaming environment.
         """
         bcftools sort -m {params.memory} -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
         """
         
 
+# rule liftover:
+#     """
+#     This rule helps liftover data from one reference genome to another.
+#     """
+#     log: outputDir("tmp/liftover/{dataset_name}_liftover.log")
+#     benchmark: outputDir("tmp/liftover/{dataset_name}_liftover.benchmark")
+#     envmodules:
+#         config["environment"]["envmodules"]["picard"]
+#     params:
+#         chainFile=join("resources", "hg19ToHg38.over.chain"),
+#         ref=join(
+#             *next(
+#                 reference_genome["file_path"]
+#                 for reference_genome in config["reference-genomes"]
+#                 if reference_genome["version"] == "GRCh38"
+#             ),
+#         ),
+#     input:
+#         vcf=outputDir("tmp/filter/{dataset_name}_sort.vcf.gz"),
+#         tbi=outputDir("tmp/filter/{dataset_name}_sort.vcf.gz.tbi"),
+#     output:
+#         vcf=outputDir("tmp/liftover/{dataset_name}_liftover.vcf.gz"),
+#         rejected=outputDir("tmp_liftover/{dataset_name}_liftover_rejected.vcf.gz")
+#     shell:
+#         """
+#         java -jar $PICARD LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
+#         """
+
 rule liftover:
     """
     This rule helps liftover data from one reference genome to another.
     """
-    log: outputDir("tmp/liftover/{dataset_name}_liftover.log")
-    benchmark: outputDir("tmp/liftover/{dataset_name}_liftover.benchmark")
+    log: outputDir("tmp/liftover/{contig}/{dataset_name}_liftover.log")
+    benchmark: outputDir("tmp/liftover/{contig}/{dataset_name}_liftover.benchmark")
     envmodules:
         config["environment"]["envmodules"]["picard"]
     params:
@@ -160,77 +266,146 @@ rule liftover:
             ),
         ),
     input:
-        vcf=outputDir("tmp/filter/{dataset_name}_sort.vcf.gz"),
-        tbi=outputDir("tmp/filter/{dataset_name}_sort.vcf.gz.tbi"),
+        vcf=outputDir("tmp/filter/{contig}/{dataset_name}_sort.vcf.gz"),
+        tbi=outputDir("tmp/filter/{contig}/{dataset_name}_sort.vcf.gz.tbi"),
     output:
-        vcf=outputDir("tmp/liftover/{dataset_name}_liftover.vcf.gz"),
-        rejected=outputDir("tmp_liftover/{dataset_name}_liftover_rejected.vcf.gz")
+        vcf=outputDir("tmp/liftover/{contig}/{dataset_name}_liftover.vcf.gz"),
+        rejected=outputDir("tmp/liftover/{contig}/{dataset_name}_liftover_rejected.vcf.gz")
     shell:
         """
         java -jar $PICARD LiftoverVcf I={input.vcf} O={output.vcf} R={params.ref} C={params.chainFile} REJECT={output.rejected} 2>{log}
         """
 
 
+# rule tabix:
+#     """
+#     Generate tabix-index.
+#     """
+#     log: outputDir("tmp/{operation}/{dataset_name}_tabix.log")
+#     benchmark: outputDir("tmp/{operation}/{dataset_name}_tabix.benchmark")
+#     envmodules:
+#         config["environment"]["envmodules"]["bcftools"],
+#     input:
+#         outputDir("tmp/{operation}/{dataset_name}_{operation}.vcf.gz")
+#     output:
+#         outputDir("tmp/{operation}/{dataset_name}_{operation}.vcf.gz.tbi")
+#     shell:
+#         """
+#         tabix -p vcf {input}
+#         """
+
 rule tabix:
     """
     Generate tabix-index.
     """
-    log: outputDir("tmp/{operation}/{dataset_name}_tabix.log")
-    benchmark: outputDir("tmp/{operation}/{dataset_name}_tabix.benchmark")
+    log: outputDir("tmp/{operation}/{contig}/{dataset_name}_tabix.log")
+    benchmark: outputDir("tmp/{operation}/{contig}/{dataset_name}_tabix.benchmark")
     envmodules:
         config["environment"]["envmodules"]["bcftools"],
     input:
-        outputDir("tmp/{operation}/{dataset_name}_{operation}.vcf.gz")
+        outputDir("tmp/{operation}/{contig}/{dataset_name}_{operation}.vcf.gz")
     output:
-        outputDir("tmp/{operation}/{dataset_name}_{operation}.vcf.gz.tbi")
+        outputDir("tmp/{operation}/{contig}/{dataset_name}_{operation}.vcf.gz.tbi")
     shell:
         """
         tabix -p vcf {input}
         """
 
 
+# # Start conditional output file list ocnstruction:
+# output_files = list()
+
+# output_files.append(
+#     expand(
+#         outputDir("tmp/sort/{dataset_name}_sort.vcf.gz"), 
+#         dataset_name=list(datasets["dataset_name"])
+#         )
+# )
+# output_files.append(
+#     expand(
+#         outputDir("tmp/sort/{dataset_name}_sort.vcf.gz.tbi"), 
+#         dataset_name=list(datasets["dataset_name"])
+#         )
+# )
+
+# # Include output for rule 'normalize'
+# output_files.append(
+#     expand(
+#         outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz"), 
+#         dataset_name=list(datasets["dataset_name"])
+#         )
+# )
+# output_files.append(
+#     expand(
+#         outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi"), 
+#         dataset_name=list(datasets["dataset_name"])
+#         )
+# )
+
+
+# # Include output for rule 'filter'
+# output_files.append(
+#     expand(
+#         outputDir("tmp/filter/{dataset_name}_filter.vcf.gz"), 
+#         dataset_name=list(datasets["dataset_name"])
+#         )
+# )
+# output_files.append(
+#     expand(
+#         outputDir("tmp/filter/{dataset_name}_filter.vcf.gz.tbi"), 
+#         dataset_name=list(datasets["dataset_name"])
+#         )
+# )
+
+
 # Start conditional output file list ocnstruction:
 output_files = list()
 
-output_files.append(
+output_files.extend(
     expand(
-        outputDir("tmp/sort/{dataset_name}_sort.vcf.gz"), 
-        dataset_name=list(datasets["dataset_name"])
+        outputDir("tmp/sort/{contig}/{dataset_name}_sort.vcf.gz"), 
+        dataset_name=datasets["dataset_name"].unique().tolist(),
+        contig=datasets["contig"].unique().tolist()
         )
 )
-output_files.append(
+output_files.extend(
     expand(
-        outputDir("tmp/sort/{dataset_name}_sort.vcf.gz.tbi"), 
-        dataset_name=list(datasets["dataset_name"])
+        outputDir("tmp/sort/{contig}/{dataset_name}_sort.vcf.gz.tbi"), 
+        dataset_name=datasets["dataset_name"].unique().tolist(),
+        contig=datasets["contig"].unique().tolist()
         )
 )
 
 # Include output for rule 'normalize'
-output_files.append(
+output_files.extend(
     expand(
-        outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz"), 
-        dataset_name=list(datasets["dataset_name"])
+        outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz"), 
+        dataset_name=datasets["dataset_name"].unique().tolist(),
+        contig=datasets["contig"].unique().tolist()
         )
 )
-output_files.append(
+output_files.extend(
     expand(
-        outputDir("tmp/normalize/{dataset_name}_normalize.vcf.gz.tbi"), 
-        dataset_name=list(datasets["dataset_name"])
+        outputDir("tmp/normalize/{contig}/{dataset_name}_normalize.vcf.gz.tbi"),
+        dataset_name=datasets["dataset_name"].unique().tolist(),
+        contig=datasets["contig"].unique().tolist()
         )
 )
 
 
 # Include output for rule 'filter'
-output_files.append(
+output_files.extend(
     expand(
-        outputDir("tmp/filter/{dataset_name}_filter.vcf.gz"), 
-        dataset_name=list(datasets["dataset_name"])
+        outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz"), 
+        dataset_name=datasets["dataset_name"].unique().tolist(),
+        contig=datasets["contig"].unique().tolist()
         )
 )
-output_files.append(
+output_files.extend(
     expand(
-        outputDir("tmp/filter/{dataset_name}_filter.vcf.gz.tbi"), 
-        dataset_name=list(datasets["dataset_name"])
+        outputDir("tmp/filter/{contig}/{dataset_name}_filter.vcf.gz.tbi"), 
+        dataset_name=datasets["dataset_name"].unique().tolist(),
+        contig=datasets["contig"].unique().tolist()
         )
 )
 
@@ -252,11 +427,11 @@ output_files.append(
 for reference_genome, groupby_subset in datasets.set_index(["reference_genome", "file"]).groupby(level=0): # [FOR] all unqiue (dataset_name and reference_genome) column combinations present
     if reference_genome != "GRCh38" and groupby_subset is not None: # [IF] reference genome version
         for dataset_name in groupby_subset.index.get_level_values(0): # [FOR] the column in our MultiIndex that contains the dataset_name's in this subset
-            output_files.append(
+            output_files.extend(
                 # [EACH] add liftover request for the DAG
                 outputDir("PREP/{dataset_name}/liftover.vcf.gz").format(dataset_name)
             )
-            output_files.append(
+            output_files.extend(
                 # [EACH]{QC} add liftover snapshot
                 outputDir("PREP/{dataset_name}/liftover.pdf").format(dataset_name)
             )
@@ -268,4 +443,5 @@ rule all:
     log: outputDir("all.log"),
     benchmark: outputDir("all.benchmark")
     input:
-        [item for sublist in output_files for item in sublist],
+        # [item for sublist in output_files for item in sublist],
+        output_files
