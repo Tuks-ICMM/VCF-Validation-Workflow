@@ -38,94 +38,9 @@ include: "rules/common.smk"
 container: "docker://graemeford/pipeline-os"
 
 
-rule clear_annotations:
-    """
-    Strip out INFO tags
-    """
-    log: outputDir("tmp/{contig}/{dataset}/cleared_annotations.log")
-    benchmark: outputDir("tmp/{contig}/{dataset}/cleared_annotations.benchmark")
-    wildcard_constraints:
-        contig=r"[0-9]{1,2}", # TODO: Make this configurable
-        dataset=r"[a-zA-Z0-9\-]"
-    input:
-        vcf=lambda wildcards: datasets.loc[
-            (datasets["dataset_name"] == wildcards.dataset) &
-             (datasets["contig"] == wildcards.contig), "file"
-        ].item(),
-    output:
-        vcf=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz")
-    shell:
-        """
-        bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
-        """
-
-
-rule normalize_variant_records:
-    """
-    Normalise variants - split multiallelic records, left align variants, and ensure variant parsimony
-    """
-    log: outputDir("tmp/normalized_variant_records/{contig}/{dataset}_normalized_variant_records.log")
-    benchmark: outputDir("tmp/normalized_variant_records/{contig}/{dataset}_normalized_variant_records.benchmark")
-    wildcard_constraints:
-        contig=r"[0-9]{1,2}", # TODO: Make this configurable
-        dataset=r"[a-zA-Z0-9\-]"
-    input:
-        vcf=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz"),
-        tbi=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz.tbi"),
-    output:
-        vcf=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz")
-    shell:
-        """
-        bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
-        """
-
-
-rule filter_variant_types:
-    """
-    Remove variant types we cant yet analyse
-    """
-    log: outputDir("tmp/{contig}/{dataset}/filtered_variant_types.log")
-    benchmark: outputDir("tmp/{contig}/{dataset}/filtered_variant_types.benchmark")
-    wildcard_constraints:
-        contig=r"[0-9]{1,2}", # TODO: Make this configurable
-        dataset=r"[a-zA-Z0-9\-]"
-    input:
-        vcf=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz"),
-        tbi=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz.tbi")
-    output:
-        vcf=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz")
-    shell:
-        """
-        bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
-        """
-
-
-rule sort_variant_records:
-    """
-    Ensure consistency of chromosome nomenclature for each dataset and sorted_variant_records by chromosome
-    """
-    log: outputDir("tmp/{contig}/{dataset}/sorted_variant_records.log")
-    benchmark: outputDir("tmp/{contig}/{dataset}/sorted_variant_records.benchmark")
-    wildcard_constraints:
-        contig=r"[0-9]{1,2}", # TODO: Make this configurable
-        dataset=r"[a-zA-Z0-9\-]"
-    params:
-        tmp=lambda wildcards,output: output["vcf"][:-7] # TODO: Convert to more scalable method using string `split()` or similar approach
-    input:
-        vcf=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz"),
-        tbi=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz.tbi")
-    output:
-        vcf=outputDir("tmp/{contig}/{dataset}/sorted_variant_records.vcf.gz")
-    shell:
-        """
-        bcftools sort -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
-        """
 
 
 rule tabix:
-    """
-    Generate tabix-index.
-    """
     log: outputDir("tmp/{contig}/{dataset}/{operation}_tabix.log")
     benchmark: outputDir("tmp/{contig}/{dataset}/{operation}_tabix.benchmark")
     wildcard_constraints:
@@ -140,6 +55,78 @@ rule tabix:
         """
         tabix -p vcf {input}
         """
+
+rule clear_annotations:
+    log: outputDir("tmp/{contig}/{dataset}/cleared_annotations.log")
+    benchmark: outputDir("tmp/{contig}/{dataset}/cleared_annotations.benchmark")
+    wildcard_constraints:
+        contig=r"[0-9]{1,2}", # TODO: Make this configurable
+        dataset=r"[a-zA-Z0-9\-]+"
+    input:
+        vcf=lambda wildcards: datasets.loc[
+            (datasets["dataset_name"] == wildcards.dataset) &
+             (datasets["contig"] == wildcards.contig), "file"
+        ].item(),
+    output:
+        vcf=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz")
+    shell:
+        """
+        bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
+        """
+
+
+rule normalize_variant_records:
+    log: outputDir("tmp/normalized_variant_records/{contig}/{dataset}_normalized_variant_records.log")
+    benchmark: outputDir("tmp/normalized_variant_records/{contig}/{dataset}_normalized_variant_records.benchmark")
+    wildcard_constraints:
+        contig=r"[0-9]{1,2}", # TODO: Make this configurable
+        dataset=r"[a-zA-Z0-9\-]+"
+    input:
+        vcf=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz"),
+        tbi=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz.tbi"),
+    output:
+        vcf=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz")
+    shell:
+        """
+        bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
+
+
+rule filter_variant_types:
+    log: outputDir("tmp/{contig}/{dataset}/filtered_variant_types.log")
+    benchmark: outputDir("tmp/{contig}/{dataset}/filtered_variant_types.benchmark")
+    wildcard_constraints:
+        contig=r"[0-9]{1,2}", # TODO: Make this configurable
+        dataset=r"[a-zA-Z0-9\-]+"
+    input:
+        vcf=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz"),
+        tbi=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz.tbi")
+    output:
+        vcf=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz")
+    shell:
+        """
+        bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
+
+
+rule sort_variant_records:
+    log: outputDir("tmp/{contig}/{dataset}/sorted_variant_records.log")
+    benchmark: outputDir("tmp/{contig}/{dataset}/sorted_variant_records.benchmark")
+    wildcard_constraints:
+        contig=r"[0-9]{1,2}", # TODO: Make this configurable
+        dataset=r"[a-zA-Z0-9\-]+"
+    params:
+        tmp=lambda wildcards,output: output["vcf"][:-7] # TODO: Convert to more scalable method using string `split()` or similar approach
+    input:
+        vcf=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz"),
+        tbi=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz.tbi")
+    output:
+        vcf=outputDir("tmp/{contig}/{dataset}/sorted_variant_records.vcf.gz")
+    shell:
+        """
+        bcftools sort -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
+        """
+
 
 
 # Start conditional output file list ocnstruction:
