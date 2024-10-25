@@ -8,7 +8,7 @@ nav_order: 1
 
 # How to use the <i>{{site.title}}</i>
 
-Welcome to the <i>{{site.title}}</i>. This is a documentation site (hosted alongside the active codebase) which contains instructions and technical explanations on the use of <i>{{ site.title }}</i>. This workflow was created by <a href="https://github.com/G-kodes" target="_blank">{% avatar G-Kodes size=15 %} Graeme Ford</a> to perform VCF validation.
+Welcome to the <i>{{site.title}}</i>. This is a documentation site (hosted alongside the active codebase) which contains instructions and technical explanations on the use of <i>{{ site.title }}</i>. This workflow was created by <a href="https://github.com/G-kodes" target="_blank">{% avatar G-Kodes size=15 %} Graeme Ford</a> to validate VCF files and perform pre-processing.
 
 # Acknowledgements
 
@@ -60,8 +60,28 @@ Many thanks to the following individuals who have been instrumental to the succe
     </td>
     <td style="text-align:center;">
       <div>
-        <img src="https://www.up.ac.za/media/shared/489/ZP_Images/michael-pepper-message.zp39643.jpg"
-          width="100" alt="Prof. Michael S. Pepper" />
+        {% avatar Fatimabp size=100 %}
+      </div>
+      <h4>Contributor</h4>
+      <hr />
+      <h4>
+        <strong>
+          <a href="https://www.linkedin.com/in/fatima-barmania-a1201238/" target="_blank">
+            Fatima Barmania-Faruk
+          </a>
+        </strong>
+      </h4>
+      <h6>
+        <italic>
+          <a href="https://github.com/orgs/Tuks-ICMM/people/Fatimabp" target="_blank">
+            Fatimabp
+          </a>
+        </italic>
+      </h6>
+    </td>
+    <td style="text-align:center;">
+      <div>
+          {% avatar MichaelSPepper size=100 %}
       </div>
       <h4>Supervisor</h4>
       <hr />
@@ -104,33 +124,10 @@ Many thanks to the following individuals who have been instrumental to the succe
         </italic>
       </h6>
     </td>
-    <td style="text-align:center;">
-      <div>
-        {% avatar Fatimabp size=100 %}
-      </div>
-      <h4>Tester</h4>
-      <hr />
-      <h4>
-        <strong>
-          <a href="https://www.linkedin.com/in/fatima-barmania-a1201238/" target="_blank">
-            Fatima Barmania-Faruk
-          </a>
-        </strong>
-      </h4>
-      <h6>
-        <italic>
-          <a href="https://github.com/orgs/Tuks-ICMM/people/Fatimabp" target="_blank">
-            Fatimabp
-          </a>
-        </italic>
-      </h6>
-    </td>
+    
   </tr>
 </table>
 
-# Technical Information
-
-Here is a quick summary of all project-wide technical information.
 
 ## Software License
 

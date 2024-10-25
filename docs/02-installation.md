@@ -20,4 +20,9 @@ Reference Genome Configuration
 
 ---
 
-The <i>{{site.title}}</i> uses a global configuration located in `config/config.json` to record information that is not analysis-specific. This file contains a top-level JSON `object` to record the configuration options. These have been broken down and are accessible via the table of contents below.
+This workflow has been designed using [Snakemake](https://snakemake.github.io/), a python library for building scalable, modular processing workflows using a domain-specific language based on Python.
+
+
+## Configuration
+
+The <i>{{site.title}}</i> workflow makes use of a configuration file, located in `config/config.json`, to declare system information required at runtime, which is not related to analysis. This file contains a top-level JSON `object` to record the configuration options. These have been broken down and are accessible via the table of contents below.
