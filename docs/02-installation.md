@@ -1,7 +1,7 @@
 ---
-title: Installation
+title: Configuration
 layout: page
-permalink: installation
+permalink: configuration
 nav_order: 2
 has_children: true
 ---
