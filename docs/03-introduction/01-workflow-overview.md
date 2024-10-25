@@ -27,8 +27,14 @@ A breakdown of the analyses performed by this workflow.
 ---
 
 The <i>{{ site.title }}</i> design follows the following order-of-events graph:
+<details open markdown="block">
+  <summary>Rule Map/Diagram</summary>
+  {: .text-delta }
 
 ```mermaid
+---
+title: VCF Validation Workflow
+---
 flowchart TD
 
   classDef bcftools stroke:#FF5733,fill:#D3D3D3,stroke-width:4px,color:black;
@@ -77,3 +83,5 @@ flowchart TD
       wipeInfo --> normalize --> sort --> filter --> annotate --> liftoverProtocol
   end
 ```
+
+</details>
