@@ -1,9 +1,9 @@
 ---
-title: Reference-Genomes
+title: Reference Genomes
 layout: page
-permalink: installation/reference-genomes
+permalink: configuration/reference-genomes
 nav_order: 1
-parent: Installation
+parent: configuration
 has_children: false
 ---
 
