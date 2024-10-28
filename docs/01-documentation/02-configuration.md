@@ -4,6 +4,7 @@ layout: page
 permalink: configuration
 nav_order: 2
 has_children: true
+parent: Documentation
 ---
 
 # Introduction

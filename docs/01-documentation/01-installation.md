@@ -4,6 +4,7 @@ layout: page
 permalink: installation
 nav_order: 1
 has_children: false
+parent: Documentation
 ---
 
 # How to configure the workflow
