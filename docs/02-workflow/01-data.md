@@ -1,12 +1,12 @@
 ---
-title: Data Requirements
+title: Data
 layout: page
-permalink: introduction/data-requirements
+permalink: introduction/data
 nav_order: 2
-parent: Introduction
+parent: Workflow
 ---
 
-# Data Requirements
+# Data
 {: .no_toc }
 
 A summary of all data required in order to use this workflow.
@@ -23,6 +23,8 @@ A summary of all data required in order to use this workflow.
 1. TOC
 {:toc}
 </details>
+
+---
 
 In order to run the <i>{{ site.title }}</i>, you will need to provide samples, and information about those samples. We have described a series of tables below, to describe your samples and datasets for analysis.
 

@@ -1,9 +1,9 @@
 ---
-title: Configuration
+title: Installation
 layout: page
-permalink: configuration
-nav_order: 2
-has_children: true
+permalink: installation
+nav_order: 1
+has_children: false
 ---
 
 # How to configure the workflow

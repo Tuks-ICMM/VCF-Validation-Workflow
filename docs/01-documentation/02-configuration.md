@@ -1,8 +1,8 @@
 ---
-title: Introduction
+title: Configuration
 layout: page
-permalink: introduction
-nav_order: 3
+permalink: configuration
+nav_order: 2
 has_children: true
 ---
 

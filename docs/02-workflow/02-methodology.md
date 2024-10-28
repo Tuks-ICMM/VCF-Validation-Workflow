@@ -1,12 +1,12 @@
 ---
-title: Workflow Overview
+title: Methodology
 layout: page
-permalink: introduction/workflow-overview
-nav_order: 1
-parent: Introduction
+permalink: workflow/methodology
+nav_order: 2
+parent: Workflow
 ---
 
-# Introduction
+# Methodology
 {: .no_toc }
 
 A breakdown of the analyses performed by this workflow.
