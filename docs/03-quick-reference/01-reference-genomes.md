@@ -1,10 +1,10 @@
 ---
 title: Reference Genomes
 layout: page
-permalink: configuration/reference-genomes
-nav_order: 1
-parent: configuration
+permalink: quick-reference/reference-genomes
 has_children: false
+nav_order: 1
+parent: Quick Reference
 ---
 
 # Reference Genomes

@@ -1,7 +1,7 @@
 ---
 title: Usage
-permalink: documentation/usage
 layout: page
+permalink: documentation/usage
 nav_order: 3
 has_children: false
 parent: Documentation

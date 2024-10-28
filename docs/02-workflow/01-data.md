@@ -1,7 +1,7 @@
 ---
 title: Data
 layout: page
-permalink: introduction/data
+permalink: workflow/data
 nav_order: 2
 parent: Workflow
 ---

@@ -1,9 +1,9 @@
 ---
 title: Quickstart
 layout: page
-parent: Cheat Sheets
+permalink: quick-reference/quickstart
 nav_order: 1
-permalink: cheat-sheets/quickstart
+parent: Quick Reference
 ---
 
 # Quickstart
