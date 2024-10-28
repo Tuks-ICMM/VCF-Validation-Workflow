@@ -2,7 +2,7 @@
 title: Welcome
 layout: home
 permalink: /
-nav_order: 1
+nav_order: 0
 ---
 <!-- <div>
     <img src="https://github.com/Tuks-ICMM/Pharmacogenetic-Analysis-Pipeline/actions/workflows/snakemake-tests.yml/badge.svg"
