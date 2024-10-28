@@ -1,7 +1,7 @@
 ---
 title: Installation
 layout: page
-permalink: installation
+permalink: documentation/installation
 nav_order: 1
 has_children: false
 parent: Documentation

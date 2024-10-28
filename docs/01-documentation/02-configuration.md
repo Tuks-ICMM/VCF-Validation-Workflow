@@ -1,9 +1,9 @@
 ---
 title: Configuration
 layout: page
-permalink: configuration
+permalink: documentation/configuration
 nav_order: 2
-has_children: true
+has_children: false
 parent: Documentation
 ---
 
