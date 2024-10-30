@@ -44,7 +44,6 @@ plugins:
   - jekyll-avatar
   - jekyll-sitemap
   - jekyll-seo-tag
-  - "jekyll-github-metadata"
 
 color_scheme: "dark"
 
