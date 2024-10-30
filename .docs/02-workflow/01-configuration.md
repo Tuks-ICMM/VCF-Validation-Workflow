@@ -1,10 +1,10 @@
 ---
 title: Configuration
 layout: page
-permalink: documentation/configuration
-nav_order: 2
+permalink: workflow/configuration
+nav_order: 1
 has_children: false
-parent: Documentation
+parent: Workflow
 ---
 
 # Configuration
