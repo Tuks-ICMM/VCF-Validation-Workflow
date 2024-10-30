@@ -6,7 +6,7 @@ nav_order: 1
 has_children: true
 ---
 
-# Introduction
+# Documentation
 
 Standardising VCF file handeling for accurate analysis and post-processing
 {: .fs-6 .fw-300 }

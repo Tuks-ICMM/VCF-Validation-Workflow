@@ -18,20 +18,15 @@
 # You can create any custom variable you would like, and they will be accessible
 # in the templates via {{ site.myvariable }}.
 
-# title: VCF-Validator
+title: VCF Validation Workflow
 tagline: A snakemake pipeline for validating VCF files.
 email: graeme.ford@tuks.co.za
-# description: >- # this means to ignore newlines until "domain:"
-#   A computational pipeline to validate VCF files.
+description: >- # this means to ignore newlines until "domain:"
+  A computational pipeline to validate VCF files.
 domain: "tuks-icmm.github.io"
-# baseurl: "/VCF-Validation-Workflow" # the subpath of your site, e.g. /blog
-# url: "https://tuks-icmm.github.io" # the base hostname & protocol for your site, e.g. http://example.com
+baseurl: "/VCF-Validation-Workflow" # the subpath of your site, e.g. /blog
+url: "https://tuks-icmm.github.io" # the base hostname & protocol for your site, e.g. http://example.com
 github_username: G-Kodes
-
-mermaid:
-  # Version of mermaid library
-  # Pick an available version from https://cdn.jsdelivr.net/npm/mermaid/
-  version: "11.3.0"
 
 # For copy button on code and syntax highlighting css classes with Rouge
 enable_copy_code_button: true
@@ -81,7 +76,7 @@ gh_edit_link: true # show or hide edit this page link
 gh_edit_link_text: "View this page on GitHub."
 gh_edit_repository: "https://github.com/Tuks-ICMM/Vcf-Validation" # the github URL for your repo
 gh_edit_branch: "main" # the branch that your docs is served from
-gh_edit_source: docs # the source that your files originate from
+gh_edit_source: ".docs" # the source that your files originate from
 gh_edit_view_mode: "tree" # "tree" or "edit" if you want the user to jump into the editor immediately
 
 # SEO
