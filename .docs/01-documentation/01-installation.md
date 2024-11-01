@@ -21,22 +21,27 @@ Reference Genome Configuration
 
 ---
 
-This workflow was created by <a href="https://github.com/G-kodes" target="_blank">{% avatar G-Kodes size=15 %} Graeme Ford</a> under the [Institute for Cellular and Molecular Medicine (ICMM)](https://www.up.ac.za/institute-for-cellular-and-molecular-medicine). This workflow is maintained and distributed through the [ICMM GitHub page](https://github.com/Tuks-ICMM), where releases are versioned for convenience.
+
+This workflow is maintained and distributed through the [ICMM GitHub page](https://github.com/Tuks-ICMM). The source-code has been versioned according to publications and relevant checkpoints, and can be downloaded via a git clone command:
+
+```bash
+git clone https://github.com/Tuks-ICMM/VCF-Validation-Workflow.git
+```
+
+If you would like to clone a specific version, versions are declared and maintained via the repositories [releases page](https://github.com/Tuks-ICMM/VCF-Validation-Workflow/tags). To access a version, users can clone the repository, and perform a <code>checkout</code> command, providing the version to checkout:
+
+```bash
+git clone https://github.com/Tuks-ICMM/VCF-Validation-Workflow.git
+git checkout tags/<release_version>
+```
 
 
+## Dependencies
 
-## Dependencies overview
+This workflow is built and powered using a python-based framework for workflow management. In addition, we make use of several underlying bioinformatics tools and third-party command-line programs to perform some steps in the analysis (For more information, see the [methodology page](/workflow/methodology)):
 
-The <i>{{site.title}}</i> workflow makes use of a configuration file, located in `config/config.json`, to declare system information required at runtime, which is not related to analysis. This file contains a top-level JSON `object` to record the configuration options. These have been broken down and are accessible via the table of contents below.
-
-This workflow is built and powered using a python-based framework for workflow management. In addition, we make use of several underlying bioinformatics toolkits and third-party command-line programs to perform some steps in the analysis (For more information, see the [methodology page](/workflow/methodology)).
-
-
-- Download a copy of the [Pharmacogenetics Analysis Workflow](https://github.com/Tuks-ICMM/Pharmacogenetic-Analysis-Pipeline)
-- Prepare a [Python](https://github.com/Tuks-ICMM/Pharmacogenetic-Analysis-Pipeline) environment with basic dependencies installed
-- Download and install required CLI dependencies:
-    - Python
-    - BCFtools
+- Python
+- BCFtools
 
 
 ### Python
