@@ -163,7 +163,7 @@ To do this, you may use the `queue` key to describing the available PBS-Torque r
   <br><i>E.g. 1</i></dd>
 
   <dt><strong>rules</strong> <code>&lt;array [&lt;str&gt;]&gt;</code></dt>
-  <dd>An array of rules this rule should be used for. For a reference of rules, please reference the rules list included in teh example below.</dd>
+  <dd>An array of rules this rule should be used for. For a reference of rules, please reference the rules list included in the example below.</dd>
 </dl>
 
 
