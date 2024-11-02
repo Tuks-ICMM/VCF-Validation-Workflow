@@ -31,8 +31,8 @@ To perform an analysis with this workflow, users will need to configure the work
 
 
 <details markdown="block" open>
-    <summary>Input Data Infographic</summary>
-    {: .text-delta }
+  <summary>Input Data Infographic</summary>
+  {: .text-delta }
 
 ```mermaid
 ---
@@ -227,77 +227,3 @@ The dataset metadata file allows you to declare information about your datasets 
 | HG002            | GRCh38               | `/nlustre/users/graeme/PUBLIC/GenomeInABottle/HG002.vcf.gz` |
 
 </details>
-
----
-
-
-
-
-
-
-
-
-
-
-
-<!-- 
-
-### Dataset Subdivisions
-
-The VCF files provided for analysis should be split by contigs. This convention reduces unnecessary processing times associated with genomic content that is not relevant to the coordinates being targeted.
-
-###  VCF Compression and Indexing
-
-VCF datasets are often quite large in uncompressed form. These files are text-based, and require parsing that reduces I/O performance. They are prone to large sizes by nature, and can contain variable-length annotation columns. For these reasons, this workflow has been configured to convert to remove annotation columns, and perform BGZip-compression and tabix-indexing for the sake of computational efficiency.
-
-
-{: .normal }
-> <b>Block Compression</b> is a non-standard type of compression. This means it is not the same as the default compression type used on Windows or MacOS. At a high level, it is used to compress files in a series of blocks or chunks. It is typically used in tandem with some kind of index, to enable targeted decompression and access of specific records. This eliminates the need to decompress the whole file.
->
-> In computational biology applications, block-compression is combined with a <b>Tabix Index</b> to record the coordinate coverage/bounds in each compressed block. This allows targeted decompression of spesific regions for analysis, as opposed to having to parse the entire file until the requested coordinates are found.
->
-> Both block-compression and tabix indexing are provided by [SamTools](http://www.htslib.org/doc/bgzip.html).
-
-## Metadata Declarations
-
-To run the _{{ site.title }}_, you will need to provide some additional contextual information. All metadata is provided in the form of appropriately named ` .csv` files located in the `input` directory.
-
-{: .normal-title }
-> Case sensitivity
->
-> The following metadata declaration files use _**case-sensitive column names**_.
-
----
-
-<h3><code>datasets.csv</code></h3>
-
-The `datasets.csv` file allows you to declare datasets and provide the necessary dataset-level information for use in this pipeline.
-
-<details markdown="block">
-    <summary><code>datasets.csv</code> format example</summary>
-    {: .text-delta }
-    
-<dl class="def-wide">
-  <dt>dataset_name <code>&lt;str&gt;</code></dt>
-  <dd>The name of the dataset. This value will be used as a universal accessor for that dataset and any information relating to it. This means that any output files will use this value to determine things like filenames, etc. It is also used to connect other metadata to this dataset computationally, E.g. sample-level information.
-  
-  <br><strong><i>E.g. <code>1000G</code></i></strong></dd>
-  
-  <dt>reference_genome <code>&lt;str&gt;</code></dt>
-  <dd>An <code>enum</code> indicating which reference genome version this dataset has been called on.
-  
-  <br><strong><i>E.g. <code>GRCh37</code> or <code>GRCh38</code></i></strong></dd>
-  
-  <dt>file <code>&lt;file_path&gt;</code></dt>
-  <dd>A file path indicating the location of the dataset to be used in the analysis.
-  
-  <br><strong><i>E.g. <code>GRCh37</code> or <code>GRCh38</code></i></strong></dd>
-</dl>
-
-| **dataset_name** | **reference_genome** | **file**                                                    |
-| :--------------- | :------------------- | :---------------------------------------------------------- |
-| HG002            | GRCh38               | `/nlustre/users/graeme/PUBLIC/GenomeInABottle/HG002.vcf.gz` |
-| HG002            | GRCh38               | `/nlustre/users/graeme/PUBLIC/GenomeInABottle/HG002.vcf.gz` |
-| HG002            | GRCh38               | `/nlustre/users/graeme/PUBLIC/GenomeInABottle/HG002.vcf.gz` |
-
-</details> -->
