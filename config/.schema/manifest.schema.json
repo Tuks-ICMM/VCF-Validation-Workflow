@@ -1,0 +1,61 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "description": "A configuration file for the VCF Validation Workflow",
+    "type": "object",
+    "required": [
+        "input",
+        "output",
+        "resources"
+    ],
+    "properties": {
+        "input": {
+            "type": "object",
+            "required": [
+                "datasets"
+            ],
+            "properties": {
+                "datasets": {
+                    "type": "list",
+                    "minItems": 1,
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "output": {
+            "type": "list",
+            "minItems": 1,
+            "items": {
+                "type": "string"
+            }
+        },
+        "resources": {
+            "type": "object",
+            "required": [
+                "reference_genomes"
+            ],
+            "properties": {
+                "reference_genomes": {
+                    "type": "list",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string"
+                            },
+                            "path": {
+                                "type": "list",
+                                "minItems": 1,
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

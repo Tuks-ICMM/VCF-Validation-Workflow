@@ -1,4 +1,4 @@
-from snakemake.utils import min_version
+from snakemake.utils import min_version, validate
 from pandas import read_csv, MultiIndex
 from os.path import join, isfile
 
@@ -21,6 +21,7 @@ min_version("7")
 
 # DEFINE CONFIG FILE FOR SNAKEMAKE:
 configfile: join("config", "manifest.json")
+validate(config, join("..", "config", ".schema", "manifest.schema.json"))
 
 
 # SET REPORT TEMPLATE
@@ -41,24 +42,24 @@ container: "docker://graemeford/pipeline-os"
 
 
 rule tabix:
-    log: outputDir("tmp/{contig}/{dataset}/{operation}_tabix.log")
-    benchmark: outputDir("tmp/{contig}/{dataset}/{operation}_tabix.benchmark")
+    log: out("tmp/{contig}/{dataset}/{operation}_tabix.log")
+    benchmark: out("tmp/{contig}/{dataset}/{operation}_tabix.benchmark")
     wildcard_constraints:
         contig=r"[0-9]{1,2}", # TODO: Make this configurable
         dataset=r"[a-zA-Z0-9\-]+",
         operation=r"[a-zA-Z0-9\-\_]+",
     input:
-        outputDir("tmp/{contig}/{dataset}/{operation}.vcf.gz")
+        out("tmp/{contig}/{dataset}/{operation}.vcf.gz")
     output:
-        outputDir("tmp/{contig}/{dataset}/{operation}.vcf.gz.tbi")
+        out("tmp/{contig}/{dataset}/{operation}.vcf.gz.tbi")
     shell:
         """
         tabix -p vcf {input}
         """
 
 rule clear_annotations:
-    log: outputDir("tmp/{contig}/{dataset}/cleared_annotations.log")
-    benchmark: outputDir("tmp/{contig}/{dataset}/cleared_annotations.benchmark")
+    log: out("tmp/{contig}/{dataset}/cleared_annotations.log")
+    benchmark: out("tmp/{contig}/{dataset}/cleared_annotations.benchmark")
     wildcard_constraints:
         contig=r"[0-9]{1,2}", # TODO: Make this configurable
         dataset=r"[a-zA-Z0-9\-]+"
@@ -68,7 +69,7 @@ rule clear_annotations:
              (datasets["contig"] == wildcards.contig), "file"
         ].item(),
     output:
-        vcf=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz")
+        vcf=out("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz")
     shell:
         """
         bcftools annotate -x INFO,FORMAT -Oz -o {output.vcf} {input.vcf} 2>{log}
@@ -76,16 +77,16 @@ rule clear_annotations:
 
 
 rule normalize_variant_records:
-    log: outputDir("tmp/{contig}/{dataset}/normalized_variant_records.log")
-    benchmark: outputDir("tmp/{contig}/{dataset}/normalized_variant_records.benchmark")
+    log: out("tmp/{contig}/{dataset}/normalized_variant_records.log")
+    benchmark: out("tmp/{contig}/{dataset}/normalized_variant_records.benchmark")
     wildcard_constraints:
         contig=r"[0-9]{1,2}", # TODO: Make this configurable
         dataset=r"[a-zA-Z0-9\-]+"
     input:
-        vcf=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz"),
-        tbi=outputDir("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz.tbi"),
+        vcf=out("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz"),
+        tbi=out("tmp/{contig}/{dataset}/cleared_annotations.vcf.gz.tbi"),
     output:
-        vcf=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz")
+        vcf=out("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz")
     shell:
         """
         bcftools norm -m -any -O z -o {output.vcf} < {input.vcf} 2>{log}
@@ -93,16 +94,16 @@ rule normalize_variant_records:
 
 
 rule filter_variant_types:
-    log: outputDir("tmp/{contig}/{dataset}/filtered_variant_types.log")
-    benchmark: outputDir("tmp/{contig}/{dataset}/filtered_variant_types.benchmark")
+    log: out("tmp/{contig}/{dataset}/filtered_variant_types.log")
+    benchmark: out("tmp/{contig}/{dataset}/filtered_variant_types.benchmark")
     wildcard_constraints:
         contig=r"[0-9]{1,2}", # TODO: Make this configurable
         dataset=r"[a-zA-Z0-9\-]+"
     input:
-        vcf=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz"),
-        tbi=outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz.tbi")
+        vcf=out("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz"),
+        tbi=out("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz.tbi")
     output:
-        vcf=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz")
+        vcf=out("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz")
     shell:
         """
         bcftools view -v snps -f PASS -O z -o {output.vcf} < {input.vcf} 2>{log}
@@ -110,18 +111,18 @@ rule filter_variant_types:
 
 
 rule sort_variant_records:
-    log: outputDir("tmp/{contig}/{dataset}/sorted_variant_records.log")
-    benchmark: outputDir("tmp/{contig}/{dataset}/sorted_variant_records.benchmark")
+    log: out("tmp/{contig}/{dataset}/sorted_variant_records.log")
+    benchmark: out("tmp/{contig}/{dataset}/sorted_variant_records.benchmark")
     wildcard_constraints:
         contig=r"[0-9]{1,2}", # TODO: Make this configurable
         dataset=r"[a-zA-Z0-9\-]+"
     params:
         tmp=lambda wildcards,output: output["vcf"][:-7] # TODO: Convert to more scalable method using string `split()` or similar approach
     input:
-        vcf=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz"),
-        tbi=outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz.tbi")
+        vcf=out("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz"),
+        tbi=out("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz.tbi")
     output:
-        vcf=outputDir("tmp/{contig}/{dataset}/sorted_variant_records.vcf.gz")
+        vcf=out("tmp/{contig}/{dataset}/sorted_variant_records.vcf.gz")
     shell:
         """
         bcftools sort -T {params.tmp} -O z -o {output.vcf} < {input.vcf} 2>{log}
@@ -134,14 +135,14 @@ output_files = list()
 
 output_files.extend(
     expand(
-        outputDir("tmp/{contig}/{dataset}/sorted_variant_records.vcf.gz"), 
+        out("tmp/{contig}/{dataset}/sorted_variant_records.vcf.gz"), 
         dataset=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
 )
 output_files.extend(
     expand(
-        outputDir("tmp/{contig}/{dataset}/sorted_variant_records.vcf.gz.tbi"), 
+        out("tmp/{contig}/{dataset}/sorted_variant_records.vcf.gz.tbi"), 
         dataset=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
@@ -150,14 +151,14 @@ output_files.extend(
 # Include output for rule 'normalized_variant_records'
 output_files.extend(
     expand(
-        outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz"), 
+        out("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz"), 
         dataset=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
 )
 output_files.extend(
     expand(
-        outputDir("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz.tbi"),
+        out("tmp/{contig}/{dataset}/normalized_variant_records.vcf.gz.tbi"),
         dataset=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
@@ -167,14 +168,14 @@ output_files.extend(
 # Include output for rule 'filtered_variant_types'
 output_files.extend(
     expand(
-        outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz"), 
+        out("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz"), 
         dataset=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
 )
 output_files.extend(
     expand(
-        outputDir("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz.tbi"), 
+        out("tmp/{contig}/{dataset}/filtered_variant_types.vcf.gz.tbi"), 
         dataset=datasets["dataset_name"].unique().tolist(),
         contig=datasets["contig"].unique().tolist()
         )
@@ -200,19 +201,19 @@ for reference_genome, groupby_subset in datasets.set_index(["reference_genome", 
         for dataset_name in groupby_subset.index.get_level_values(0): # [FOR] the column in our MultiIndex that contains the dataset_name's in this subset
             output_files.extend(
                 # [EACH] add liftover request for the DAG
-                outputDir("PREP/{dataset}/liftover.vcf.gz").format(dataset_name)
+                out("PREP/{dataset}/liftover.vcf.gz").format(dataset_name)
             )
             output_files.extend(
                 # [EACH]{QC} add liftover snapshot
-                outputDir("PREP/{dataset}/liftover.pdf").format(dataset_name)
+                out("PREP/{dataset}/liftover.pdf").format(dataset_name)
             )
 rule all:
     """
     Catch-all rule to trigger auto-run of all processes. This process will be fired automatically in absence of explicit process name given by cli-argument.
     """
     default_target: True
-    log: outputDir("all.log"),
-    benchmark: outputDir("all.benchmark")
+    log: out("all.log"),
+    benchmark: out("all.benchmark")
     input:
         # [item for sublist in output_files for item in sublist],
         output_files
