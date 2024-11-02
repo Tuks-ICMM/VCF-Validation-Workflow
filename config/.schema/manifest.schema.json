@@ -15,7 +15,7 @@
             ],
             "properties": {
                 "datasets": {
-                    "type": "list",
+                    "type": "array",
                     "minItems": 1,
                     "items": {
                         "type": "string"
@@ -24,7 +24,7 @@
             }
         },
         "output": {
-            "type": "list",
+            "type": "array",
             "minItems": 1,
             "items": {
                 "type": "string"
@@ -37,7 +37,7 @@
             ],
             "properties": {
                 "reference_genomes": {
-                    "type": "list",
+                    "type": "array",
                     "minItems": 1,
                     "items": {
                         "type": "object",
@@ -46,7 +46,7 @@
                                 "type": "string"
                             },
                             "path": {
-                                "type": "list",
+                                "type": "array",
                                 "minItems": 1,
                                 "items": {
                                     "type": "string"
