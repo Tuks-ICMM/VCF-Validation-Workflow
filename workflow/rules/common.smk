@@ -14,7 +14,7 @@ def directoryExists(path: str):
 
 def out(path: str) -> str:
     """This function consults the `manifest.json` file and uses the provided directory."""
-    if "output-dir" in config:
+    if "output" in config:
         OUTPUT_DIR_PATH = join(*config["output"])
         return join(OUTPUT_DIR_PATH, path)
     else:
