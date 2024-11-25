@@ -25,7 +25,7 @@ validate(config, join("..", "config", ".schema", "manifest.schema.json"))
 
 
 # SET REPORT TEMPLATE
-report: "report/template.rst"
+# report: "report/template.rst"
 
 
 # IMPORT DATASET METADATA:
