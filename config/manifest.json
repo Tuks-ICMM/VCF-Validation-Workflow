@@ -1,8 +1,33 @@
 {
+    "input": {
+        "datasets": [
+            "/",
+            "path",
+            "to",
+            "my",
+            "datasets.csv"
+        ]
+    },
     "output-dir": [
         "/",
-        "mnt",
-        "ICMM_HDD_12TB",
-        "Results_25SEP2024"
-    ]
+        "path",
+        "to",
+        "my",
+        "output",
+        "folder"
+    ],
+    "resources": {
+        "reference_genomes": [
+            {
+                "name": "reference_genome_a",
+                "path": [
+                    "/",
+                    "path",
+                    "to",
+                    "my",
+                    "reference_genome.fa"
+                ]
+            }
+        ]
+    }
 }

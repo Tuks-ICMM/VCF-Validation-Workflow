@@ -29,7 +29,7 @@ validate(config, join("..", "config", ".schema", "manifest.schema.json"))
 
 
 # IMPORT DATASET METADATA:
-datasets = read_csv(join("input", "datasets.csv"), header=0, dtype=dict(dataset=str, reference_genome=str, contig=str, file=str))
+datasets = read_csv(join(*config["input"]["datasets"]), header=0, dtype=dict(dataset=str, reference_genome=str, contig=str, file=str))
 
 
 # IMPORT COMMON FUNCTIONS:
